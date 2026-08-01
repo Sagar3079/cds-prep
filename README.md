@@ -96,4 +96,4 @@ This project is not affiliated with, endorsed by, or connected to UPSC.
 
 ## Licence
 
-[MIT](./LICENSE)
+[MIT](./LICENSE) — code only. Exam content: see [NOTICE](./NOTICE).

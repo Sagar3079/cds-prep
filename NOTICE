@@ -1,0 +1,20 @@
+NOTICE — exam content
+=====================
+
+The MIT licence in LICENSE covers the source code of this project only.
+
+UPSC Combined Defence Services question papers, and any answer keys published by
+third parties, remain the property of their respective rights holders. They are
+not distributed in this repository:
+
+  - pdfs/                      source exam PDFs, gitignored
+  - answer_keys/*.jpg|png|pdf  third-party answer-key images, gitignored
+
+Obtain them yourself from the original sources. pdfs/_manifest.json lists the
+expected filenames. See README.md for the data pipeline.
+
+The derived question bank (src/data/questions.json) is included so the app runs
+out of the box. 192 of its 427 answers are model-predicted rather than taken
+from an official key -- see the answer-accuracy table in README.md.
+
+This project is not affiliated with, endorsed by, or connected to UPSC.

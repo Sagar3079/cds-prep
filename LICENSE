@@ -19,15 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-NOTE ON EXAM CONTENT
-
-This licence covers the source code of this project only.
-
-UPSC Combined Defence Services question papers, and any answer keys published by
-third parties, remain the property of their respective rights holders. They are
-not distributed in this repository — `pdfs/` and the answer-key images in
-`answer_keys/` are gitignored and must be obtained by the user from the original
-sources. See README.md.
