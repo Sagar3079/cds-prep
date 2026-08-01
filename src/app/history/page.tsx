@@ -141,14 +141,16 @@ export default function HistoryPage() {
         </div>
 
         {!loaded ? (
-          <div className="space-y-3" aria-hidden="true">
+          <>
             <p role="status" className="sr-only">
               Loading your history…
             </p>
-            <div className="card h-24" />
-            <div className="card h-24" />
-            <div className="card h-24" />
-          </div>
+            <div className="space-y-3" aria-hidden="true">
+              <div className="card h-24" />
+              <div className="card h-24" />
+              <div className="card h-24" />
+            </div>
+          </>
         ) : attempts.length === 0 ? (
           <div className="card fade-up flex flex-col items-center gap-4 py-12 text-center">
             <p className="text-lg font-bold tracking-tight text-ink">
@@ -178,9 +180,11 @@ export default function HistoryPage() {
                   above says the same thing in one. */}
               <div
                 aria-hidden="true"
-                /* auto-cols-fr is load-bearing: implicit columns default to
-                   `auto`, and empty cells would size them to zero. */
-                className="grid grid-flow-col auto-cols-fr grid-rows-7 gap-[3px]"
+                /* auto-cols-fr is load-bearing: the columns are implicit under
+                   grid-flow-col, and `auto` would size these empty cells to
+                   zero. Rows are `auto` so each one takes the square height
+                   that the 1fr column width gives it. */
+                className="grid grid-flow-col auto-cols-fr grid-rows-[repeat(7,auto)] gap-[3px]"
               >
                 {calendar.map((day) => (
                   <span
@@ -198,7 +202,6 @@ export default function HistoryPage() {
                 className="flex items-center justify-end gap-1.5 text-[0.625rem] font-bold uppercase tracking-[0.12em] text-muted"
               >
                 <span>lower</span>
-                <span className="h-2.5 w-2.5 rounded-[3px] bg-surface-2" />
                 <span className="h-2.5 w-2.5 rounded-[3px] bg-accent/40" />
                 <span className="h-2.5 w-2.5 rounded-[3px] bg-accent/70" />
                 <span className="h-2.5 w-2.5 rounded-[3px] bg-accent" />
