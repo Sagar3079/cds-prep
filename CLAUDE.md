@@ -63,24 +63,33 @@ pdfs/                  gitignored — fetch locally, see README
 
 ### Answer-quality caveat
 
-**Only 110 of the 427 questions come from a real UPSC paper** (CDS-1 2015–2018). The
-other 317 are hand-typed Python literals in `scripts/expand_bank.py` (192, ids `pred-*`)
-and `scripts/seed_questions.py` (125, ids `seed-*`).
+The bank is **803 questions**: 486 mined from real papers (ids `cds1-*` / `cds2-*`) and
+317 hand-typed Python literals in `scripts/expand_bank.py` (192, `pred-*`) and
+`scripts/seed_questions.py` (125, `seed-*`).
 
-Two things follow, and both matter when writing user-facing copy:
+`answerSource` is the only honest signal, and the labels are not equal:
 
-- **`year` and `session` are fabricated for those 317.** They are hardcoded — `pred-*`
-  all claim `2024/1`, `seed-*` all claim `2020/1`. There is no 2020 or 2024 paper
-  content in the bank. Never present those fields as provenance.
-- **The four `answerSource` values are not verification tiers.** All four are
-  unconditional string constants written by the generating script. Only `verified-key`
-  (38 questions) traces to an external artifact — `answer_keys/manual_keys.json`.
-  `answer_keys/keys.json` is an empty object and its code path never fires.
+- **`official-key` (464)** — read from the answer key UPSC published for that paper
+  (Series A). `answer_keys/keys.json` holds all 1,798 of them across fifteen papers.
+  This is the one tier you may describe to a learner as authoritative.
+- **`verified` (22)** — hand-typed from the paper with no key. Likely, not settled.
+- **`verified-pyq-pattern` (125)** and **`predicted-cds-pattern` (192)** — constants
+  stamped on every hand-written record. They record nothing about verification, despite
+  one of them starting with the word "verified".
 
-Any feature that shows an answer to a learner must surface `answerSource` honestly, and
-must not imply a hand-written answer carries the authority of an official key. Do not
-write copy claiming the answers are official. See the answer-accuracy section in
-README.md, which documents the real numbers.
+Two traps that have already caused real bugs:
+
+- **`year` and `session` are fabricated for the 317 hand-written questions** — `pred-*`
+  all claim `2024/1`, `seed-*` all claim `2020/1`. Only show a paper reference for ids
+  starting `cds1-`/`cds2-`.
+- **A hand-typed key is not a key.** `answer_keys/manual_keys.json` was the sole source
+  of the old `verified-key` tier and disagreed with the official UPSC key on 20.6% of
+  its entries; twelve wrong answers shipped under the app's strongest label before this
+  was caught. If you add answers, they come from `answer_keys/keys.json` or they are not
+  `official-key`.
+
+Any feature showing an answer must surface `answerSource` honestly and must not imply a
+hand-written answer carries the authority of a key. See README.md for the full numbers.
 
 ---
 

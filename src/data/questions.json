@@ -255,6 +255,24 @@
   "topic": "General"
  },
  {
+  "id": "cds1-2016-004",
+  "year": 2016,
+  "session": 1,
+  "qnum": 4,
+  "passage": null,
+  "question": "They took away everything that belonged to him.",
+  "fixedOptions": true,
+  "options": [
+   "that had been belonging",
+   "that belong",
+   "that has been belonging",
+   "No improvement"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Sentence Improvement"
+ },
+ {
   "id": "cds1-2016-005",
   "year": 2016,
   "session": 1,
@@ -338,6 +356,24 @@
   "answer": 1,
   "answerSource": "official-key",
   "topic": "General"
+ },
+ {
+  "id": "cds1-2016-010",
+  "year": 2016,
+  "session": 1,
+  "qnum": 10,
+  "passage": null,
+  "question": "Each time he felt tired he lied down.",
+  "fixedOptions": true,
+  "options": [
+   "lies",
+   "lays",
+   "lay",
+   "No improvement"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Sentence Improvement"
  },
  {
   "id": "cds1-2016-012",
@@ -457,6 +493,76 @@
   "answer": 2,
   "answerSource": "official-key",
   "topic": "General"
+ },
+ {
+  "id": "cds1-2016-019",
+  "year": 2016,
+  "session": 1,
+  "qnum": 19,
+  "passage": null,
+  "question": "Wake me up when father will come.",
+  "fixedOptions": true,
+  "options": [
+   "comes",
+   "will have come",
+   "came",
+   "No improvement"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Sentence Improvement"
+ },
+ {
+  "id": "cds1-2016-020",
+  "year": 2016,
+  "session": 1,
+  "qnum": 20,
+  "passage": null,
+  "question": "Do take an umbrella with you lest you do not get wet.",
+  "fixedOptions": true,
+  "options": [
+   "lest you should get wet",
+   "lest you should not get wet",
+   "lest you might not get wet",
+   "No improvement"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Sentence Improvement"
+ },
+ {
+  "id": "cds1-2016-039",
+  "year": 2016,
+  "session": 1,
+  "qnum": 39,
+  "passage": null,
+  "question": "S1 : Good memory is so common that we regard a man who does not possess it as eccentric. S6 : She wheeled away the perambulator, picturing to herself his terror when he would come out and find the baby gone. P : I have heard of a father who, having offered to take the baby out in a perambulator, was tempted by the sunny morning to pause on his journey and slip into a public house for a glass of beer. Q : A little later, his wife had to do some shopping which took her past _the public house where to her horror, she discovered her sleeping baby. R : Leaving the perambulator outside, he disappeared into the drink shop. S : Indignant at her husband's behaviour, she decided to teach him a lesson. The proper sequence should be",
+  "options": [
+   "PQRS",
+   "PRQS",
+   "PSQR",
+   "PQSR"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Ordering of Sentences"
+ },
+ {
+  "id": "cds1-2016-040",
+  "year": 2016,
+  "session": 1,
+  "qnum": 40,
+  "passage": null,
+  "question": "S1 : Human ways of life have steadily changed. S6 : Even if we try to do nothing, we cannot prevent change. P : Ancient Egypt - Greece - the Roman Empire - the Dark Ages and the Middle Ages -_ the Renaissance - the age of modern science and of modern nations one has succeeded the other; the history has never stood still. Q : About ten thousand years ago, man lived entirely by hunting. R : A settled civilized life only began when agriculture was discovered. S : From that time to this, civilization has always been changing. The proper sequence should be",
+  "options": [
+   "QRSP",
+   "QPSR",
+   "QSRP",
+   "PRSQ"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Ordering of Sentences"
  },
  {
   "id": "cds1-2017-067",
@@ -1892,6 +1998,550 @@
   "topic": "Idioms and Phrases"
  },
  {
+  "id": "cds1-2019-007",
+  "year": 2019,
+  "session": 1,
+  "qnum": 7,
+  "passage": null,
+  "question": "We live a tower block. Our apartment is on the fifteenth floor.",
+  "options": [
+   "at",
+   "in",
+   "over",
+   "above"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2019-011",
+  "year": 2019,
+  "session": 1,
+  "qnum": 11,
+  "passage": null,
+  "question": "A provocative message had been doing rounds on social media to instigate the mob against migrants.",
+  "target": "provocative",
+  "options": [
+   "dexterous",
+   "inflammatory",
+   "valiant",
+   "prudent"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2019-012",
+  "year": 2019,
+  "session": 1,
+  "qnum": 12,
+  "passage": null,
+  "question": "The differences include increase in mean temperature and heavy precipitation in several regions.",
+  "target": "precipitation",
+  "options": [
+   "drought",
+   "oasis",
+   "rainfall",
+   "snowing"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2019-013",
+  "year": 2019,
+  "session": 1,
+  "qnum": 13,
+  "passage": null,
+  "question": "The portal will help victims and complainants to anonymously report cyber crime.",
+  "target": "anonymously",
+  "options": [
+   "incognito",
+   "directly",
+   "unfailingly",
+   "in situ"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2019-014",
+  "year": 2019,
+  "session": 1,
+  "qnum": 14,
+  "passage": null,
+  "question": "He is suffering from a terminal disease.",
+  "target": "terminal",
+  "options": [
+   "sublunary",
+   "terrific",
+   "chronic",
+   "incurable"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2019-015",
+  "year": 2019,
+  "session": 1,
+  "qnum": 15,
+  "passage": null,
+  "question": "Doctors are reluctant to take rural postings despite big salary offers.",
+  "target": "reluctant",
+  "options": [
+   "disinclined",
+   "eager",
+   "fervent",
+   "unrepentant"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2019-016",
+  "year": 2019,
+  "session": 1,
+  "qnum": 16,
+  "passage": null,
+  "question": "The authorities have reprimanded the subordinate officer for violating the protocol.",
+  "target": "reprimanded",
+  "options": [
+   "extolled",
+   "purported",
+   "admonished",
+   "required an apology"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2019-018",
+  "year": 2019,
+  "session": 1,
+  "qnum": 18,
+  "passage": null,
+  "question": "How hysterical he is!",
+  "target": "hysterical",
+  "options": [
+   "berserk",
+   "inconsistent",
+   "duplicitous",
+   "insincere"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2019-019",
+  "year": 2019,
+  "session": 1,
+  "qnum": 19,
+  "passage": null,
+  "question": "Mahesh is mostly prejudiced in his political opinion.",
+  "target": "prejudiced",
+  "options": [
+   "objectionable",
+   "predatory",
+   "jaundiced",
+   "intimate"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2019-020",
+  "year": 2019,
+  "session": 1,
+  "qnum": 20,
+  "passage": null,
+  "question": "Do not indulge in tautology.",
+  "target": "tautology",
+  "options": [
+   "truth telling",
+   "prolixity",
+   "foretelling",
+   "telepathic conversation"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2019-021",
+  "year": 2019,
+  "session": 1,
+  "qnum": 21,
+  "passage": null,
+  "question": "His religious views are rather fanatical.",
+  "target": "fanatical",
+  "options": [
+   "bigoted",
+   "rabid",
+   "moderate",
+   "militant"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2019-022",
+  "year": 2019,
+  "session": 1,
+  "qnum": 22,
+  "passage": null,
+  "question": "Religious fundamentalists often consider the followers of other religions to be heretics.",
+  "target": "heretics",
+  "options": [
+   "dissenter",
+   "believer",
+   "renegade",
+   "apostate"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2019-023",
+  "year": 2019,
+  "session": 1,
+  "qnum": 23,
+  "passage": null,
+  "question": "According to G B Shaw, men have become inert. Therefore, life force has chosen women to perform its functions.",
+  "target": "inert",
+  "options": [
+   "lively",
+   "quiescent",
+   "dormant",
+   "apathetic"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2019-024",
+  "year": 2019,
+  "session": 1,
+  "qnum": 24,
+  "passage": null,
+  "question": "Some of the men are highly misanthropic.",
+  "target": "misanthropic",
+  "options": [
+   "anti-social",
+   "philosophic",
+   "atrophic",
+   "philanthropic"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2019-025",
+  "year": 2019,
+  "session": 1,
+  "qnum": 25,
+  "passage": null,
+  "question": "The teacher was a very profound man.",
+  "target": "profound",
+  "options": [
+   "sincere",
+   "erudite",
+   "scholarly",
+   "superficial"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2019-027",
+  "year": 2019,
+  "session": 1,
+  "qnum": 27,
+  "passage": null,
+  "question": "Mohan is his steadfast friend.",
+  "target": "steadfast",
+  "options": [
+   "committed",
+   "unwavering",
+   "unfaltering",
+   "unreliable"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2019-028",
+  "year": 2019,
+  "session": 1,
+  "qnum": 28,
+  "passage": null,
+  "question": "Radha often goes tempestuous while debating.",
+  "target": "tempestuous",
+  "options": [
+   "calm",
+   "violent",
+   "fierce",
+   "vehement"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2019-029",
+  "year": 2019,
+  "session": 1,
+  "qnum": 29,
+  "passage": null,
+  "question": "The thief had very vital information to pass on to the police.",
+  "target": "vital",
+  "options": [
+   "crucial",
+   "inessential",
+   "indispensable",
+   "fundamental"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2019-106",
+  "year": 2019,
+  "session": 1,
+  "qnum": 106,
+  "passage": null,
+  "question": "A match made in heaven",
+  "options": [
+   "a marriage that is solemnized formally",
+   "a marriage that is unsuccessful",
+   "a marriage that is likely to be happy and successful",
+   "a marriage of convenience"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2019-109",
+  "year": 2019,
+  "session": 1,
+  "qnum": 109,
+  "passage": null,
+  "question": "The jewel in the crown",
+  "options": [
+   "someone who has many skills",
+   "something that one wants",
+   "the most valuable thing in a group of things",
+   "the jewel in the crown of the king"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2019-110",
+  "year": 2019,
+  "session": 1,
+  "qnum": 110,
+  "passage": null,
+  "question": "To live in a fool's paradise",
+  "options": [
+   "to live a life that is dishonest",
+   "to be happy because you will not accept how bad a situation really is",
+   "to believe that things you want will happen",
+   "to enjoy yourself by spending a lot of money"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2019-111",
+  "year": 2019,
+  "session": 1,
+  "qnum": 111,
+  "passage": null,
+  "question": "A rotten apple",
+  "options": [
+   "to remove something which is rotten",
+   "one bad person in a group of good people",
+   "a loving and kind person",
+   "a disorganized person with bad habits"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2019-112",
+  "year": 2019,
+  "session": 1,
+  "qnum": 112,
+  "passage": null,
+  "question": "To vote with your feet",
+  "options": [
+   "to show that you do not support something",
+   "to replace something important",
+   "to change something you must do",
+   "to express a particular opinion"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2019-113",
+  "year": 2019,
+  "session": 1,
+  "qnum": 113,
+  "passage": null,
+  "question": "Verbal diarrhoea",
+  "options": [
+   "to be sick",
+   "to talk too much",
+   "to be in a difficult situation",
+   "to be a good orator"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2019-114",
+  "year": 2019,
+  "session": 1,
+  "qnum": 114,
+  "passage": null,
+  "question": "To sail close to the wind",
+  "options": [
+   "to pretend to be something that you are not",
+   "to be in some unpleasant situation",
+   "to be destroyed by a belief",
+   "to do something that is dangerous"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2019-115",
+  "year": 2019,
+  "session": 1,
+  "qnum": 115,
+  "passage": null,
+  "question": "A double entendre",
+  "options": [
+   "to look at someone or something twice",
+   "a situation in which you cannot succeed",
+   "a word which has two meanings",
+   "something that causes both advantages and problems"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2019-116",
+  "year": 2019,
+  "session": 1,
+  "qnum": 116,
+  "passage": null,
+  "question": "To cut your own throat",
+  "options": [
+   "to stop doing something",
+   "to do something because you are angry",
+   "to behave in a relaxed manner",
+   "to allow someone to do something"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2019-117",
+  "year": 2019,
+  "session": 1,
+  "qnum": 117,
+  "passage": null,
+  "question": "Cook the books",
+  "options": [
+   "to record false information in the accounts of an organization",
+   "to do something that spoils someone's plan",
+   "to tell a false story",
+   "to be very angry"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2019-118",
+  "year": 2019,
+  "session": 1,
+  "qnum": 118,
+  "passage": null,
+  "question": "Change your tune",
+  "options": [
+   "to listen to good music",
+   "to do things that you are not willing",
+   "to change your opinion completely because it will bring you an advantage",
+   "to pretend to be very friendly"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2019-119",
+  "year": 2019,
+  "session": 1,
+  "qnum": 119,
+  "passage": null,
+  "question": "Blue -blood",
+  "options": [
+   "to swallow poison",
+   "to be overly interested in someone",
+   "to suddenly become jealous",
+   "to belong to a family of the highest social class"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2019-120",
+  "year": 2019,
+  "session": 1,
+  "qnum": 120,
+  "passage": null,
+  "question": "Cut the crap",
+  "options": [
+   "an impolite way of telling someone to stop saying things that are not true",
+   "to stop needing someone else to look after you",
+   "to talk about something important",
+   "to upset someone by criticizing them"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
   "id": "seed-0001",
   "year": 2020,
   "session": 1,
@@ -2942,6 +3592,24 @@
   "topic": "Idioms and Phrases"
  },
  {
+  "id": "cds1-2020-076",
+  "year": 2020,
+  "session": 1,
+  "qnum": 76,
+  "passage": null,
+  "question": "Tempestuous behaviour would not yield much in any place.",
+  "target": "Tempestuous",
+  "options": [
+   "relaxed",
+   "passionate",
+   "intense",
+   "windy"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
   "id": "seed-0076",
   "year": 2020,
   "session": 1,
@@ -2957,6 +3625,24 @@
   "answer": 1,
   "answerSource": "verified-pyq-pattern",
   "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2020-077",
+  "year": 2020,
+  "session": 1,
+  "qnum": 77,
+  "passage": null,
+  "question": "Wooing everyone over an issue for support will not serve much purpose.",
+  "target": "Wooing",
+  "options": [
+   "discouraging",
+   "encouraging",
+   "pursuing",
+   "persuading"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
  },
  {
   "id": "seed-0077",
@@ -2976,6 +3662,24 @@
   "topic": "Idioms and Phrases"
  },
  {
+  "id": "cds1-2020-078",
+  "year": 2020,
+  "session": 1,
+  "qnum": 78,
+  "passage": null,
+  "question": "The highest award was bestowed upon her for her yeoman service.",
+  "target": "bestowed",
+  "options": [
+   "conferred",
+   "withdrawn",
+   "imparted",
+   "imbibed"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
   "id": "seed-0078",
   "year": 2020,
   "session": 1,
@@ -2991,6 +3695,24 @@
   "answer": 1,
   "answerSource": "verified-pyq-pattern",
   "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2020-079",
+  "year": 2020,
+  "session": 1,
+  "qnum": 79,
+  "passage": null,
+  "question": "One feels elated when someone praises one's work.",
+  "target": "elated",
+  "options": [
+   "feels good",
+   "excited",
+   "depressed",
+   "sober"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
  },
  {
   "id": "seed-0079",
@@ -3010,6 +3732,24 @@
   "topic": "Idioms and Phrases"
  },
  {
+  "id": "cds1-2020-080",
+  "year": 2020,
+  "session": 1,
+  "qnum": 80,
+  "passage": null,
+  "question": "All business activities need not result in profit-making. There is a need to be charitable.",
+  "target": "charitable",
+  "options": [
+   "lenient",
+   "malevolent",
+   "unforeseen",
+   "gracious"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
   "id": "seed-0080",
   "year": 2020,
   "session": 1,
@@ -3025,6 +3765,23 @@
   "answer": 1,
   "answerSource": "verified-pyq-pattern",
   "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2020-086",
+  "year": 2020,
+  "session": 1,
+  "qnum": 86,
+  "passage": null,
+  "question": "When he reached the department, the officials had left for the meeting.",
+  "options": [
+   "Past perfect verb",
+   "Past tense",
+   "Dependent clause",
+   "Independent clause"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
  },
  {
   "id": "seed-0086",
@@ -3044,6 +3801,23 @@
   "topic": "Sentence Improvement"
  },
  {
+  "id": "cds1-2020-087",
+  "year": 2020,
+  "session": 1,
+  "qnum": 87,
+  "passage": null,
+  "question": "He has offered her another chance.",
+  "options": [
+   "Intransitive verb",
+   "Past tense",
+   "Perfect tense",
+   "Transitive verb"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
   "id": "seed-0087",
   "year": 2020,
   "session": 1,
@@ -3059,6 +3833,23 @@
   "answer": 0,
   "answerSource": "verified-pyq-pattern",
   "topic": "Sentence Improvement"
+ },
+ {
+  "id": "cds1-2020-088",
+  "year": 2020,
+  "session": 1,
+  "qnum": 88,
+  "passage": null,
+  "question": "The building is very ancient.",
+  "options": [
+   "Transitive verb",
+   "Intransitive verb",
+   "Phrasal verb",
+   "Auxiliary verb"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
  },
  {
   "id": "seed-0088",
@@ -3078,6 +3869,23 @@
   "topic": "Sentence Improvement"
  },
  {
+  "id": "cds1-2020-089",
+  "year": 2020,
+  "session": 1,
+  "qnum": 89,
+  "passage": null,
+  "question": "Hurrah! What a scintillating beauty the landscape is",
+  "options": [
+   "Conjunction",
+   "Adjective",
+   "Adverb",
+   "Interjection"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
   "id": "seed-0089",
   "year": 2020,
   "session": 1,
@@ -3093,6 +3901,23 @@
   "answer": 0,
   "answerSource": "verified-pyq-pattern",
   "topic": "Sentence Improvement"
+ },
+ {
+  "id": "cds1-2020-091",
+  "year": 2020,
+  "session": 1,
+  "qnum": 91,
+  "passage": null,
+  "question": "Which one of the following alternatives has the correct spelling",
+  "options": [
+   "Continuum",
+   "Continuem",
+   "Contuneim",
+   "Continueiam"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "General"
  },
  {
   "id": "seed-0091",
@@ -3112,6 +3937,23 @@
   "topic": "Sentence Improvement"
  },
  {
+  "id": "cds1-2020-092",
+  "year": 2020,
+  "session": 1,
+  "qnum": 92,
+  "passage": null,
+  "question": "Which one of the following alternatives has the correct spelling",
+  "options": [
+   "Stretegy",
+   "Stretagy",
+   "Stratagy",
+   "Strategy"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
   "id": "seed-0092",
   "year": 2020,
   "session": 1,
@@ -3127,6 +3969,23 @@
   "answer": 0,
   "answerSource": "verified-pyq-pattern",
   "topic": "Sentence Improvement"
+ },
+ {
+  "id": "cds1-2020-093",
+  "year": 2020,
+  "session": 1,
+  "qnum": 93,
+  "passage": null,
+  "question": "Which one of the following alternatives has the correct spelling",
+  "options": [
+   "Commisionor",
+   "Commisioner",
+   "Commissioner",
+   "Comissioner"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "General"
  },
  {
   "id": "seed-0093",
@@ -3180,6 +4039,40 @@
   "topic": "Sentence Improvement"
  },
  {
+  "id": "cds1-2020-096",
+  "year": 2020,
+  "session": 1,
+  "qnum": 96,
+  "passage": null,
+  "question": "Which one of the following alternatives has the correct spelling",
+  "options": [
+   "Neuphrology",
+   "Nephrology",
+   "Neprology",
+   "Neaprology"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
+  "id": "cds1-2020-097",
+  "year": 2020,
+  "session": 1,
+  "qnum": 97,
+  "passage": null,
+  "question": "Which one of the following alternatives has the correct spelling",
+  "options": [
+   "Psudonym",
+   "Pseudonym",
+   "Pseudanym",
+   "Seeudonym"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
   "id": "seed-0097",
   "year": 2020,
   "session": 1,
@@ -3214,6 +4107,23 @@
   "topic": "Ordering of Words"
  },
  {
+  "id": "cds1-2020-099",
+  "year": 2020,
+  "session": 1,
+  "qnum": 99,
+  "passage": null,
+  "question": "Which one of the following alternatives has the correct spelling",
+  "options": [
+   "Resilient",
+   "Resilint",
+   "Risilient",
+   "Realisent"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
   "id": "seed-0099",
   "year": 2020,
   "session": 1,
@@ -3246,6 +4156,23 @@
   "answer": 0,
   "answerSource": "verified-pyq-pattern",
   "topic": "Ordering of Words"
+ },
+ {
+  "id": "cds1-2020-101",
+  "year": 2020,
+  "session": 1,
+  "qnum": 101,
+  "passage": null,
+  "question": "Which is the correct combination of the given two sentences ? The officer will return from China on Monday. You can meet him.",
+  "options": [
+   "You can meet the officer when he returned from China on Monday",
+   "You can meet the officer when he will return from China on Monday",
+   "You can meet the officer when he returns from China on Monday",
+   "The officer will meet you when you return from China on Monday"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "General"
  },
  {
   "id": "seed-0101",
@@ -3384,6 +4311,23 @@
   "topic": "Prepositions"
  },
  {
+  "id": "cds1-2020-109",
+  "year": 2020,
+  "session": 1,
+  "qnum": 109,
+  "passage": null,
+  "question": "Which is the correct combination of the given two sentences ? The teacher entered the classroom. All students stopped talking.",
+  "options": [
+   "No sooner did the teacher enter the classroom than the students stopped talking",
+   "As soon as the teacher entered the classroom all students were asked to stop talking",
+   "All students stopped talking as the teacher enters the classroom",
+   "No sooner did the students stop talking than the teacher entered the classroom"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
   "id": "seed-0109",
   "year": 2020,
   "session": 1,
@@ -3418,6 +4362,23 @@
   "topic": "Prepositions"
  },
  {
+  "id": "cds1-2020-111",
+  "year": 2020,
+  "session": 1,
+  "qnum": 111,
+  "passage": null,
+  "question": "Rahul said to his teacher, \"Madam, what is the way to solve the question ?",
+  "options": [
+   "Rahul asked his teacher what the way to solve the question was",
+   "Rahul told his teacher what was the way to solve the question",
+   "Rahul asked to his teacher what the way was to solve the question",
+   "Rahul told his teacher what the way was to solve the question"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Direct Indirect"
+ },
+ {
   "id": "seed-0111",
   "year": 2020,
   "session": 1,
@@ -3435,6 +4396,23 @@
   "topic": "Prepositions"
  },
  {
+  "id": "cds1-2020-112",
+  "year": 2020,
+  "session": 1,
+  "qnum": 112,
+  "passage": null,
+  "question": "He said to his friend, \"Could you please close the door ?",
+  "options": [
+   "He requested his friend to close the door",
+   "He requested his friend to please close the door",
+   "He ordered his friend to close the door",
+   "He wanted his friend to close the door for him"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Direct Indirect"
+ },
+ {
   "id": "seed-0112",
   "year": 2020,
   "session": 1,
@@ -3450,6 +4428,23 @@
   "answer": 1,
   "answerSource": "verified-pyq-pattern",
   "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2020-114",
+  "year": 2020,
+  "session": 1,
+  "qnum": 114,
+  "passage": null,
+  "question": "Navanitha said to her friends, \"What a scintillating beauty it is !",
+  "options": [
+   "Navanitha told to her friends that it was a scintillating beauty",
+   "Navanitha exclaimed to her friends what a scintillating beauty it was",
+   "Navanitha asked her friends whether it was a scintillating beauty",
+   "Navanitha exclaimed to her friends that it was a scintillating beauty"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Direct Indirect"
  },
  {
   "id": "seed-0116",
@@ -3484,6 +4479,23 @@
   "answer": 1,
   "answerSource": "verified-pyq-pattern",
   "topic": "Comprehension"
+ },
+ {
+  "id": "cds1-2020-120",
+  "year": 2020,
+  "session": 1,
+  "qnum": 120,
+  "passage": null,
+  "question": "The grandfather said to the baby, \"May you live long with all good things of life.",
+  "options": [
+   "The grandfather blessed to the baby with long life and all good things of life",
+   "The grandfather asked the baby that she would live long with all good things of life",
+   "The grandfather wanted the baby to live long with all good things of life",
+   "The grandfather blessed the baby that she would live long with all good things of life"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Direct Indirect"
  },
  {
   "id": "seed-0120",
@@ -4078,6 +5090,4796 @@
   "answer": 1,
   "answerSource": "verified-pyq-pattern",
   "topic": "Comprehension"
+ },
+ {
+  "id": "cds2-2020-031",
+  "year": 2020,
+  "session": 2,
+  "qnum": 31,
+  "passage": null,
+  "question": "Get the jitters",
+  "options": [
+   "Feeling anxious",
+   "Feeling happy",
+   "Stammering",
+   "Feeling exposed"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2020-032",
+  "year": 2020,
+  "session": 2,
+  "qnum": 32,
+  "passage": null,
+  "question": "French leave",
+  "options": [
+   "Absent from work without asking for permission in French",
+   "Asking for permission before leaving work",
+   "Work for permission to get leave",
+   "Absent from work without asking for permission"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2020-033",
+  "year": 2020,
+  "session": 2,
+  "qnum": 33,
+  "passage": null,
+  "question": "Take a stand",
+  "options": [
+   "To publicly express an opinion about something",
+   "To make a stand for one to sit",
+   "To be firm on’ your work",
+   "To be part of the work"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2020-034",
+  "year": 2020,
+  "session": 2,
+  "qnum": 34,
+  "passage": null,
+  "question": "Cut and run",
+  "options": [
+   "To avoid a difficult situation by leaving suddenly",
+   "To avoid an event suddenly",
+   "To meet some danger suddenly",
+   "To ask for sudden meeting with someone"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2020-035",
+  "year": 2020,
+  "session": 2,
+  "qnum": 35,
+  "passage": null,
+  "question": "Cut the cord",
+  "options": [
+   "To stop needing your parents for money",
+   "To stop needing someone else to look after you and start acting independently",
+   "To be safe on your own",
+   "To be a married person"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2020-036",
+  "year": 2020,
+  "session": 2,
+  "qnum": 36,
+  "passage": null,
+  "question": "Cupboard love.",
+  "options": [
+   "Loving someone to get something from the person",
+   "Loving the cupboards",
+   "Innocent love",
+   "Loving to be free of all conditions"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2020-037",
+  "year": 2020,
+  "session": 2,
+  "qnum": 37,
+  "passage": null,
+  "question": "Around the corner",
+  "options": [
+   "A thing which is at the end of the comer",
+   "An event or thing which is going to happen soon",
+   "An event that corners someone for his wrong",
+   "An event that happens in the corner of powerful place"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2020-038",
+  "year": 2020,
+  "session": 2,
+  "qnum": 38,
+  "passage": null,
+  "question": "With Heavy Heart",
+  "options": [
+   "With heavy weight",
+   "With joy and humour",
+   "With sense of shame",
+   "With pain and regret"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2020-062",
+  "year": 2020,
+  "session": 2,
+  "qnum": 62,
+  "passage": null,
+  "question": "It is encouraging to see India’s indigenous cinema is going places.",
+  "options": [
+   "homogenous",
+   "classical",
+   "home-grown",
+   "Non-native language"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2020-064",
+  "year": 2020,
+  "session": 2,
+  "qnum": 64,
+  "passage": null,
+  "question": "He tried to avoid saying something that would implicate him further.",
+  "options": [
+   "reward",
+   "incriminate",
+   "encourage",
+   "incite"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2020-065",
+  "year": 2020,
+  "session": 2,
+  "qnum": 65,
+  "passage": null,
+  "question": "The statutory corporate tax which forms the major income of the government has not changed this year.",
+  "options": [
+   "legislature",
+   "unlawful",
+   "government",
+   "legal"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2020-066",
+  "year": 2020,
+  "session": 2,
+  "qnum": 66,
+  "passage": null,
+  "question": "He has been part of the all dissident activities.",
+  "options": [
+   "rebellious",
+   "supportive",
+   "conformist",
+   "legal"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2020-067",
+  "year": 2020,
+  "session": 2,
+  "qnum": 67,
+  "passage": null,
+  "question": "Advocacy is one major component of any new programme.",
+  "options": [
+   "promotion",
+   "opposition",
+   "critique",
+   "liking"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2020-069",
+  "year": 2020,
+  "session": 2,
+  "qnum": 69,
+  "passage": null,
+  "question": "There is a tendency to treat social changes as mere development in terms of accumulation of wealth.",
+  "options": [
+   "position",
+   "predisposition",
+   "thinking",
+   "idea"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2020-070",
+  "year": 2020,
+  "session": 2,
+  "qnum": 70,
+  "passage": null,
+  "question": "During the ancient period poets were patronized through various institutions.",
+  "options": [
+   "supported",
+   "respected",
+   "opposed",
+   "scolded"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2020-072",
+  "year": 2020,
+  "session": 2,
+  "qnum": 72,
+  "passage": null,
+  "question": "Police had to resort to tear gas to diffuse tension among the crowd.",
+  "options": [
+   "concentrate",
+   "scatter",
+   "disperse",
+   "strew"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2020-073",
+  "year": 2020,
+  "session": 2,
+  "qnum": 73,
+  "passage": null,
+  "question": "Unrest in some pockets made the city dwellers confine themselves at home.",
+  "options": [
+   "Turbulence",
+   "Unease",
+   "Apprehension",
+   "Calm"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2020-074",
+  "year": 2020,
+  "session": 2,
+  "qnum": 74,
+  "passage": null,
+  "question": "Peace and tranquility are instruments which would boost the development of society.",
+  "options": [
+   "uproar",
+   "calm",
+   "serenity",
+   "sound"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2020-075",
+  "year": 2020,
+  "session": 2,
+  "qnum": 75,
+  "passage": null,
+  "question": "Barring a decision of such disputes, other matters relating to the election of President or Vice-President may be regulated by law made by Parliament.",
+  "options": [
+   "excepting",
+   "without",
+   "including",
+   "excluding"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2020-078",
+  "year": 2020,
+  "session": 2,
+  "qnum": 78,
+  "passage": null,
+  "question": "All the allegations against the actor were expunged by the committee of inquiry.",
+  "options": [
+   "got rid of",
+   "part of",
+   "accepted",
+   "rejected"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2020-079",
+  "year": 2020,
+  "session": 2,
+  "qnum": 79,
+  "passage": null,
+  "question": "His relatives dissuaded him from giving up. the job.",
+  "options": [
+   "persuaded",
+   "discouraged",
+   "advised against",
+   "deter"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2020-080",
+  "year": 2020,
+  "session": 2,
+  "qnum": 80,
+  "passage": null,
+  "question": "He is one of the confidants of the leader and can influence the decision of the government.",
+  "options": [
+   "opponents",
+   "intimate",
+   "close friend",
+   "colleague"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2020-081",
+  "year": 2020,
+  "session": 2,
+  "qnum": 81,
+  "passage": null,
+  "question": "All the pilgrims rested for a while under the banyan tree.",
+  "options": [
+   "Adverb",
+   "Place value",
+   "Preposition",
+   "Verb"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2020-082",
+  "year": 2020,
+  "session": 2,
+  "qnum": 82,
+  "passage": null,
+  "question": "The wonderful statue of the leader welcomes all people to city.",
+  "options": [
+   "Object",
+   "Adjective",
+   "Noun phrase",
+   "Noun"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2020-085",
+  "year": 2020,
+  "session": 2,
+  "qnum": 85,
+  "passage": null,
+  "question": "It is eleven O'clock now and all of us should retire to bed.",
+  "options": [
+   "Personal pronoun",
+   "Relative pronoun",
+   "Impersonal pronoun",
+   "Verb"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2020-086",
+  "year": 2020,
+  "session": 2,
+  "qnum": 86,
+  "passage": null,
+  "question": "The flower is very beautiful.",
+  "options": [
+   "Adjective",
+   "Adverb",
+   "Preposition",
+   "Conjunction"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2020-087",
+  "year": 2020,
+  "session": 2,
+  "qnum": 87,
+  "passage": null,
+  "question": "This boy is stronger than Ramesh.",
+  "options": [
+   "Pronoun",
+   "Adjective",
+   "Article",
+   "Adverb"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2020-089",
+  "year": 2020,
+  "session": 2,
+  "qnum": 89,
+  "passage": null,
+  "question": "The ants fought the wasps.",
+  "options": [
+   "Intransitive verb",
+   "Transitive verb",
+   "Demonstrative verb",
+   "Adjective"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2020-111",
+  "year": 2020,
+  "session": 2,
+  "qnum": 111,
+  "passage": null,
+  "question": "Which one of the following alternative: has the correct spelling?",
+  "options": [
+   "Mountaneous",
+   "Mountenous",
+   "Mountaineous",
+   "Mountainous"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Spelling"
+ },
+ {
+  "id": "cds2-2020-112",
+  "year": 2020,
+  "session": 2,
+  "qnum": 112,
+  "passage": null,
+  "question": "Which one of the following alternatives has the correct spelling?",
+  "options": [
+   "Etiquette",
+   "Etiquete",
+   "Etiequtte",
+   "Etequtte"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Spelling"
+ },
+ {
+  "id": "cds2-2020-114",
+  "year": 2020,
+  "session": 2,
+  "qnum": 114,
+  "passage": null,
+  "question": "Which one of the following alternatives has the correct spelling.",
+  "options": [
+   "Magnificent",
+   "Magnificant",
+   "Magneficent",
+   "Magenficient"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Spelling"
+ },
+ {
+  "id": "cds2-2020-115",
+  "year": 2020,
+  "session": 2,
+  "qnum": 115,
+  "passage": null,
+  "question": "Which one of the following alternatives has the correct spelling?",
+  "options": [
+   "Felecitation",
+   "Felicitation",
+   "Falicitation",
+   "Felicitasion"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Spelling"
+ },
+ {
+  "id": "cds2-2020-116",
+  "year": 2020,
+  "session": 2,
+  "qnum": 116,
+  "passage": null,
+  "question": "Which one of the following alternatives has the correct spelling?",
+  "options": [
+   "Twelth",
+   "Twelfth",
+   "Tweluth",
+   "Twelthe"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Spelling"
+ },
+ {
+  "id": "cds2-2020-118",
+  "year": 2020,
+  "session": 2,
+  "qnum": 118,
+  "passage": null,
+  "question": "Which one of the following alternatives has the correct spelling?",
+  "options": [
+   "Neurasis",
+   "Nuroesis",
+   "Neurosis",
+   "Neuresis"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Spelling"
+ },
+ {
+  "id": "cds1-2021-011",
+  "year": 2021,
+  "session": 1,
+  "qnum": 11,
+  "passage": null,
+  "question": "Be in eclipse",
+  "options": [
+   "Less successful",
+   "Feeling happy",
+   "Very successful",
+   "Being defeated"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2021-012",
+  "year": 2021,
+  "session": 1,
+  "qnum": 12,
+  "passage": null,
+  "question": "Ways and means",
+  "options": [
+   "A technique",
+   "Methods of achieving something",
+   "Norms and regulations of doing something",
+   "Improving one's way of doing"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2021-013",
+  "year": 2021,
+  "session": 1,
+  "qnum": 13,
+  "passage": null,
+  "question": "Up in arms",
+  "options": [
+   "Very happy",
+   "Very satisfied",
+   "Very angry",
+   "Feeling fine"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2021-014",
+  "year": 2021,
+  "session": 1,
+  "qnum": 14,
+  "passage": null,
+  "question": "Big ticket",
+  "options": [
+   "Very less",
+   "Very costly",
+   "Very easy",
+   "Not much"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2021-016",
+  "year": 2021,
+  "session": 1,
+  "qnum": 16,
+  "passage": null,
+  "question": "Be a law unto yourself",
+  "options": [
+   "Behave unconventional and unpredictable",
+   "Abide by law and order",
+   "Ask others to follow the law",
+   "Create law and order for others"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2021-045",
+  "year": 2021,
+  "session": 1,
+  "qnum": 45,
+  "passage": null,
+  "question": "S1 : Languages in contact with each other cause change. S6 : Changes often occur first in informal and casual language. P : The increasing use of English in many parts of the world affect both local languages and English. Q : Language contact has long been recognised as a major engine of change. R : This gives rise to new, hybrid language varieties, . S : A historical example is that of Danish and English which led to a major shift in the vocabulary and grammar of English.",
+  "options": [
+   "RSQP",
+   "QSPR",
+   "QRSP",
+   "SQRP"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Ordering of Sentences"
+ },
+ {
+  "id": "cds1-2021-061",
+  "year": 2021,
+  "session": 1,
+  "qnum": 61,
+  "passage": null,
+  "question": "His arguments are not valid. People consider it bombastic",
+  "target": "bombastic",
+  "options": [
+   "outdated",
+   "straight forward",
+   "verbose",
+   "not true"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2021-063",
+  "year": 2021,
+  "session": 1,
+  "qnum": 63,
+  "passage": null,
+  "question": "Relatives of deceased have been informed about the accident",
+  "target": "deceased",
+  "options": [
+   "injured",
+   "alive",
+   "dead",
+   "survived"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2021-064",
+  "year": 2021,
+  "session": 1,
+  "qnum": 64,
+  "passage": null,
+  "question": "At last she was able to get some solace as the matter has been resolved amicably",
+  "target": "solace",
+  "options": [
+   "comfort",
+   "relief",
+   "punishment",
+   "aggravation"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2021-065",
+  "year": 2021,
+  "session": 1,
+  "qnum": 65,
+  "passage": null,
+  "question": "Twenty first century has turned out to be a century of problems contrary to the thinking that it would be a better time",
+  "target": "contrary",
+  "options": [
+   "similar",
+   "different",
+   "divergent",
+   "good faith"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2021-067",
+  "year": 2021,
+  "session": 1,
+  "qnum": 67,
+  "passage": null,
+  "question": "Language is an instrument for asserting one's identity, attitude and perspective",
+  "target": "asserting",
+  "options": [
+   "declaring",
+   "supporting",
+   "denying",
+   "propagating"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2021-068",
+  "year": 2021,
+  "session": 1,
+  "qnum": 68,
+  "passage": null,
+  "question": "He has been exonerated as he tendered an apology",
+  "target": "exonerated",
+  "options": [
+   "honoured",
+   "pardoned",
+   "convicted",
+   "felicitated"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2021-069",
+  "year": 2021,
+  "session": 1,
+  "qnum": 69,
+  "passage": null,
+  "question": "Persuasion is essential for people to work as a team",
+  "target": "Persuasion",
+  "options": [
+   "Dislike",
+   "Discouraging",
+   "Convincing",
+   "Deter"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2021-083",
+  "year": 2021,
+  "session": 1,
+  "qnum": 83,
+  "passage": null,
+  "question": "The officer was reprimanded by the court for delaying the case",
+  "target": "reprimanded",
+  "options": [
+   "admonished",
+   "appreciated",
+   "praised",
+   "disliked"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2021-084",
+  "year": 2021,
+  "session": 1,
+  "qnum": 84,
+  "passage": null,
+  "question": "Some people think that their strength is perpetual",
+  "target": "perpetual",
+  "options": [
+   "temporary",
+   "powerful",
+   "ever lasting",
+   "all persuasive"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2021-085",
+  "year": 2021,
+  "session": 1,
+  "qnum": 85,
+  "passage": null,
+  "question": "One's actions exemplify one's attitude and values",
+  "target": "exemplify",
+  "options": [
+   "devise",
+   "sympathize",
+   "asks for",
+   "demonstrate"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2021-090",
+  "year": 2021,
+  "session": 1,
+  "qnum": 90,
+  "passage": null,
+  "question": "The indignant attitude of the speaker made the groups unhappy",
+  "target": "indignant",
+  "options": [
+   "resentful",
+   "congenial",
+   "unruly",
+   "supportive"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2021-093",
+  "year": 2021,
+  "session": 1,
+  "qnum": 93,
+  "passage": null,
+  "question": "Alas! He has been defeated",
+  "options": [
+   "Adjective",
+   "Adverb",
+   "Interjection",
+   "Conjunction"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2021-095",
+  "year": 2021,
+  "session": 1,
+  "qnum": 95,
+  "passage": null,
+  "question": "He has been living in the jungle for long and he knows all the animals here",
+  "options": [
+   "Subordinating conjunction",
+   "Coordinating conjunction",
+   "Preposition",
+   "Personal pronoun"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2021-097",
+  "year": 2021,
+  "session": 1,
+  "qnum": 97,
+  "passage": null,
+  "question": "This time we woke up to the virus related diseases",
+  "options": [
+   "Demonstrative",
+   "Article",
+   "Adverb",
+   "Noun phrase"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2021-099",
+  "year": 2021,
+  "session": 1,
+  "qnum": 99,
+  "passage": null,
+  "question": "Ravi won the match with a huge margin",
+  "options": [
+   "Intransitive verb",
+   "Transitive verb",
+   "Demonstrative verb",
+   "Adjective"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2021-100",
+  "year": 2021,
+  "session": 1,
+  "qnum": 100,
+  "passage": null,
+  "question": "There was an exultation in the group",
+  "options": [
+   "Adjective",
+   "Adverb",
+   "Adjectival Noun",
+   "Noun"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2021-101",
+  "year": 2021,
+  "session": 1,
+  "qnum": 101,
+  "passage": null,
+  "question": "Sheela has been at the receiving end",
+  "options": [
+   "but she is very honest",
+   "and she is very honest",
+   "she had been proud of it",
+   "she was fine with it"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds1-2021-102",
+  "year": 2021,
+  "session": 1,
+  "qnum": 102,
+  "passage": null,
+  "question": "Elam has no other option",
+  "options": [
+   "unless he wins",
+   "but to accept the challenge",
+   "though he has won challenge",
+   "he has to accept the challenge"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds1-2021-104",
+  "year": 2021,
+  "session": 1,
+  "qnum": 104,
+  "passage": null,
+  "question": "Unless you fulfil the essential qualifications",
+  "options": [
+   "you will be called for the interview",
+   "you shall be selected for the post",
+   "you will not be called for the interview",
+   "you can't be rejected"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds1-2021-109",
+  "year": 2021,
+  "session": 1,
+  "qnum": 109,
+  "passage": null,
+  "question": "If you had planned the work well",
+  "options": [
+   "you shall have completed it on time",
+   "you could complete it on time",
+   "you will complete it on time",
+   "you could have completed it on time"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds1-2021-110",
+  "year": 2021,
+  "session": 1,
+  "qnum": 110,
+  "passage": null,
+  "question": "You can use my computer",
+  "options": [
+   "as long as you can't use any external drive",
+   "as long as you used any external drive",
+   "as long as you do not use any external drive",
+   "as long as you shall use any external drive"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds1-2021-111",
+  "year": 2021,
+  "session": 1,
+  "qnum": 111,
+  "passage": null,
+  "question": "Don't go the wind, you will face the music later.",
+  "options": [
+   "with",
+   "for",
+   "about",
+   "between"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds2-2021-002",
+  "year": 2021,
+  "session": 2,
+  "qnum": 2,
+  "passage": null,
+  "question": "The room was very warm",
+  "options": [
+   "because the AC was set to moderate temperature",
+   "though the AC was set to very cold",
+   "since the AC was not very warm in its temperature setting",
+   "since the AC was in a very low temperature setting"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds2-2021-003",
+  "year": 2021,
+  "session": 2,
+  "qnum": 3,
+  "passage": null,
+  "question": "We could leave’ today or we could leave tomorrow",
+  "options": [
+   "preferring what you want",
+   "as you prefer one of the two",
+   "depending on what you prefer",
+   "whichever you prefer"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds2-2021-005",
+  "year": 2021,
+  "session": 2,
+  "qnum": 5,
+  "passage": null,
+  "question": "There are many good hotels, you can choose to stay in",
+  "options": [
+   "many of them",
+   "any one of them",
+   "either of them",
+   "all of them"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds2-2021-006",
+  "year": 2021,
+  "session": 2,
+  "qnum": 6,
+  "passage": null,
+  "question": "The bus service is very good; there is a bus",
+  "options": [
+   "after ten minutes",
+   "in ten minutes",
+   "before ten minutes",
+   "every ten minutes"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds2-2021-007",
+  "year": 2021,
+  "session": 2,
+  "qnum": 7,
+  "passage": null,
+  "question": "We live near a busy airport; the planes fly",
+  "options": [
+   "near our house",
+   "by our house",
+   "over our house",
+   "around our house"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds2-2021-009",
+  "year": 2021,
+  "session": 2,
+  "qnum": 9,
+  "passage": null,
+  "question": "I don’t like stories",
+  "options": [
+   "which can have unhappy endings",
+   "which had sad endings",
+   "that have unhappy endings",
+   "which are unhappy endings"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds2-2021-041",
+  "year": 2021,
+  "session": 2,
+  "qnum": 41,
+  "passage": null,
+  "question": "Forty winks",
+  "options": [
+   "Winking forty times",
+   "Sleep disorders",
+   "Long sleeping hours",
+   "A short sleep during the day"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2021-042",
+  "year": 2021,
+  "session": 2,
+  "qnum": 42,
+  "passage": null,
+  "question": "Life in the raw",
+  "options": [
+   "Life in its natural, unembellished state",
+   "Life at its easiest",
+   "Life that is complex",
+   "A daredevil’s life"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2021-043",
+  "year": 2021,
+  "session": 2,
+  "qnum": 43,
+  "passage": null,
+  "question": "A paper tiger",
+  "options": [
+   "A person or thing that appears threatening but is ineffectual",
+   "To threaten someone but do no harm",
+   "Environmental protection paperwork",
+   "To speak to people in a roaring voice"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2021-044",
+  "year": 2021,
+  "session": 2,
+  "qnum": 44,
+  "passage": null,
+  "question": "Penny-wise and pound-foolish",
+  "options": [
+   "Wise to spend each penny carefully",
+   "Careful about small amounts but careless about large amounts",
+   "People who don’t understand the importance of each penny",
+   "Careful about large amounts but careless about small amounts"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2021-045",
+  "year": 2021,
+  "session": 2,
+  "qnum": 45,
+  "passage": null,
+  "question": "Pin back your ears",
+  "options": [
+   "To listen carefully to something",
+   "Person or organisation that pins important issues",
+   "To keep yourself away from ‘hearing bad stuff",
+   "To clean your ears with a pin"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2021-046",
+  "year": 2021,
+  "session": 2,
+  "qnum": 46,
+  "passage": null,
+  "question": "Turncoat",
+  "options": [
+   "Expert at altering coats",
+   "Someone who deserts one group to join another",
+   "A truly dishonest person",
+   "Going round and round in a court of law"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2021-047",
+  "year": 2021,
+  "session": 2,
+  "qnum": 47,
+  "passage": null,
+  "question": "Say your piece",
+  "options": [
+   "Speak but don’t listen",
+   "Speak in a talkative manner",
+   "Make your argument piece by piece",
+   "Express your opinion"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2021-048",
+  "year": 2021,
+  "session": 2,
+  "qnum": 48,
+  "passage": null,
+  "question": "Top-notch",
+  "options": [
+   "The highest marking on a tree or a building",
+   "Person or organization that attracts only the top",
+   "Of highest possible quality",
+   "Person of integrity"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2021-054",
+  "year": 2021,
+  "session": 2,
+  "qnum": 54,
+  "passage": null,
+  "question": "S1: Then what is necessary with regard to taming science and technology is S6: Then why do we not tame atomic energy to peaceful purposes P We must have the basic knowledge of the two. Q It is said, ‘Science is a useful servant but destructive master’. R By the misuse of science, mankind will meet its doom quite soon. S If we do not harness it for the welfare of mankind, I am afraid, a total annihilation is a must. The correct sequence should be",
+  "options": [
+   "SRQP",
+   "PQSR",
+   "RQSP",
+   "QRSP"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Ordering of Sentences"
+ },
+ {
+  "id": "cds2-2021-059",
+  "year": 2021,
+  "session": 2,
+  "qnum": 59,
+  "passage": null,
+  "question": "S1: Different people have different hobbies. S6: With hobbies, you spend time in a gainful way. P Thus, they say, as many people, so many hobbies. Q In due course, that becomes your hobby. R: Whatever leisure time you get, you use that in creative activity. S: Hobby is a leisure time activity. The correct sequence should be",
+  "options": [
+   "PQRS",
+   "PQSR",
+   "SRQP",
+   "RSQP"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Ordering of Sentences"
+ },
+ {
+  "id": "cds2-2021-071",
+  "year": 2021,
+  "session": 2,
+  "qnum": 71,
+  "passage": null,
+  "question": "He drowned in the flood water last year.",
+  "options": [
+   "swarmed",
+   "swam",
+   "submerged",
+   "floated"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2021-072",
+  "year": 2021,
+  "session": 2,
+  "qnum": 72,
+  "passage": null,
+  "question": "Autumn is rather a dry season.",
+  "options": [
+   "arid",
+   "humid",
+   "rainy",
+   "moist"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2021-073",
+  "year": 2021,
+  "session": 2,
+  "qnum": 73,
+  "passage": null,
+  "question": "Our differences are growing day by day.",
+  "options": [
+   "confabulations",
+   "interferences",
+   "disagreements",
+   "discrepancies"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2021-074",
+  "year": 2021,
+  "session": 2,
+  "qnum": 74,
+  "passage": null,
+  "question": "The big tree hindered access of sunlight into the house.",
+  "options": [
+   "impeded",
+   "shaded",
+   "facilitated",
+   "poured"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2021-075",
+  "year": 2021,
+  "session": 2,
+  "qnum": 75,
+  "passage": null,
+  "question": "The complexity of the issue baffled everyone.",
+  "options": [
+   "conclusion",
+   "intricacy",
+   "grievance",
+   "complacency"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2021-076",
+  "year": 2021,
+  "session": 2,
+  "qnum": 76,
+  "passage": null,
+  "question": "He drank excessive amount of liquor.",
+  "options": [
+   "inculpable",
+   "inordinate",
+   "unreasonable",
+   "innocuous"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2021-077",
+  "year": 2021,
+  "session": 2,
+  "qnum": 77,
+  "passage": null,
+  "question": "He initiated the dialogue.",
+  "options": [
+   "ordered",
+   "interfered",
+   "began",
+   "planned"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2021-079",
+  "year": 2021,
+  "session": 2,
+  "qnum": 79,
+  "passage": null,
+  "question": "I overrule your proposal.",
+  "options": [
+   "wan",
+   "veto",
+   "weaken",
+   "supersede"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2021-080",
+  "year": 2021,
+  "session": 2,
+  "qnum": 80,
+  "passage": null,
+  "question": "His behaviour shocked me.",
+  "options": [
+   "entreated",
+   "pacified",
+   "appalled",
+   "scintillated"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2021-082",
+  "year": 2021,
+  "session": 2,
+  "qnum": 82,
+  "passage": null,
+  "question": "He has become paunchy.",
+  "options": [
+   "stout",
+   "slim",
+   "plump",
+   "fat"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2021-083",
+  "year": 2021,
+  "session": 2,
+  "qnum": 83,
+  "passage": null,
+  "question": "This river originates from the Ganges.",
+  "options": [
+   "inaugurates",
+   "culminates",
+   "initiates",
+   "emanates"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2021-084",
+  "year": 2021,
+  "session": 2,
+  "qnum": 84,
+  "passage": null,
+  "question": "The film I saw was hilarious.",
+  "options": [
+   "tragic",
+   "serious",
+   "uproarious",
+   "jovial"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2021-085",
+  "year": 2021,
+  "session": 2,
+  "qnum": 85,
+  "passage": null,
+  "question": "On that day, pandemonium reigned in the hall.",
+  "options": [
+   "hullaballoo",
+   "uproar",
+   "peace",
+   "accolade"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2021-086",
+  "year": 2021,
+  "session": 2,
+  "qnum": 86,
+  "passage": null,
+  "question": "The police detained me today amidst busy traffic.",
+  "options": [
+   "impeded",
+   "released",
+   "confined",
+   "held"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2021-087",
+  "year": 2021,
+  "session": 2,
+  "qnum": 87,
+  "passage": null,
+  "question": "In my state of despair, I confessed everything.",
+  "options": [
+   "despondency",
+   "determination",
+   "dependant",
+   "elation"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2021-089",
+  "year": 2021,
+  "session": 2,
+  "qnum": 89,
+  "passage": null,
+  "question": "There was much to boast about the quality of his work.",
+  "options": [
+   "bluster",
+   "brag",
+   "deprecate",
+   "flaunt"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2021-090",
+  "year": 2021,
+  "session": 2,
+  "qnum": 90,
+  "passage": null,
+  "question": "He delivered an eccentric speech.",
+  "options": [
+   "an odd",
+   "a peculiar",
+   "a normal",
+   "an idiosyncratic"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2021-091",
+  "year": 2021,
+  "session": 2,
+  "qnum": 91,
+  "passage": null,
+  "question": "They wandered around aimlessly.",
+  "options": [
+   "Verb",
+   "Adjective",
+   "Intensifier",
+   "Noun"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2021-092",
+  "year": 2021,
+  "session": 2,
+  "qnum": 92,
+  "passage": null,
+  "question": "We went away after they had left.",
+  "options": [
+   "Pronoun",
+   "Adjective",
+   "Intensifier",
+   "Conjunction"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2021-093",
+  "year": 2021,
+  "session": 2,
+  "qnum": 93,
+  "passage": null,
+  "question": "Public culture is associated with extremely new civil societies.",
+  "options": [
+   "Adverb",
+   "Intensifier",
+   "Adjective",
+   "Noun Clause"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2021-094",
+  "year": 2021,
+  "session": 2,
+  "qnum": 94,
+  "passage": null,
+  "question": "You are paying less attention to your studies these days.",
+  "options": [
+   "Adverb",
+   "Adjective",
+   "Intensifier",
+   "Noun"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2021-095",
+  "year": 2021,
+  "session": 2,
+  "qnum": 95,
+  "passage": null,
+  "question": "Why, is it really Sujata on the phone?",
+  "options": [
+   "Interjection",
+   "Adjective",
+   "Intensifier",
+   "Noun"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2021-097",
+  "year": 2021,
+  "session": 2,
+  "qnum": 97,
+  "passage": null,
+  "question": "Rakesh is too old to run fast.",
+  "options": [
+   "Adverb",
+   "Conjunction",
+   "Intensifier",
+   "Noun"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2021-098",
+  "year": 2021,
+  "session": 2,
+  "qnum": 98,
+  "passage": null,
+  "question": "For the next generation of interior architects and design graduates, work opportunities are immense.",
+  "options": [
+   "Adverb",
+   "Adjective",
+   "Noun",
+   "Pronoun"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2021-099",
+  "year": 2021,
+  "session": 2,
+  "qnum": 99,
+  "passage": null,
+  "question": "Life is a solo fight, and each person makes his or her own journey.",
+  "options": [
+   "Noun",
+   "Adjective",
+   "Intensifier",
+   "Adverb"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2021-100",
+  "year": 2021,
+  "session": 2,
+  "qnum": 100,
+  "passage": null,
+  "question": "The cat loves comfort.",
+  "options": [
+   "Indefinite article",
+   "Definite article",
+   "Intensifier",
+   "Subject"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2022-026",
+  "year": 2022,
+  "session": 1,
+  "qnum": 26,
+  "passage": null,
+  "question": "Everyone and his brother",
+  "options": [
+   "An individual and all his relatives",
+   "To think about universal brotherhood",
+   "A large number of people",
+   "To treat people as relatives"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2022-027",
+  "year": 2022,
+  "session": 1,
+  "qnum": 27,
+  "passage": null,
+  "question": "Feet of clay",
+  "options": [
+   "Very soft feet",
+   "Difficulty in running",
+   "Slow in actions",
+   "Hidden faults"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2022-030",
+  "year": 2022,
+  "session": 1,
+  "qnum": 30,
+  "passage": null,
+  "question": "A foregone conclusion",
+  "options": [
+   "A generous gift",
+   "A confusing idea",
+   "An obvious speculation",
+   "An inevitable result"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2022-037",
+  "year": 2022,
+  "session": 1,
+  "qnum": 37,
+  "passage": null,
+  "question": "She tormented me with her detached behaviour.",
+  "options": [
+   "threatened",
+   "ignored",
+   "cajoled",
+   "distressed"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
+  "id": "cds1-2022-051",
+  "year": 2022,
+  "session": 1,
+  "qnum": 51,
+  "passage": null,
+  "question": "Please use conversational language.",
+  "target": "conversational",
+  "options": [
+   "formal",
+   "complex",
+   "dialogical",
+   "informal"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2022-054",
+  "year": 2022,
+  "session": 1,
+  "qnum": 54,
+  "passage": null,
+  "question": "Words of endearment always touch me.",
+  "target": "endearment",
+  "options": [
+   "praise",
+   "fondness",
+   "conviction",
+   "wisdom"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2022-055",
+  "year": 2022,
+  "session": 1,
+  "qnum": 55,
+  "passage": null,
+  "question": "We should follow patience and forbearance.",
+  "target": "forbearance",
+  "options": [
+   "constraint",
+   "encouragement",
+   "restraint",
+   "support"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2022-058",
+  "year": 2022,
+  "session": 1,
+  "qnum": 58,
+  "passage": null,
+  "question": "Her peerless manners were noticed.",
+  "target": "peerless",
+  "options": [
+   "lovable",
+   "rowdy",
+   "irrelevant",
+   "unequalled"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2022-059",
+  "year": 2022,
+  "session": 1,
+  "qnum": 59,
+  "passage": null,
+  "question": "He studied mensuration carefully.",
+  "target": "mensuration",
+  "options": [
+   "measurement",
+   "questions",
+   "conclusions",
+   "lessons"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2022-061",
+  "year": 2022,
+  "session": 1,
+  "qnum": 61,
+  "passage": null,
+  "question": "He discontinued the work due to pressure.",
+  "target": "discontinued",
+  "options": [
+   "deputed",
+   "resumed",
+   "ceased",
+   "concealed"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2022-062",
+  "year": 2022,
+  "session": 1,
+  "qnum": 62,
+  "passage": null,
+  "question": "The teacher chided the pupil.",
+  "target": "chided",
+  "options": [
+   "admonished",
+   "reprimanded",
+   "commended",
+   "reproved"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2022-063",
+  "year": 2022,
+  "session": 1,
+  "qnum": 63,
+  "passage": null,
+  "question": "I cherish your company.",
+  "target": "cherish",
+  "options": [
+   "deprecate",
+   "value",
+   "adore",
+   "sustain"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2022-064",
+  "year": 2022,
+  "session": 1,
+  "qnum": 64,
+  "passage": null,
+  "question": "The house was full of chaos when I reached.",
+  "target": "chaos",
+  "options": [
+   "disorder",
+   "confusion",
+   "uniformity",
+   "order"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2022-065",
+  "year": 2022,
+  "session": 1,
+  "qnum": 65,
+  "passage": null,
+  "question": "We worship celestial beings.",
+  "target": "celestial",
+  "options": [
+   "utopian",
+   "earthly",
+   "transcendental",
+   "ritual"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2022-066",
+  "year": 2022,
+  "session": 1,
+  "qnum": 66,
+  "passage": null,
+  "question": "Mohan is quite reticent.",
+  "target": "reticent",
+  "options": [
+   "garrulous",
+   "taciturn",
+   "reserved",
+   "quiet"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2022-067",
+  "year": 2022,
+  "session": 1,
+  "qnum": 67,
+  "passage": null,
+  "question": "He was rather childish.",
+  "target": "childish",
+  "options": [
+   "infantile",
+   "harmonious",
+   "seasoned",
+   "exquisite"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2022-068",
+  "year": 2022,
+  "session": 1,
+  "qnum": 68,
+  "passage": null,
+  "question": "John is a magniloquent person.",
+  "target": "magniloquent",
+  "options": [
+   "pompous",
+   "turgid",
+   "lofty",
+   "terse"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2022-069",
+  "year": 2022,
+  "session": 1,
+  "qnum": 69,
+  "passage": null,
+  "question": "His clandestine affairs were suspicious.",
+  "target": "clandestine",
+  "options": [
+   "covert",
+   "conspicuous",
+   "furtive",
+   "unknown"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2022-070",
+  "year": 2022,
+  "session": 1,
+  "qnum": 70,
+  "passage": null,
+  "question": "Some animals live a dormant life.",
+  "target": "dormant",
+  "options": [
+   "latent",
+   "inert",
+   "sluggish",
+   "active"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2022-082",
+  "year": 2022,
+  "session": 1,
+  "qnum": 82,
+  "passage": null,
+  "question": "He led the caravan",
+  "options": [
+   "whenever he wanted to go",
+   "whichever he wanted to go",
+   "wherever he wanted to go",
+   "whomsoever he wanted to go"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds1-2022-085",
+  "year": 2022,
+  "session": 1,
+  "qnum": 85,
+  "passage": null,
+  "question": "He would be happier",
+  "options": [
+   "was he more honest",
+   "had he more honest",
+   "should he be more honest",
+   "were he more honest"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds1-2022-091",
+  "year": 2022,
+  "session": 1,
+  "qnum": 91,
+  "passage": null,
+  "question": "He succeeded dint of perseverance and hard work.",
+  "options": [
+   "in",
+   "of",
+   "by",
+   "with"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2022-092",
+  "year": 2022,
+  "session": 1,
+  "qnum": 92,
+  "passage": null,
+  "question": "_ his ill health, he retired from his business.",
+  "options": [
+   "With regard to",
+   "Due",
+   "As",
+   "Owing to"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2022-093",
+  "year": 2022,
+  "session": 1,
+  "qnum": 93,
+  "passage": null,
+  "question": "These are the good rules to live",
+  "options": [
+   "with",
+   "by",
+   "off",
+   "in"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2022-112",
+  "year": 2022,
+  "session": 1,
+  "qnum": 112,
+  "passage": null,
+  "question": "This year marks the quincentenary o Columbus's voyage to America.",
+  "options": [
+   "Noun",
+   "Adjective",
+   "Adverb",
+   "Article"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2022-116",
+  "year": 2022,
+  "session": 1,
+  "qnum": 116,
+  "passage": null,
+  "question": "Try to knock that vase over.",
+  "options": [
+   "Preposition",
+   "Conjunction",
+   "Adjective",
+   "Adverb"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2022-118",
+  "year": 2022,
+  "session": 1,
+  "qnum": 118,
+  "passage": null,
+  "question": "My parents lent me the money. Otherwise, I could not have afforded the trip.",
+  "options": [
+   "Adjective",
+   "Adverb",
+   "Conjunction",
+   "Participle"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2022-119",
+  "year": 2022,
+  "session": 1,
+  "qnum": 119,
+  "passage": null,
+  "question": "She wrote me an anguished letter from her prison cell.",
+  "options": [
+   "Noun",
+   "Verb",
+   "Adjective",
+   "Adverb"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2023-001",
+  "year": 2023,
+  "session": 1,
+  "qnum": 1,
+  "passage": null,
+  "question": "I like that boy.",
+  "options": [
+   "Noun",
+   "Demonstrative Pronoun",
+   "Participle",
+   "Conjunction"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2023-002",
+  "year": 2023,
+  "session": 1,
+  "qnum": 2,
+  "passage": null,
+  "question": "Without health there is no happiness.",
+  "options": [
+   "Noun",
+   "Pronoun",
+   "Adjective",
+   "Adverb"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2023-003",
+  "year": 2023,
+  "session": 1,
+  "qnum": 3,
+  "passage": null,
+  "question": "You have no sense.",
+  "options": [
+   "Noun",
+   "Determiner",
+   "Adverb",
+   "Preposition"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2023-004",
+  "year": 2023,
+  "session": 1,
+  "qnum": 4,
+  "passage": null,
+  "question": "None of these cars is in use.",
+  "options": [
+   "Reflexive Pronoun",
+   "Demonstrative Pronoun",
+   "Distributive Pronoun",
+   "Indefinite Pronoun"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2023-005",
+  "year": 2023,
+  "session": 1,
+  "qnum": 5,
+  "passage": null,
+  "question": "We shall now begin to work.",
+  "options": [
+   "Adverb",
+   "Adjective",
+   "Conjunction",
+   "Pronoun"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2023-006",
+  "year": 2023,
+  "session": 1,
+  "qnum": 6,
+  "passage": null,
+  "question": "Owing to his ill health, he retired from business.",
+  "options": [
+   "Conjunction",
+   "Preposition",
+   "Participle",
+   "Determiner"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2023-007",
+  "year": 2023,
+  "session": 1,
+  "qnum": 7,
+  "passage": null,
+  "question": "My sister is just sixteen and therefore not eligible to vote.",
+  "options": [
+   "Gerund",
+   "Adverb",
+   "Adjective",
+   "Conjunction"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2023-008",
+  "year": 2023,
+  "session": 1,
+  "qnum": 8,
+  "passage": null,
+  "question": "They tried to find fault with us.",
+  "options": [
+   "Participle",
+   "Verb",
+   "Infinitive",
+   "Gerund"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2023-009",
+  "year": 2023,
+  "session": 1,
+  "qnum": 9,
+  "passage": null,
+  "question": "Which way shall we go?",
+  "options": [
+   "Noun",
+   "Gerund",
+   "Conjunction",
+   "Adjective"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2023-010",
+  "year": 2023,
+  "session": 1,
+  "qnum": 10,
+  "passage": null,
+  "question": "Alas! He is dead.",
+  "options": [
+   "Determiner",
+   "Conjunction",
+   "Preposition",
+   "Interjection"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2023-011",
+  "year": 2023,
+  "session": 1,
+  "qnum": 11,
+  "passage": null,
+  "question": "He was _____ speaker that I had ever heard.",
+  "options": [
+   "the most eloquent",
+   "the more eloquent",
+   "very eloquent",
+   "eloquent"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2023-012",
+  "year": 2023,
+  "session": 1,
+  "qnum": 12,
+  "passage": null,
+  "question": "What was the name of the person to -____ you spoke on the phone?",
+  "options": [
+   "who",
+   "whom",
+   "whose",
+   "which"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2023-013",
+  "year": 2023,
+  "session": 1,
+  "qnum": 13,
+  "passage": null,
+  "question": "Have you seen Mohan ___?",
+  "options": [
+   "lately",
+   "yesterday",
+   "lastly",
+   "late"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2023-014",
+  "year": 2023,
+  "session": 1,
+  "qnum": 14,
+  "passage": null,
+  "question": "We live in ____ an old house.",
+  "options": [
+   "rather",
+   "fairly",
+   "quite",
+   "pretty"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2023-016",
+  "year": 2023,
+  "session": 1,
+  "qnum": 16,
+  "passage": null,
+  "question": "The _____ of the car is unknown.",
+  "options": [
+   "make up",
+   "making",
+   "made up",
+   "make"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2023-017",
+  "year": 2023,
+  "session": 1,
+  "qnum": 17,
+  "passage": null,
+  "question": "He paid his debts___ to the last penny.",
+  "options": [
+   "down",
+   "over",
+   "full",
+   "fully"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2023-018",
+  "year": 2023,
+  "session": 1,
+  "qnum": 18,
+  "passage": null,
+  "question": "Developing _____ in a diverse country requires detailed planning.",
+  "options": [
+   "growth",
+   "scarcity",
+   "poverty",
+   "infrastructure"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2023-019",
+  "year": 2023,
+  "session": 1,
+  "qnum": 19,
+  "passage": null,
+  "question": "_____ provisions have been made to support agriculture.",
+  "options": [
+   "Procurement",
+   "Subsidized",
+   "Adequate",
+   "Capital"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2023-020",
+  "year": 2023,
+  "session": 1,
+  "qnum": 20,
+  "passage": null,
+  "question": "The ______ growth in the Indian financial markets can be attributed to a number of reforms.",
+  "options": [
+   "efficiency",
+   "phenomenal",
+   "catastrophe",
+   "meteor"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2023-031",
+  "year": 2023,
+  "session": 1,
+  "qnum": 31,
+  "passage": null,
+  "question": "Have an axe to grind",
+  "options": [
+   "to have a selfish aim or motive",
+   "a thing that causes problems",
+   "an essential equipment for work",
+   "to behave arrogantly"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2023-032",
+  "year": 2023,
+  "session": 1,
+  "qnum": 32,
+  "passage": null,
+  "question": "Bite the bullet",
+  "options": [
+   "to be angry and unhappy",
+   "to start doing something in a very keen way",
+   "to accept something unpleasant and difficult",
+   "to try to do more than you are able"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2023-033",
+  "year": 2023,
+  "session": 1,
+  "qnum": 33,
+  "passage": null,
+  "question": "Laughing stock",
+  "options": [
+   "someone who does something very stupid and is made fun of",
+   "to avoid conflict",
+   "to laugh at someone secretly",
+   "a jovial and respected person"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2023-034",
+  "year": 2023,
+  "session": 1,
+  "qnum": 34,
+  "passage": null,
+  "question": "Pay over the odds",
+  "options": [
+   "to get dividends for investments",
+   "to work hard to make payments",
+   "to treat someone in the bad way",
+   "to pay more for something than it is worth"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2023-035",
+  "year": 2023,
+  "session": 1,
+  "qnum": 35,
+  "passage": null,
+  "question": "Play to the gallery",
+  "options": [
+   "to do something alone",
+   "to say things that will make people admire you",
+   "to behave in a very annoying way",
+   "to take big risks in business"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2023-037",
+  "year": 2023,
+  "session": 1,
+  "qnum": 37,
+  "passage": null,
+  "question": "A turn of the screw",
+  "options": [
+   "to begin to behave in a more positive way",
+   "to change people's opinions in your favour",
+   "to become unpopular",
+   "an action which makes a _ bad situation worse"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2023-038",
+  "year": 2023,
+  "session": 1,
+  "qnum": 38,
+  "passage": null,
+  "question": "A white elephant",
+  "options": [
+   "someone who is completely good and honest",
+   "something that has cost a lot of money but has no useful purpose",
+   "a situation where you waste time looking for something",
+   "to make someone feel anxious"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2023-039",
+  "year": 2023,
+  "session": 1,
+  "qnum": 39,
+  "passage": null,
+  "question": "A hot potato",
+  "options": [
+   "someone who is very angry",
+   "something that is difficult to deal with",
+   "someone who is_ holier than appears to be",
+   "to be unable to decide"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2023-040",
+  "year": 2023,
+  "session": 1,
+  "qnum": 40,
+  "passage": null,
+  "question": "Apples and oranges",
+  "options": [
+   "people who are close to each other",
+   "people who argue a lot",
+   "people who are different and thus incomparable",
+   "people who fight over minor issues"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2023-051",
+  "year": 2023,
+  "session": 1,
+  "qnum": 51,
+  "passage": null,
+  "question": "There are plenty of graduates anxious for work.",
+  "target": "anxious",
+  "options": [
+   "composed",
+   "eager",
+   "indifferent",
+   "prominent"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2023-053",
+  "year": 2023,
+  "session": 1,
+  "qnum": 53,
+  "passage": null,
+  "question": "We caught him eavesdropping outside the window.",
+  "target": "eavesdropping",
+  "options": [
+   "wandering aimlessly",
+   "talking loudly",
+   "listening secretly",
+   "reflecting calmly"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2023-054",
+  "year": 2023,
+  "session": 1,
+  "qnum": 54,
+  "passage": null,
+  "question": "The party leader exhorted his members to start preparing for the formation of their government.",
+  "target": "exhorted",
+  "options": [
+   "expected",
+   "urged",
+   "facilitated",
+   "discouraged"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2023-055",
+  "year": 2023,
+  "session": 1,
+  "qnum": 55,
+  "passage": null,
+  "question": "The local people are hospitable to strangers.",
+  "target": "hospitable",
+  "options": [
+   "surly",
+   "distant",
+   "frosty",
+   "cordial"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2023-057",
+  "year": 2023,
+  "session": 1,
+  "qnum": 57,
+  "passage": null,
+  "question": "Mohan has mercurial temperament.",
+  "target": "mercurial",
+  "options": [
+   "volatile",
+   "pleasant",
+   "agreeable",
+   "merciful"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2023-058",
+  "year": 2023,
+  "session": 1,
+  "qnum": 58,
+  "passage": null,
+  "question": "It is obligatory for all employees to wear protective clothing.",
+  "target": "obligatory",
+  "options": [
+   "voluntary",
+   "elective",
+   "optional",
+   "essential"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2023-059",
+  "year": 2023,
+  "session": 1,
+  "qnum": 59,
+  "passage": null,
+  "question": "She has a genetic predisposition to liver disease.",
+  "target": "predisposition",
+  "options": [
+   "resistance",
+   "immunity",
+   "vulnerability",
+   "exemption"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2023-060",
+  "year": 2023,
+  "session": 1,
+  "qnum": 60,
+  "passage": null,
+  "question": "She wore a sardonic smile on her face.",
+  "target": "sardonic",
+  "options": [
+   "mocking",
+   "respectful",
+   "reverential",
+   "deferential"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2023-062",
+  "year": 2023,
+  "session": 1,
+  "qnum": 62,
+  "passage": null,
+  "question": "S1 : Consider the potential effect of just a small increase in the earth's atmospheric temperature. S6 : If the sea level rose only a few feet, dozens of coastal cities would be destroyed and life would change utterly. P : Some deserts might anyway bloom. Q : But lands now fertile might turn to deserts, and many hot climates could become uninhabitable. R : Arise of only a few degrees could melt the polar ice caps and submerge the planet in a short time. S : Rainfall patterns would change.",
+  "options": [
+   "SQPR",
+   "RQSP",
+   "RSPQ",
+   "QRSP"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Ordering of Sentences"
+ },
+ {
+  "id": "cds1-2023-063",
+  "year": 2023,
+  "session": 1,
+  "qnum": 63,
+  "passage": null,
+  "question": "S1 : In the ancient times, the kings and the royal families had their own banner and seal. S6 : So the high officials commanded great respect because of the descent, ability and character. P : All the members of the royal family shared in the administration as far as possible. Q : The royal palace was maintained in a great state. R : The king was in theory an autocrat. S : There were opportunities to influence the king in _ the formulation of policies.",
+  "options": [
+   "RSPQ",
+   "QRPS",
+   "PQSR",
+   "QPSR"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Ordering of Sentences"
+ },
+ {
+  "id": "cds1-2023-066",
+  "year": 2023,
+  "session": 1,
+  "qnum": 66,
+  "passage": null,
+  "question": "S1 : In agriculture, water is mainly used for irrigation. S6 : Hence, it is difficult to practice agriculture without assured irrigation during dry seasons. P : The large tracts of the country are deficient in rainfall and are drought prone. Q : Winter and summer seasons are more or less dry in most part of the country. R : Irrigation is needed because of spatio-temporal variability in rainfall in the country. S : North-Western India and Deccan Plateau constitute such areas.",
+  "options": [
+   "RPSQ",
+   "RSPQ",
+   "SPQR",
+   "QPRS"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Ordering of Sentences"
+ },
+ {
+  "id": "cds1-2023-068",
+  "year": 2023,
+  "session": 1,
+  "qnum": 68,
+  "passage": null,
+  "question": "S1 : During the past two decades, many organizations in both the manufacturing and service sectors have faced dramatic changes in their business environment. S6 : These changes have had a significant influence on management accounting systems. P : To succeed in today's highly competitive environment, companies have made customer satisfaction an overriding priority. Q : They have also adopted new management approaches and manufacturing companies have changed their manufacturing systems and invested in new technologies. R : Deregulation and extensive competition from overseas companies in domestic markets have resulted in a situation in which most companies now operate in a highly competitive global market. S : At the same time there has been a significant reduction in product life cycles arising from technological innovations and the need to meet increasingly discrimi",
+  "options": [
+   "PQRS",
+   "RSPQ",
+   "SRQP",
+   "QPRS"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Ordering of Sentences"
+ },
+ {
+  "id": "cds1-2023-072",
+  "year": 2023,
+  "session": 1,
+  "qnum": 72,
+  "passage": null,
+  "question": "Blend the grains to make a smooth paste.",
+  "target": "Blend",
+  "options": [
+   "separate",
+   "mingle",
+   "coalesce",
+   "amalgamate"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2023-074",
+  "year": 2023,
+  "session": 1,
+  "qnum": 74,
+  "passage": null,
+  "question": "She has always been disdainful of people who haven't been to college.",
+  "target": "disdainful",
+  "options": [
+   "contemptuous",
+   "dismissive",
+   "scornful",
+   "respectful"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2023-075",
+  "year": 2023,
+  "session": 1,
+  "qnum": 75,
+  "passage": null,
+  "question": "He had a frugal lunch.",
+  "target": "frugal",
+  "options": [
+   "sparing",
+   "extravagant",
+   "meagre",
+   "delicious"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2023-076",
+  "year": 2023,
+  "session": 1,
+  "qnum": 76,
+  "passage": null,
+  "question": "He is forced to lead an itinerant life.",
+  "target": "itinerant",
+  "options": [
+   "vagrant",
+   "roving",
+   "settled",
+   "nomadic"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2023-077",
+  "year": 2023,
+  "session": 1,
+  "qnum": 77,
+  "passage": null,
+  "question": "His malicious intentions were aborted.",
+  "target": "malicious",
+  "options": [
+   "pernicious",
+   "spiteful",
+   "benevolent",
+   "vindictive"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2023-078",
+  "year": 2023,
+  "session": 1,
+  "qnum": 78,
+  "passage": null,
+  "question": "Comics tend to perpetuate several myths.",
+  "target": "perpetuate",
+  "options": [
+   "cease",
+   "conserve",
+   "sustain",
+   "maintain"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2023-080",
+  "year": 2023,
+  "session": 1,
+  "qnum": 80,
+  "passage": null,
+  "question": "The movie is about fusion of old and contemporary ideas.",
+  "target": "fusion",
+  "options": [
+   "joining",
+   "bonding",
+   "separation",
+   "blending"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2023-091",
+  "year": 2023,
+  "session": 1,
+  "qnum": 91,
+  "passage": null,
+  "question": "Steve has gone away. He will be away _____ Monday.",
+  "options": [
+   "on",
+   "by",
+   "until",
+   "from"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2023-092",
+  "year": 2023,
+  "session": 1,
+  "qnum": 92,
+  "passage": null,
+  "question": "I'll see you _____ Friday morning.",
+  "options": [
+   "in",
+   "on",
+   "along",
+   "at"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2023-093",
+  "year": 2023,
+  "session": 1,
+  "qnum": 93,
+  "passage": null,
+  "question": "Write your name ______ the top of the page.",
+  "options": [
+   "at",
+   "in",
+   "by",
+   "with"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2023-094",
+  "year": 2023,
+  "session": 1,
+  "qnum": 94,
+  "passage": null,
+  "question": "Sohan is studying ___ the _ university.",
+  "options": [
+   "in",
+   "at",
+   "on",
+   "from"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2023-095",
+  "year": 2023,
+  "session": 1,
+  "qnum": 95,
+  "passage": null,
+  "question": "He is indebted ____ his friend.",
+  "options": [
+   "from",
+   "with",
+   "by",
+   "to"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2023-096",
+  "year": 2023,
+  "session": 1,
+  "qnum": 96,
+  "passage": null,
+  "question": "Can I be held responsible _____ my spouse's debts?",
+  "options": [
+   "for",
+   "to",
+   "by",
+   "with"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2023-097",
+  "year": 2023,
+  "session": 1,
+  "qnum": 97,
+  "passage": null,
+  "question": "It was fun to hang out ____ the pier.",
+  "options": [
+   "down",
+   "with",
+   "in",
+   "beneath"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2023-101",
+  "year": 2023,
+  "session": 1,
+  "qnum": 101,
+  "passage": null,
+  "question": "They were informed that the inaugural version of the scheme",
+  "options": [
+   "had three parts",
+   "was three parts",
+   "have three parts",
+   "had has three parts"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds1-2023-102",
+  "year": 2023,
+  "session": 1,
+  "qnum": 102,
+  "passage": null,
+  "question": "What would you do",
+  "options": [
+   "if you would won a lot of money?",
+   "if you have won a lot of money?",
+   "if you will win a lot of moneys?",
+   "if you won a lot of money?"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds1-2023-103",
+  "year": 2023,
+  "session": 1,
+  "qnum": 103,
+  "passage": null,
+  "question": "If it stopped raining",
+  "options": [
+   "we had gone out",
+   "we could go out",
+   "we should go out",
+   "we ought to go out"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds1-2023-109",
+  "year": 2023,
+  "session": 1,
+  "qnum": 109,
+  "passage": null,
+  "question": "I am trying to",
+  "options": [
+   "shut down on coffee",
+   "cut down on coffee",
+   "break down on coffee",
+   "turn down on coffee"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds2-2023-002",
+  "year": 2023,
+  "session": 2,
+  "qnum": 2,
+  "passage": null,
+  "question": "Put the fork and knife in the cutlery box.",
+  "options": [
+   "Preposition",
+   "Verb",
+   "Conjunction",
+   "Determiner"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2023-003",
+  "year": 2023,
+  "session": 2,
+  "qnum": 3,
+  "passage": null,
+  "question": "She came slowly up to the main door.",
+  "options": [
+   "Adjective",
+   "Adverb",
+   "Verb",
+   "Pronoun"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2023-004",
+  "year": 2023,
+  "session": 2,
+  "qnum": 4,
+  "passage": null,
+  "question": "Oh no! I am getting late for the function.",
+  "options": [
+   "Preposition",
+   "Article",
+   "Noun",
+   "Interjection"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2023-005",
+  "year": 2023,
+  "session": 2,
+  "qnum": 5,
+  "passage": null,
+  "question": "They are all going to attend the function.",
+  "options": [
+   "Noun",
+   "Adverb",
+   "Pronoun",
+   "Conjunction"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2023-006",
+  "year": 2023,
+  "session": 2,
+  "qnum": 6,
+  "passage": null,
+  "question": "The sun shone through the dull grey clouds.",
+  "options": [
+   "Noun",
+   "Adverb",
+   "Verb",
+   "Adjective"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2023-007",
+  "year": 2023,
+  "session": 2,
+  "qnum": 7,
+  "passage": null,
+  "question": "The Principal is presiding over the meeting.",
+  "options": [
+   "Verb",
+   "Noun",
+   "Adjective",
+   "Preposition"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2023-008",
+  "year": 2023,
+  "session": 2,
+  "qnum": 8,
+  "passage": null,
+  "question": "Cash machines permit people to withdraw money at any time.",
+  "options": [
+   "Verb",
+   "Noun",
+   "Pronoun",
+   "Adverb"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2023-009",
+  "year": 2023,
+  "session": 2,
+  "qnum": 9,
+  "passage": null,
+  "question": "The novel is loosely based on his childhood in England.",
+  "options": [
+   "Verb",
+   "Adverb",
+   "Noun",
+   "Adjective"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2023-013",
+  "year": 2023,
+  "session": 2,
+  "qnum": 13,
+  "passage": null,
+  "question": "Davis is not sure whether he should ______ the forest guest house after dark.",
+  "options": [
+   "stay",
+   "leave",
+   "left",
+   "leaves"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds2-2023-014",
+  "year": 2023,
+  "session": 2,
+  "qnum": 14,
+  "passage": null,
+  "question": "They ______ as responsible people do during the difficult situation.",
+  "options": [
+   "behaves",
+   "behaved",
+   "behaving",
+   "belief"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds2-2023-015",
+  "year": 2023,
+  "session": 2,
+  "qnum": 15,
+  "passage": null,
+  "question": "Criminal law has taken long ______ in facilitating access to justice for women by making various provisions.",
+  "options": [
+   "stand",
+   "strides",
+   "aside",
+   "walk"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds2-2023-017",
+  "year": 2023,
+  "session": 2,
+  "qnum": 17,
+  "passage": null,
+  "question": "A person purchasing goods and services for commercial purposes will also not come under the ______ ______ of this act.",
+  "options": [
+   "review",
+   "view",
+   "limits",
+   "purview"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds2-2023-018",
+  "year": 2023,
+  "session": 2,
+  "qnum": 18,
+  "passage": null,
+  "question": "The emergence of a sovereign Indian nation was ______ on the notion of equality.",
+  "options": [
+   "promised",
+   "looked",
+   "premised",
+   "depend"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds2-2023-019",
+  "year": 2023,
+  "session": 2,
+  "qnum": 19,
+  "passage": null,
+  "question": "In Manipur, the most important piece of literary work that continues to ______ a sense of patriotism is ‘Khongjom Parva’.",
+  "options": [
+   "instil",
+   "install",
+   "installs",
+   "installed"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds2-2023-020",
+  "year": 2023,
+  "session": 2,
+  "qnum": 20,
+  "passage": null,
+  "question": "Women’s autobiographies in the post- Independence period can be seen as ______ of their literary interest.",
+  "options": [
+   "subsistence",
+   "insistence",
+   "evidence",
+   "dependence"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds2-2023-031",
+  "year": 2023,
+  "session": 2,
+  "qnum": 31,
+  "passage": null,
+  "question": "I always preferred to study Physics and Mathematics, now choosing Economics and Literature for further studies is another kettle of fish.",
+  "options": [
+   "Completely different matter",
+   "Slightly different matter",
+   "Completely difficult matter",
+   "Doing things in a hurry"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2023-034",
+  "year": 2023,
+  "session": 2,
+  "qnum": 34,
+  "passage": null,
+  "question": "When it comes to using technology, she is completely at sea.",
+  "options": [
+   "Relaxed",
+   "Confused",
+   "Comfortable",
+   "Prepared"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2023-035",
+  "year": 2023,
+  "session": 2,
+  "qnum": 35,
+  "passage": null,
+  "question": "He is not a great scholar but he has the gift of the gab.",
+  "options": [
+   "Ability to write creatively",
+   "Ability to read fluently",
+   "Ability to convince",
+   "Ability to speak confidently"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2023-036",
+  "year": 2023,
+  "session": 2,
+  "qnum": 36,
+  "passage": null,
+  "question": "This car belonged to Ravi, but recently it changed hands.",
+  "options": [
+   "Change of ownership",
+   "Change of driver",
+   "Change of mechanic",
+   "Change of machinery"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2023-037",
+  "year": 2023,
+  "session": 2,
+  "qnum": 37,
+  "passage": null,
+  "question": "He turned down the new assignment; he felt that he already had too many. irons in the fire.",
+  "options": [
+   "Having involvement in illegal activities",
+   "Having problems in completing tasks",
+   "Having financial hurdles",
+   "Having multiple tasks to complete"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2023-038",
+  "year": 2023,
+  "session": 2,
+  "qnum": 38,
+  "passage": null,
+  "question": "Something should be done to stop the brain drain of Indian scientists to other countries.",
+  "options": [
+   "Movement of professionals to another country for higher studies",
+   "Movement of professionals to another country for better prospect",
+   "Movement of professionals to another country for security",
+   "Movement of professionals to another country for excursion"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds2-2023-051",
+  "year": 2023,
+  "session": 2,
+  "qnum": 51,
+  "passage": null,
+  "question": "His views on the matter are utopian.",
+  "options": [
+   "realistic",
+   "ideal",
+   "practicable",
+   "materialistic"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2023-052",
+  "year": 2023,
+  "session": 2,
+  "qnum": 52,
+  "passage": null,
+  "question": "The shortage of funds will render nugatory the implementation of reform policies.",
+  "options": [
+   "explicit",
+   "implicit",
+   "ineffectual",
+   "composite"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2023-054",
+  "year": 2023,
+  "session": 2,
+  "qnum": 54,
+  "passage": null,
+  "question": "We must not become complacent about the progress of the technology.",
+  "options": [
+   "discontented",
+   "contented",
+   "ignorant",
+   "unsure"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2023-055",
+  "year": 2023,
+  "session": 2,
+  "qnum": 55,
+  "passage": null,
+  "question": "The employees rejected the derisory pay offer.",
+  "options": [
+   "partial",
+   "full",
+   "derogatory",
+   "inadequate"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2023-057",
+  "year": 2023,
+  "session": 2,
+  "qnum": 57,
+  "passage": null,
+  "question": "The business floundered during the pandemic.",
+  "options": [
+   "faced many problems",
+   "glided through",
+   "floated through",
+   "succeeded"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2023-058",
+  "year": 2023,
+  "session": 2,
+  "qnum": 58,
+  "passage": null,
+  "question": "His speeches were models of brevity.",
+  "options": [
+   "lengthiness",
+   "concision",
+   "permanence",
+   "exemplary"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2023-060",
+  "year": 2023,
+  "session": 2,
+  "qnum": 60,
+  "passage": null,
+  "question": "No one knew what transpired during the meeting.",
+  "options": [
+   "emerged",
+   "exchanged",
+   "was spoken",
+   "merged"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2023-071",
+  "year": 2023,
+  "session": 2,
+  "qnum": 71,
+  "passage": null,
+  "question": "American Independence was a great blow to the invincible image of Great Britain.",
+  "options": [
+   "vulnerable",
+   "impregnable",
+   "unbeatable",
+   "insurmountable"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2023-072",
+  "year": 2023,
+  "session": 2,
+  "qnum": 72,
+  "passage": null,
+  "question": "The first step in precipitation is condensation.",
+  "options": [
+   "constriction",
+   "abridgement",
+   "recapitulation",
+   "evaporation"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2023-073",
+  "year": 2023,
+  "session": 2,
+  "qnum": 73,
+  "passage": null,
+  "question": "This ushered in a large-scale social, economic, and political transformation.",
+  "options": [
+   "led",
+   "conducted",
+   "obstructed",
+   "directed"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2023-074",
+  "year": 2023,
+  "session": 2,
+  "qnum": 74,
+  "passage": null,
+  "question": "The writer obfuscated the real issue with small details.",
+  "options": [
+   "mystified",
+   "obscured",
+   "illuminated",
+   "muddled"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2023-075",
+  "year": 2023,
+  "session": 2,
+  "qnum": 75,
+  "passage": null,
+  "question": "The horror and abomination of the system of Sati in India was condemned thoroughly.",
+  "options": [
+   "abhorrence",
+   "termination",
+   "adoration",
+   "detestation"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2023-076",
+  "year": 2023,
+  "session": 2,
+  "qnum": 76,
+  "passage": null,
+  "question": "He was rebuked for his infraction of the discipline.",
+  "options": [
+   "transgression",
+   "observance",
+   "breach",
+   "acceptance"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2023-077",
+  "year": 2023,
+  "session": 2,
+  "qnum": 77,
+  "passage": null,
+  "question": "It is the general reaction of some people to denounce any new proposal by enthusiastic professionals.",
+  "options": [
+   "criticise",
+   "censure",
+   "comment",
+   "appreciate"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2023-078",
+  "year": 2023,
+  "session": 2,
+  "qnum": 78,
+  "passage": null,
+  "question": "The emperor as a centralised entity indisputably went beyond regional conflicts and fostered a certain mode of elite culture.",
+  "options": [
+   "cultivated",
+   "endorsed",
+   "suppressed",
+   "incubated"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2023-091",
+  "year": 2023,
+  "session": 2,
+  "qnum": 91,
+  "passage": null,
+  "question": "He persevered ______ difficulties.",
+  "options": [
+   "despite of",
+   "because of",
+   "although",
+   "in spite of"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds2-2023-094",
+  "year": 2023,
+  "session": 2,
+  "qnum": 94,
+  "passage": null,
+  "question": "Pll phone you sometime ______ the afternoon.",
+  "options": [
+   "on",
+   "at",
+   "in",
+   "into"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds2-2023-095",
+  "year": 2023,
+  "session": 2,
+  "qnum": 95,
+  "passage": null,
+  "question": "He raised several questions ______ the future of the organisation.",
+  "options": [
+   "concern to",
+   "concerned for",
+   "concerning",
+   "concerned with"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds2-2023-096",
+  "year": 2023,
+  "session": 2,
+  "qnum": 96,
+  "passage": null,
+  "question": "He is the gentleman whose name is written ______ the board.",
+  "options": [
+   "that",
+   "with",
+   "in",
+   "on"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds2-2023-097",
+  "year": 2023,
+  "session": 2,
+  "qnum": 97,
+  "passage": null,
+  "question": "______ his negligence the company suffered a heavy loss.",
+  "options": [
+   "In accordance with",
+   "Instead of",
+   "On account of",
+   "In front of"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds2-2023-099",
+  "year": 2023,
+  "session": 2,
+  "qnum": 99,
+  "passage": null,
+  "question": "his illness, he could not finish the work on time.",
+  "options": [
+   "Subsequent for",
+   "As a consequence of",
+   "In consequence to",
+   "On account"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds2-2023-103",
+  "year": 2023,
+  "session": 2,
+  "qnum": 103,
+  "passage": null,
+  "question": "Each of the scholars ——.",
+  "options": [
+   "have done well",
+   "has done well",
+   "shall done well",
+   "will done well"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds2-2023-104",
+  "year": 2023,
+  "session": 2,
+  "qnum": 104,
+  "passage": null,
+  "question": "He asked whether either of the brothers",
+  "options": [
+   "were at home",
+   "are at home",
+   "was at home",
+   "have come home"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds2-2023-105",
+  "year": 2023,
+  "session": 2,
+  "qnum": 105,
+  "passage": null,
+  "question": "One cannot be too careful of ______.",
+  "options": [
+   "his good name",
+   "their good name",
+   "whether good name",
+   "one’s good name"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds2-2023-106",
+  "year": 2023,
+  "session": 2,
+  "qnum": 106,
+  "passage": null,
+  "question": "The applicant is the native of this country, so he has the right ______.",
+  "options": [
+   "to have vote",
+   "to vote",
+   "of vote",
+   "at vote"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds2-2023-107",
+  "year": 2023,
+  "session": 2,
+  "qnum": 107,
+  "passage": null,
+  "question": "No sooner had he returned ______.",
+  "options": [
+   "than he was off again",
+   "but he was off again",
+   "therefore went away",
+   "thence went away"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds2-2023-109",
+  "year": 2023,
+  "session": 2,
+  "qnum": 109,
+  "passage": null,
+  "question": "When I was on holiday, ______.",
+  "options": [
+   "my whole luggage were stolen",
+   "my part luggage was stolen",
+   "all my luggage was stolen",
+   "my some luggage was stolen"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Sentence Completion"
+ },
+ {
+  "id": "cds1-2024-003",
+  "year": 2024,
+  "session": 1,
+  "qnum": 3,
+  "passage": null,
+  "question": "He indulges in nefarious activities.",
+  "target": "nefarious",
+  "options": [
+   "flagitious",
+   "execrable",
+   "admirable",
+   "abominable"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2024-004",
+  "year": 2024,
+  "session": 1,
+  "qnum": 4,
+  "passage": null,
+  "question": "When he was born, his family was indigent.",
+  "target": "indigent",
+  "options": [
+   "pretentious",
+   "impecunious",
+   "affluent",
+   "ruined"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2024-005",
+  "year": 2024,
+  "session": 1,
+  "qnum": 5,
+  "passage": null,
+  "question": "All of us are living in turbulent times.",
+  "target": "turbulent",
+  "options": [
+   "capricious",
+   "desolate",
+   "tranquil",
+   "obstreperous"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds1-2024-006",
+  "year": 2024,
+  "session": 1,
+  "qnum": 6,
+  "passage": null,
+  "question": "I shall not be going to the theatre___.",
+  "options": [
+   "if it may snow",
+   "if it snow",
+   "if it snows",
+   "if snowed"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2024-007",
+  "year": 2024,
+  "session": 1,
+  "qnum": 7,
+  "passage": null,
+  "question": "__ than a hundred passengers were killed in the recent train accident.",
+  "options": [
+   "Less",
+   "No less",
+   "Fewest",
+   "No fewer"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2024-008",
+  "year": 2024,
+  "session": 1,
+  "qnum": 8,
+  "passage": null,
+  "question": "Each of these paintings ____ made by a famous painter.",
+  "options": [
+   "are",
+   "is",
+   "be",
+   "should"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2024-009",
+  "year": 2024,
+  "session": 1,
+  "qnum": 9,
+  "passage": null,
+  "question": "This is an area of_____ dense population.",
+  "options": [
+   "extremely",
+   "totally",
+   "tangentially",
+   "languidly"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2024-010",
+  "year": 2024,
+  "session": 1,
+  "qnum": 10,
+  "passage": null,
+  "question": "Reading ability in young children _____ by speech disorders.",
+  "options": [
+   "effected",
+   "affected",
+   "is effected",
+   "is affected"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2024-011",
+  "year": 2024,
+  "session": 1,
+  "qnum": 11,
+  "passage": null,
+  "question": "She has faced almost _____ difficulty in arranging the funds for the event.",
+  "options": [
+   "big",
+   "insurmountable",
+   "gigantic",
+   "large"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2024-012",
+  "year": 2024,
+  "session": 1,
+  "qnum": 12,
+  "passage": null,
+  "question": "Our school building is___ dilapidated.",
+  "options": [
+   "visibly",
+   "little",
+   "deeply",
+   "satisfactorily"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2024-013",
+  "year": 2024,
+  "session": 1,
+  "qnum": 13,
+  "passage": null,
+  "question": "Ranikhet is a place of remarkably ___ beauty.",
+  "options": [
+   "scenery",
+   "scenic",
+   "scene",
+   "scenically"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2024-014",
+  "year": 2024,
+  "session": 1,
+  "qnum": 14,
+  "passage": null,
+  "question": "The criminal on the run managed to _____ capture by the police officer.",
+  "options": [
+   "invade",
+   "evade",
+   "slip",
+   "run away"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2024-015",
+  "year": 2024,
+  "session": 1,
+  "qnum": 15,
+  "passage": null,
+  "question": "I am _____ on the ambitious project of learning one new language every year.",
+  "options": [
+   "sailing",
+   "embarking",
+   "adventuring",
+   "concurring"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Fill in the Blanks"
+ },
+ {
+  "id": "cds1-2024-018",
+  "year": 2024,
+  "session": 1,
+  "qnum": 18,
+  "passage": null,
+  "question": "Neither fish nor fowl",
+  "options": [
+   "Difficult to describe or classify",
+   "Neither this or that",
+   "Strict rules and regulations",
+   "Feel awkward because of unfamiliarity"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2024-032",
+  "year": 2024,
+  "session": 1,
+  "qnum": 32,
+  "passage": null,
+  "question": "S1 : COVID-19 was a health catastrophe that caused great distress. S6 : It triggered the movement of more than 7 million people through lockdown and _post-lockdown periods. P : India also undertook the Vande Bharat Mission. Q : Made-in-India vaccines were sent to more than 90 countries on a commercial and grant basis. R : India justified its credentials as a global HADR player deploying Rapid Response Teams_ to Maldives, Kuwait and Mauritius launching the multiphased mission SAGAR. S : During the pandemic, India re-established its credentials as the Pharmacy of the World by supplying medicines and equipment to over 150 countries in the face of daunting logistical challenges.",
+  "options": [
+   "SQRP",
+   "SPRQ",
+   "QPRS",
+   "QRSP"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Ordering of Sentences"
+ },
+ {
+  "id": "cds1-2024-037",
+  "year": 2024,
+  "session": 1,
+  "qnum": 37,
+  "passage": null,
+  "question": "S1 : One of the features of humanist culture in Italy was a slackening of the control of religion over human life. S6 : There was also a concern at this time with good manners. P : Though they were not irreligious, Italians were strongly attracted to material wealth, power and glory. Q : He wrote a pamphlet defending acquisition of wealth as a virtue. R : In On Pleasure, Lorenzo Valla, another humanist, criticised the Christian injunction against pleasure. S : Francesco Barbaro was a humanist from Venice.",
+  "options": [
+   "QRSP",
+   "QPSR",
+   "PSQR",
+   "RSPQ"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Ordering of Sentences"
+ },
+ {
+  "id": "cds1-2024-040",
+  "year": 2024,
+  "session": 1,
+  "qnum": 40,
+  "passage": null,
+  "question": "S1 : Nano Mission Programme was initiated in 2007. S6 : The efforts of this mission are evident through India's global ranking based on the publications in SCI journals. P : The Nano Mission is likely to pave the path for India's domination in cutting-edge science. Q : Its goal is to foster, promote and develop all aspects of nanoscience and nanotechnology. R : This is an umbrella programme which promotes basic research and focuses on nanotechnology adaptation. and transfer to industry for use by masses. S : The support under this extends to create skilled human resources, projects related to nanoscience and nanotechnology and building infrastructure of nano S&T labs at several . institutes spread across the country.",
+  "options": [
+   "PSRQ",
+   "QRPS",
+   "RPQS",
+   "SPRQ"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Ordering of Sentences"
+ },
+ {
+  "id": "cds1-2024-041",
+  "year": 2024,
+  "session": 1,
+  "qnum": 41,
+  "passage": null,
+  "question": "She sings much better than I do.",
+  "options": [
+   "Adjective",
+   "Adverb",
+   "Verb",
+   "Conjunction"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2024-042",
+  "year": 2024,
+  "session": 1,
+  "qnum": 42,
+  "passage": null,
+  "question": "The story was in all the dailies.",
+  "options": [
+   "Noun",
+   "Adjective",
+   "Adverb",
+   "Determiner"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2024-043",
+  "year": 2024,
+  "session": 1,
+  "qnum": 43,
+  "passage": null,
+  "question": "Smoking is injurious to health.",
+  "options": [
+   "Participle",
+   "Infinitive",
+   "Gerund",
+   "Verb"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2024-046",
+  "year": 2024,
+  "session": 1,
+  "qnum": 46,
+  "passage": null,
+  "question": "Hurray! We have won the match.",
+  "options": [
+   "Interjection",
+   "Conjunction",
+   "Adjective",
+   "Interrogative"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2024-050",
+  "year": 2024,
+  "session": 1,
+  "qnum": 50,
+  "passage": null,
+  "question": "India is revered as the fountainhead of democracy in the world today.",
+  "options": [
+   "Noun",
+   "Adjective",
+   "Adverb",
+   "Interjection"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds1-2024-061",
+  "year": 2024,
+  "session": 1,
+  "qnum": 61,
+  "passage": null,
+  "question": "I don't like working ___ night.",
+  "options": [
+   "in",
+   "at",
+   "on",
+   "into"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2024-062",
+  "year": 2024,
+  "session": 1,
+  "qnum": 62,
+  "passage": null,
+  "question": "I'll see you ____ the morning.",
+  "options": [
+   "at",
+   "on",
+   "along",
+   "in"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2024-063",
+  "year": 2024,
+  "session": 1,
+  "qnum": 63,
+  "passage": null,
+  "question": "There is a mark _____ the wall.",
+  "options": [
+   "on",
+   "by",
+   "into",
+   "from"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2024-064",
+  "year": 2024,
+  "session": 1,
+  "qnum": 64,
+  "passage": null,
+  "question": "Shalini usually goes to work ____ bus.",
+  "options": [
+   "on",
+   "by",
+   "at",
+   "with"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2024-065",
+  "year": 2024,
+  "session": 1,
+  "qnum": 65,
+  "passage": null,
+  "question": "She has always been very polite___ me.",
+  "options": [
+   "about",
+   "by",
+   "to",
+   "of"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2024-066",
+  "year": 2024,
+  "session": 1,
+  "qnum": 66,
+  "passage": null,
+  "question": "I'm fed up ___ you.",
+  "options": [
+   "by",
+   "at",
+   "until",
+   "with"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2024-067",
+  "year": 2024,
+  "session": 1,
+  "qnum": 67,
+  "passage": null,
+  "question": "We had a discussion _____ the _ project.",
+  "options": [
+   "beneath",
+   "with",
+   "about",
+   "in"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2024-068",
+  "year": 2024,
+  "session": 1,
+  "qnum": 68,
+  "passage": null,
+  "question": "She is capable ____ winning the race.",
+  "options": [
+   "on",
+   "at",
+   "of",
+   "until"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2024-069",
+  "year": 2024,
+  "session": 1,
+  "qnum": 69,
+  "passage": null,
+  "question": "His first novel has been translated ____ many languages.",
+  "options": [
+   "into",
+   "with",
+   "on",
+   "along"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2024-083",
+  "year": 2024,
+  "session": 1,
+  "qnum": 83,
+  "passage": null,
+  "question": "The hotel room had dingy walls.",
+  "target": "dingy",
+  "options": [
+   "hazy",
+   "dark and dirty",
+   "pale",
+   "cloudy"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2024-084",
+  "year": 2024,
+  "session": 1,
+  "qnum": 84,
+  "passage": null,
+  "question": "Keshav planned the event with fastidious care.",
+  "target": "fastidious",
+  "options": [
+   "inattentive",
+   "boring",
+   "meticulous",
+   "uninteresting"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2024-085",
+  "year": 2024,
+  "session": 1,
+  "qnum": 85,
+  "passage": null,
+  "question": "Her left leg was paralysed due to a debilitating disease.",
+  "target": "debilitating",
+  "options": [
+   "crippling",
+   "sad",
+   "strange",
+   "critical"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds1-2024-086",
+  "year": 2024,
+  "session": 1,
+  "qnum": 86,
+  "passage": null,
+  "question": "S1 : Civics classes focus on citizenship and governance. S2 : The subject develops concepts that enable the reader to apply knowledge about government and the state to the idea of participative citizenship. The second sentence",
+  "options": [
+   "expands the first",
+   "contrasts with the first",
+   "proposes a solution",
+   "states an effect"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
+  "id": "cds1-2024-087",
+  "year": 2024,
+  "session": 1,
+  "qnum": 87,
+  "passage": null,
+  "question": "S1 : China has made rapid economic strides but at the cost of democracy. S2 : India has followed a path towards rapid economic growth, but by abiding by the norms of a democratic polity. The second sentence",
+  "options": [
+   "negates the first",
+   "explains what is stated in the first",
+   "offers a contrast to the first",
+   "confirms the first"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
+  "id": "cds1-2024-088",
+  "year": 2024,
+  "session": 1,
+  "qnum": 88,
+  "passage": null,
+  "question": "S1 : The concept of right or wrong needs to be determined on the basis of principles. S2 : When it comes to matters related to the field of human rights, positions should be based solely on principles.",
+  "options": [
+   "establishes the first",
+   "develops an axiom based on the first",
+   "contradicts the first",
+   "delegitimises the premise of the first"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
+  "id": "cds1-2024-089",
+  "year": 2024,
+  "session": 1,
+  "qnum": 89,
+  "passage": null,
+  "question": "S1 : The concept of Ahimsa was adopted by Gandhiji after he was introduced to it by Tolstoy. The latter first read about it in German translation of Thirukkural, the great moral treatise in Tamil. S2 : Much in the same way that Gandhi was influenced by Tolstoy, in the United States of America, Martin Luther King Jr. shaped his Civil Rights Movement based on Gandhian principles. The second sentence",
+  "options": [
+   "counters the first",
+   "defends the premise of the first",
+   "provides an analogy for the first",
+   "explains the first"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
+  "id": "cds1-2024-111",
+  "year": 2024,
+  "session": 1,
+  "qnum": 111,
+  "passage": null,
+  "question": "She was advised by her coach to to form if she wanted to do well in the tournament.",
+  "options": [
+   "get on",
+   "get along",
+   "get done",
+   "get back"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Phrasal Verbs"
+ },
+ {
+  "id": "cds1-2024-112",
+  "year": 2024,
+  "session": 1,
+  "qnum": 112,
+  "passage": null,
+  "question": "She said goodbye and along the road.",
+  "options": [
+   "tripped out",
+   "tripped over",
+   "tripped off",
+   "tripped in"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Phrasal Verbs"
+ },
+ {
+  "id": "cds1-2024-113",
+  "year": 2024,
+  "session": 1,
+  "qnum": 113,
+  "passage": null,
+  "question": "The team reported that they had ___ the contract with tooth and comb before forwarding its recommendation.",
+  "options": [
+   "pored over",
+   "plied over",
+   "poured over",
+   "run over"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Phrasal Verbs"
  },
  {
   "id": "pred-9000",
@@ -7393,5 +13195,671 @@
   "answer": 1,
   "answerSource": "predicted-cds-pattern",
   "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2024-001",
+  "year": 2024,
+  "session": 2,
+  "qnum": 1,
+  "passage": null,
+  "question": "The leader’s views were equivocal on contentious issue.",
+  "options": [
+   "obscure",
+   "ambiguous",
+   "clear",
+   "vague"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2024-002",
+  "year": 2024,
+  "session": 2,
+  "qnum": 2,
+  "passage": null,
+  "question": "The authorities interacted with a group mutinous students.",
+  "options": [
+   "unruly",
+   "contumacious",
+   "seditious",
+   "obedient"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2024-003",
+  "year": 2024,
+  "session": 2,
+  "qnum": 3,
+  "passage": null,
+  "question": "His behaviour was quite belligerent.",
+  "options": [
+   "bellicose",
+   "antagonistic",
+   "combative",
+   "amiable"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2024-004",
+  "year": 2024,
+  "session": 2,
+  "qnum": 4,
+  "passage": null,
+  "question": "He was effusive in his praise.",
+  "options": [
+   "exuberant",
+   "profuse",
+   "voluble",
+   "reticent"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2024-005",
+  "year": 2024,
+  "session": 2,
+  "qnum": 5,
+  "passage": null,
+  "question": "He is often accused of being iniquitous in conduct.",
+  "options": [
+   "preposterous",
+   "execrable",
+   "virtuous",
+   "revolting"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Antonyms"
+ },
+ {
+  "id": "cds2-2024-042",
+  "year": 2024,
+  "session": 2,
+  "qnum": 42,
+  "passage": null,
+  "question": "His only answer was a grunt.",
+  "options": [
+   "Noun",
+   "Adjective",
+   "Pronoun",
+   "Determiner"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2024-043",
+  "year": 2024,
+  "session": 2,
+  "qnum": 43,
+  "passage": null,
+  "question": "To swim every day is good for health.",
+  "options": [
+   "Participle",
+   "Infinitive verb",
+   "Gerund",
+   "Adjective"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2024-045",
+  "year": 2024,
+  "session": 2,
+  "qnum": 45,
+  "passage": null,
+  "question": "She married at and gave birth to her child shortly thereafter.",
+  "options": [
+   "Pronoun",
+   "Determiner",
+   "Adjective",
+   "Adverb"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2024-047",
+  "year": 2024,
+  "session": 2,
+  "qnum": 47,
+  "passage": null,
+  "question": "The mighty river Brahmaputra flows through the plains of Assam.",
+  "options": [
+   "Adverb",
+   "Adjective",
+   "Noun",
+   "Pronoun"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2024-048",
+  "year": 2024,
+  "session": 2,
+  "qnum": 48,
+  "passage": null,
+  "question": "The money which one earns is not the money for himself, it is for the family and society.",
+  "options": [
+   "Noun",
+   "Pronoun",
+   "Verb",
+   "Adverb"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Parts of Speech"
+ },
+ {
+  "id": "cds2-2024-085",
+  "year": 2024,
+  "session": 2,
+  "qnum": 85,
+  "passage": null,
+  "question": "They were fed-up with his doltish behaviour.",
+  "options": [
+   "wise",
+   "imbecilic",
+   "clever",
+   "precocious"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Synonyms"
+ },
+ {
+  "id": "cds2-2024-107",
+  "year": 2024,
+  "session": 2,
+  "qnum": 107,
+  "passage": null,
+  "question": "He undertook the difficult task. He did so albeit the fact that he did not have any spare time.",
+  "options": [
+   "He undertook the difficult task in spite of the fact that he did not have any spare time",
+   "He undertook the difficult task because of the fact that he did not have any spare time",
+   "He undertook the difficult task contrary to the fact that he did not have any spare time",
+   "He undertook the difficult task nevertheless for the fact that he did not have any spare time"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
+  "id": "cds2-2024-115",
+  "year": 2024,
+  "session": 2,
+  "qnum": 115,
+  "passage": null,
+  "question": "He claimed that he was merely uninterested participant in the negotiation",
+  "options": [
+   "an interested",
+   "a disinterested",
+   "a uninterested",
+   "no improvement"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Sentence Improvement",
+  "fixedOptions": true
+ },
+ {
+  "id": "cds2-2024-116",
+  "year": 2024,
+  "session": 2,
+  "qnum": 116,
+  "passage": null,
+  "question": "Change from Active to Passive voice Respect your elders:",
+  "options": [
+   "You should respect elders",
+   "Elders are respected",
+   "Respect the elders",
+   "Elders should be respected"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Active Passive"
+ },
+ {
+  "id": "cds2-2024-117",
+  "year": 2024,
+  "session": 2,
+  "qnum": 117,
+  "passage": null,
+  "question": "Change from Active to Passive voice Shut the door",
+  "options": [
+   "The door is to be shut",
+   "Let the door be shut",
+   "The door be shut",
+   "No change"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Active Passive",
+  "fixedOptions": true
+ },
+ {
+  "id": "cds2-2024-119",
+  "year": 2024,
+  "session": 2,
+  "qnum": 119,
+  "passage": null,
+  "question": "Change from Passive to Active voice He was said to be a good cricketer",
+  "options": [
+   "They said he is a good cricketer",
+   "They said he was a good cricketer",
+   "He is a good cricketer",
+   "No change"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Active Passive",
+  "fixedOptions": true
+ },
+ {
+  "id": "cds1-2025-001",
+  "year": 2025,
+  "session": 1,
+  "qnum": 1,
+  "passage": null,
+  "question": "The officer under suspension felt intimated by the committee members during his interrogation regarding the allegations against him.",
+  "options": [
+   "inculcated",
+   "intimidated",
+   "asphyxiated",
+   "annulled"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
+  "id": "cds1-2025-002",
+  "year": 2025,
+  "session": 1,
+  "qnum": 2,
+  "passage": null,
+  "question": "Amongst them all, she was the only one with the perquisite to understand the complexity of the situation.",
+  "options": [
+   "perspicacity",
+   "perniciousness",
+   "peremptoriness",
+   "presumptuousness"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
+  "id": "cds1-2025-003",
+  "year": 2025,
+  "session": 1,
+  "qnum": 3,
+  "passage": null,
+  "question": "At the official function organised for the attending dignitaries, guests arrived in scrumptious attire for the banquet.",
+  "options": [
+   "synergistic",
+   "stentorian",
+   "sumptuous",
+   "scrimpy"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
+  "id": "cds1-2025-005",
+  "year": 2025,
+  "session": 1,
+  "qnum": 5,
+  "passage": null,
+  "question": "The candidates went through an intensive instruction process before their absorption into the service.",
+  "options": [
+   "immersion",
+   "intimation",
+   "induction",
+   "unction"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Sentence Improvement"
+ },
+ {
+  "id": "cds1-2025-006",
+  "year": 2025,
+  "session": 1,
+  "qnum": 6,
+  "passage": null,
+  "question": "The office memorandum directed personnel to minimise their consumption of office stationery by up to twenty percent.",
+  "options": [
+   "supervise",
+   "surmise",
+   "lower",
+   "reduce"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "Sentence Improvement"
+ },
+ {
+  "id": "cds1-2025-007",
+  "year": 2025,
+  "session": 1,
+  "qnum": 7,
+  "passage": null,
+  "question": "The announcement of an unexpected bonus led to great tumult among the staff.",
+  "options": [
+   "merriment",
+   "trepidation",
+   "upheaval",
+   "uproar"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Sentence Improvement"
+ },
+ {
+  "id": "cds1-2025-008",
+  "year": 2025,
+  "session": 1,
+  "qnum": 8,
+  "passage": null,
+  "question": "The scurrilous remarks in the article were met with great joy by the leadership of the company.",
+  "options": [
+   "laudatory",
+   "reviling",
+   "scathing",
+   "upbraiding"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Sentence Improvement"
+ },
+ {
+  "id": "cds1-2025-010",
+  "year": 2025,
+  "session": 1,
+  "qnum": 10,
+  "passage": null,
+  "question": "The enormity of the mountain range stunned the visitors to the hill station.",
+  "options": [
+   "eternity",
+   "enormousness",
+   "extremity",
+   "simulacrum"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Sentence Improvement"
+ },
+ {
+  "id": "cds1-2025-022",
+  "year": 2025,
+  "session": 1,
+  "qnum": 22,
+  "passage": null,
+  "question": "The bridge was intended to allow people to cross to the other side of the river and get to work.",
+  "options": [
+   "on",
+   "over",
+   "across",
+   "down"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2025-024",
+  "year": 2025,
+  "session": 1,
+  "qnum": 24,
+  "passage": null,
+  "question": "There are several reasons behind my choice of location the family visit.",
+  "options": [
+   "to",
+   "in",
+   "for",
+   "from"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "Prepositions"
+ },
+ {
+  "id": "cds1-2025-031",
+  "year": 2025,
+  "session": 1,
+  "qnum": 31,
+  "passage": null,
+  "question": "Listen with half an ear",
+  "options": [
+   "Not pay full attention",
+   "Being impartial",
+   "Being imperious",
+   "Listening with ironic distaste"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Phrasal Verbs"
+ },
+ {
+  "id": "cds1-2025-033",
+  "year": 2025,
+  "session": 1,
+  "qnum": 33,
+  "passage": null,
+  "question": "Let sleeping dogs lie",
+  "options": [
+   "Let things remain as they are because of laziness",
+   "Not interfere in situations where interference may exacerbate matters",
+   "Not stoke a dangerous situation",
+   "Lie about the past"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Phrasal Verbs"
+ },
+ {
+  "id": "cds1-2025-035",
+  "year": 2025,
+  "session": 1,
+  "qnum": 35,
+  "passage": null,
+  "question": "Fight fire with fire",
+  "options": [
+   "Use the same force or strategy of one's opponent to counter them",
+   "Use incendiary tactics to destroy by fire",
+   "Add fuel to further escalate a fiery situation",
+   "Scorch one's opponent with a barrage of firing"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2025-036",
+  "year": 2025,
+  "session": 1,
+  "qnum": 36,
+  "passage": null,
+  "question": "Straight and narrow",
+  "options": [
+   "Be excessively careful",
+   "Honest and morally acceptable way of being",
+   "Follow the straight path defined by society",
+   "To not deviate from one's goal"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2025-037",
+  "year": 2025,
+  "session": 1,
+  "qnum": 37,
+  "passage": null,
+  "question": "Someone's ears are burning",
+  "options": [
+   "The feeling when someone thinks others are talking about them",
+   "Being excessively jealous of others",
+   "Being angry due to unfair criticism",
+   "Itching to enter into an argument"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2025-038",
+  "year": 2025,
+  "session": 1,
+  "qnum": 38,
+  "passage": null,
+  "question": "Turn one's stomach",
+  "options": [
+   "Being nauseated by something or someone",
+   "Being plagued by a stomach upset",
+   "Unable to cope with the changes",
+   "Switch sides while asleep"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2025-040",
+  "year": 2025,
+  "session": 1,
+  "qnum": 40,
+  "passage": null,
+  "question": "Cast one's bread upon the waters",
+  "options": [
+   "To dilute one's intentions",
+   "To do good without seeking reward",
+   "To while away one's time in unfruitful activity",
+   "To misdirect one's efforts in life"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "Idioms and Phrases"
+ },
+ {
+  "id": "cds1-2025-043",
+  "year": 2025,
+  "session": 1,
+  "qnum": 43,
+  "passage": null,
+  "question": "S1. The manhunt for the perpetrator of the crime spread across the entire state. S2. There was deep public anger triggered by the enormity of the crime. The second statement",
+  "options": [
+   "is a precursor to the first",
+   "follows the first",
+   "contradicts the first",
+   "alters the premise of the first"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
+  "id": "cds1-2025-044",
+  "year": 2025,
+  "session": 1,
+  "qnum": 44,
+  "passage": null,
+  "question": "S1. Awareness about one's own personality type is very important. S2. Self-awareness is a difficult goal for most people. The second statement",
+  "options": [
+   "contradicts the first",
+   "is contrapuntal vis-a-vis the first",
+   "confirms the first",
+   "contrasts the first"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
+  "id": "cds1-2025-046",
+  "year": 2025,
+  "session": 1,
+  "qnum": 46,
+  "passage": null,
+  "question": "S1. The final outcome can never be predicted incontrovertibly. S2. All outcomes are based on variables that cannot always be fully understood. The second statement",
+  "options": [
+   "fully reinforces the first",
+   "reinforces the first to an extent",
+   "definitely follows the first",
+   "definitely does not follow the first"
+  ],
+  "answer": 1,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
+  "id": "cds1-2025-049",
+  "year": 2025,
+  "session": 1,
+  "qnum": 49,
+  "passage": null,
+  "question": "S1. Roseate is an adjective for the rose flower. S2. The rose is a powerful poetic symbol in many languages. The second statement",
+  "options": [
+   "expands the first",
+   "explicates the first",
+   "contrasts the first",
+   "coincides with the first"
+  ],
+  "answer": 0,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
+  "id": "cds1-2025-050",
+  "year": 2025,
+  "session": 1,
+  "qnum": 50,
+  "passage": null,
+  "question": "S1. The early bird gets the worm. S2. To go about one's tasks expeditiously is to achieve one's goals. The second statement",
+  "options": [
+   "makes assertions about the first",
+   "provides a metaphorical reassertion of the first",
+   "reinforces the assumption of the first",
+   "contrasts with the first"
+  ],
+  "answer": 2,
+  "answerSource": "official-key",
+  "topic": "General"
+ },
+ {
+  "id": "cds1-2025-090",
+  "year": 2025,
+  "session": 1,
+  "qnum": 90,
+  "passage": null,
+  "question": "The Principal was addressing the students on ways and means of conducting the sports meet of the college. ________, responding to the opinion of one of the athletes, she wanted to learn about how more sports could be included in the meet.",
+  "options": [
+   "In spite of",
+   "While",
+   "Still",
+   "Further"
+  ],
+  "answer": 3,
+  "answerSource": "official-key",
+  "topic": "General"
  }
 ]
