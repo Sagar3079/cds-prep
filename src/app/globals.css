@@ -671,11 +671,49 @@ mark.target-word {
 .potter-thought[data-leaving="true"] { animation: thoughtOut 0.28s var(--ease) both; }
 @keyframes thoughtOut { to { opacity: 0; transform: scale(0.86); } }
 
-/* ---- the reviewer: rides the scroll down the answer list ---- */
+/* ---- the reviewer: rides the scroll down the answer list ----
+   `right: -10px` is only the origin of the weave; the whole horizontal sweep
+   is a negative translate from here, so this is the far-right end of his path.
+   He crosses the column, so the wrapper takes no pointer events — otherwise a
+   79px-wide mascot would sit over whatever is beneath him. `.potter--tappable`
+   re-enables them on the figure itself, which must stay tappable to mute him. */
 .potter-rider {
   position: absolute;
   right: -10px;
   top: 0;
   z-index: 30;
   will-change: transform;
+  pointer-events: none;
 }
+/* Rolled into the turn by the rAF loop. Separate from the wrapper so the bank
+   composes with the translate instead of fighting it for the same property. */
+.potter-rider__tilt {
+  transform-origin: 50% 58%;
+  will-change: transform;
+}
+/* Faded by the loop as he crosses the middle — `.potter-thought`'s own entry
+   animation fills forwards, so the bubble's own opacity is not available to
+   drive. Must stay unpositioned: the bubble is absolute against the
+   `.relative` box, not against this. */
+.potter-rider__say {
+  will-change: opacity;
+}
+/* Once he is past the middle the bubble has no room on his left, so it swaps
+   to his right — same geometry as `.potter-thought--left`, driven by the loop
+   rather than by a prop, and only ever at the point where it is invisible. */
+.potter-rider[data-lean="left"] .potter-thought {
+  right: auto;
+  left: calc(100% - 10px);
+  border-radius: 13px 13px 13px 3px;
+  transform-origin: 0 50%;
+}
+
+/* A mirrored figure should turn, not snap. The muted badge lives outside this
+   group so it never reads reversed. */
+.potter__facing {
+  transition: transform 0.32s var(--ease);
+  transform-origin: 60px 70px;
+}
+/* Flying, not perching — the idle breathe and mood leans would fight the
+   rider's own transform work. */
+.potter--riding .potter__svg { animation: none; }

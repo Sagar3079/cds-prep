@@ -22,15 +22,30 @@ export interface PotterProps {
   /** Tapping him toggles his thoughts. Omit to render him inert. */
   onToggle?: () => void;
   thoughtsOn?: boolean;
+  /** Flying on a broomstick instead of gripping a ledge. */
+  riding?: boolean;
 }
 
 /**
  * Potter — the study companion. Chibi wizard: enormous head, tiny body, round
  * glasses, striped house scarf, wand.
  *
- * Flat sticker art rendered with depth rather than as flat fills — every form
- * carries a radial or linear gradient, a contact shadow and a rim light, so it
- * reads as a moulded vinyl figure instead of a decal.
+ * STICKER RULES — this is flat vector art, not a render. Every form is a solid
+ * fill inside a thick dark outline (stroke 2.6–3.2 at this 120x140 viewBox); the
+ * outlines are the style, so never thin them. Shading is limited to at most one
+ * flat secondary tone per form — one darker hair wedge, one dark robe opening,
+ * one dark band on the scarf tail. No gradients, no rim lights, no specular
+ * sweeps, no soft cast shadows: they read as "3D toy" rather than "sticker".
+ *
+ * Consequently there are no <defs> at all. If a gradient, filter or clipPath is
+ * ever reintroduced, its id MUST be namespaced per instance (a useRef random
+ * suffix) — three Potters mount at once, SVG ids are document-global, and fixed
+ * ids make every copy resolve to whichever one mounted first.
+ *
+ * The only tonal element that is not a fill is the contact shadow ellipse under
+ * his hands: a flat low-opacity ellipse. It is load-bearing — without it he
+ * floats — so it stays in the perched pose. It is dropped while `riding`,
+ * because floating is the point there.
  *
  * LEDGE_Y = 74 of 140 is the line his hands grip; everything below is meant to
  * sit behind whatever he is perched on. LEDGE_RATIO is exported so the CSS can
@@ -41,15 +56,19 @@ export const LEDGE_RATIO = 74 / 140;
 const OUTLINE = "#1b1720";
 const HAIR = "#6d6733";
 const HAIR_DARK = "#4c4722";
-const HAIR_LIT = "#8f8848";
 const SKIN = "#f6d8bf";
 const SKIN_MID = "#e7bb9b";
 const SKIN_DEEP = "#cf9a76";
 const ROBE = "#26232c";
-const ROBE_LIT = "#3b3743";
+const ROBE_DEEP = "#141218";
 const SCARF_R = "#b8323a";
 const SCARF_R_D = "#8d2229";
 const SCARF_G = "#e3b23c";
+const LENS = "#e9f0fb";
+const WOOD = "#8a5a2e";
+const WOOD_DARK = "#5b3c22";
+const BRISTLE = "#dda75a";
+const BRISTLE_DARK = "#a9762e";
 
 export default function Potter({
   mood = "idle",
@@ -59,11 +78,11 @@ export default function Potter({
   className = "",
   onToggle,
   thoughtsOn = true,
+  riding = false,
 }: PotterProps) {
   const [blink, setBlink] = useState(false);
   const [tapped, setTapped] = useState(false);
   const t = useRef<number | null>(null);
-  const uid = useRef(`p${Math.random().toString(36).slice(2, 8)}`);
 
   useEffect(() => {
     let dead = false;
@@ -89,7 +108,6 @@ export default function Potter({
   const ly = Math.max(-1, Math.min(1, lookY));
   const shut = blink || mood === "cheer";
   const happy = mood === "excited" || mood === "cheer" || mood === "impressed";
-  const u = uid.current;
 
   const handleTap = () => {
     if (!onToggle) return;
@@ -98,78 +116,118 @@ export default function Potter({
     onToggle();
   };
 
+  // The broom's bristles are drawn on the right, so the art reads as travelling
+  // LEFT. On the rightward half of the review weave that means flying
+  // backwards. Mirror the whole figure when he is heading right.
+  //
+  // Done as an SVG group rather than a CSS transform on `.potter__svg`: that
+  // element already carries the breathing/mood keyframes, and a CSS transform
+  // would be overwritten by them.
+  const facingRight = riding && lx > 0.05;
+
   const art = (
     <svg viewBox="0 0 120 140" width="100%" height="100%" className="potter__svg">
-      <defs>
-        <radialGradient id={`${u}-face`} cx="38%" cy="30%" r="76%">
-          <stop offset="0%" stopColor="#fff0e2" />
-          <stop offset="62%" stopColor={SKIN} />
-          <stop offset="100%" stopColor={SKIN_MID} />
-        </radialGradient>
-        <linearGradient id={`${u}-hair`} x1=".25" y1="0" x2=".8" y2="1">
-          <stop offset="0%" stopColor={HAIR_LIT} />
-          <stop offset="45%" stopColor={HAIR} />
-          <stop offset="100%" stopColor={HAIR_DARK} />
-        </linearGradient>
-        <linearGradient id={`${u}-robe`} x1=".2" y1="0" x2=".85" y2="1">
-          <stop offset="0%" stopColor={ROBE_LIT} />
-          <stop offset="100%" stopColor={ROBE} />
-        </linearGradient>
-        <linearGradient id={`${u}-lens`} x1=".1" y1="0" x2=".8" y2="1">
-          <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="48%" stopColor="#f2f6ff" />
-          <stop offset="100%" stopColor="#d9e4f5" />
-        </linearGradient>
-        <linearGradient id={`${u}-wand`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#a8794b" />
-          <stop offset="55%" stopColor="#6f4a2a" />
-          <stop offset="100%" stopColor="#4a301a" />
-        </linearGradient>
-        {/* contact shadow that sells the figure sitting on something */}
-        <radialGradient id={`${u}-shadow`} cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#0d1024" stopOpacity=".34" />
-          <stop offset="100%" stopColor="#0d1024" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-
-      {/* ============== WAND, held out to the side ============== */}
-      <g className="potter__wand">
-        <g transform="rotate(-28 26 74)">
-          <rect x="-4" y="70" width="40" height="6" rx="3" fill={`url(#${u}-wand)`} stroke={OUTLINE} strokeWidth="2.4" />
-          <rect x="26" y="69" width="11" height="8" rx="3.5" fill="#5b3c22" stroke={OUTLINE} strokeWidth="2.4" />
-          <circle cx="-3" cy="73" r="2.4" fill="#e9d9c2" opacity=".9" />
+      <g
+        className="potter__facing"
+        transform={facingRight ? "translate(120,0) scale(-1,1)" : undefined}
+      >
+      {/* ============== WAND, held out to the side ==============
+          Both hands are on the broom when riding, so the wand is put away. */}
+      {!riding && (
+        <g className="potter__wand">
+          <g transform="rotate(-28 26 74)">
+            <rect x="-4" y="70" width="40" height="6" rx="3" fill={WOOD} stroke={OUTLINE} strokeWidth="2.4" />
+            <rect x="26" y="69" width="11" height="8" rx="3.5" fill={WOOD_DARK} stroke={OUTLINE} strokeWidth="2.4" />
+            <circle cx="-3" cy="73" r="2.4" fill="#e9d9c2" />
+          </g>
+          {/* a faint spark at the tip */}
+          <circle className="potter__spark" cx="6" cy="59" r="3" fill="var(--streak)" />
         </g>
-        {/* a faint spark at the tip */}
-        <circle className="potter__spark" cx="6" cy="59" r="3" fill="var(--streak)" opacity=".85" />
-      </g>
+      )}
 
       {/* ============== BODY ============== */}
       <g className="potter__torso">
-        {/* legs + shoes, visible only when he is not perched */}
-        <g stroke={OUTLINE} strokeWidth="2.6">
-          <rect x="45" y="112" width="11" height="17" rx="4" fill="#6d6b78" />
-          <rect x="64" y="112" width="11" height="17" rx="4" fill="#5f5d6a" />
-          <rect x="41" y="126" width="17" height="9" rx="4" fill="#221f28" />
-          <rect x="62" y="126" width="17" height="9" rx="4" fill="#1b1820" />
-        </g>
+        {riding ? (
+          <>
+            {/* legs hanging off the broom — drawn first so the robe hem cuts
+                across them and reads as cloth in front of the legs */}
+            <g stroke={OUTLINE} strokeWidth="2.6">
+              <rect x="44" y="104" width="11" height="18" rx="4" fill="#6d6b78" />
+              <rect x="64" y="106" width="11" height="18" rx="4" fill="#5f5d6a" />
+              <rect x="40" y="118" width="17" height="9" rx="4" fill="#221f28" />
+              <rect x="61" y="120" width="17" height="9" rx="4" fill="#1b1820" />
+            </g>
 
-        {/* robe */}
-        <path
-          d="M60 64c17 0 28 9 31 24l4 41H25l4-41c3-15 14-24 31-24Z"
-          fill={`url(#${u}-robe)`}
-          stroke={OUTLINE}
-          strokeWidth="2.8"
-        />
-        {/* opening, and the shadow inside it */}
-        <path d="M60 70 50 129h20Z" fill="#141218" opacity=".85" />
-        <path d="M42 78c-4 14-6 31-6 51h-5c0-21 3-38 8-53Z" fill="#000" opacity=".22" />
-        {/* rim light down the left edge — the main 3D cue on the cloth */}
-        <path d="M35 88c-2 12-3 26-3 41h3c0-15 1-29 3-41Z" fill="#8e93b5" opacity=".3" />
+            {/* seated robe: shorter and wider than the standing one, hem draping
+                over the broom */}
+            <path
+              d="M60 64c15 0 26 9 29 22l4 26H27l4-26c3-13 14-22 29-22Z"
+              fill={ROBE}
+              stroke={OUTLINE}
+              strokeWidth="2.8"
+            />
+            <path d="M60 70 52 112h16Z" fill={ROBE_DEEP} />
 
-        {/* arms up onto the ledge */}
-        <path d="M29 72c-9 4-13 12-11 21l3 12 19-4-4-19Z" fill={`url(#${u}-robe)`} stroke={OUTLINE} strokeWidth="2.6" />
-        <path d="M91 72c9 4 13 12 11 21l-3 12-19-4 4-19Z" fill={`url(#${u}-robe)`} stroke={OUTLINE} strokeWidth="2.6" />
+            {/* arms reaching down to the handle. Drawn as a dark stroke with a
+                narrower robe-coloured stroke over it — an outlined limb without
+                a second path to keep in sync. Both outlines go down first so the
+                arms cannot cut into each other. */}
+            <g className="potter__arms" fill="none" strokeLinecap="round">
+              <path d="M33 72C24 80 26 91 39 97" stroke={OUTLINE} strokeWidth="14" />
+              <path d="M87 72C96 80 94 93 80 100" stroke={OUTLINE} strokeWidth="14" />
+              <path d="M33 72C24 80 26 91 39 97" stroke={ROBE} strokeWidth="8.8" />
+              <path d="M87 72C96 80 94 93 80 100" stroke={ROBE} strokeWidth="8.8" />
+            </g>
+          </>
+        ) : (
+          <>
+            {/* legs + shoes, visible only when he is not perched */}
+            <g stroke={OUTLINE} strokeWidth="2.6">
+              <rect x="45" y="112" width="11" height="17" rx="4" fill="#6d6b78" />
+              <rect x="64" y="112" width="11" height="17" rx="4" fill="#5f5d6a" />
+              <rect x="41" y="126" width="17" height="9" rx="4" fill="#221f28" />
+              <rect x="62" y="126" width="17" height="9" rx="4" fill="#1b1820" />
+            </g>
+
+            {/* robe */}
+            <path
+              d="M60 64c17 0 28 9 31 24l4 41H25l4-41c3-15 14-24 31-24Z"
+              fill={ROBE}
+              stroke={OUTLINE}
+              strokeWidth="2.8"
+            />
+            {/* the opening down the front — the robe's one flat secondary tone */}
+            <path d="M60 70 50 129h20Z" fill={ROBE_DEEP} />
+
+            {/* arms up onto the ledge */}
+            <path d="M29 72c-9 4-13 12-11 21l3 12 19-4-4-19Z" fill={ROBE} stroke={OUTLINE} strokeWidth="2.6" />
+            <path d="M91 72c9 4 13 12 11 21l-3 12-19-4 4-19Z" fill={ROBE} stroke={OUTLINE} strokeWidth="2.6" />
+          </>
+        )}
       </g>
+
+      {/* ============== BROOM ==============
+          Behind him and in front of the robe hem, so the handle passes across
+          his lap the way a stick you are sitting on does. Tilted nose-up. */}
+      {riding && (
+        <g className="potter__broom" transform="rotate(6 60 100)">
+          <rect x="2" y="96.5" width="88" height="7" rx="3.5" fill={WOOD} stroke={OUTLINE} strokeWidth="2.8" />
+          <path
+            d="M95 93C105 84.5 112 83 115 86c1.4 1.4 1.4 26.6 0 28-3 3-10 1.5-20-7Z"
+            fill={BRISTLE}
+            stroke={OUTLINE}
+            strokeWidth="2.8"
+            strokeLinejoin="round"
+          />
+          <g stroke={BRISTLE_DARK} strokeWidth="2" strokeLinecap="round" fill="none">
+            <path d="M99.5 96.5C105 94 110 93.2 112.5 93.4" />
+            <path d="M99.5 100.4C105 99.4 110 99.4 112.5 100.2" />
+            <path d="M99.5 104.2C105 105.6 110 106.8 112.5 107.4" />
+          </g>
+          {/* the binding where the straw meets the shaft */}
+          <rect x="86" y="91" width="10" height="18" rx="4" fill={WOOD_DARK} stroke={OUTLINE} strokeWidth="2.6" />
+        </g>
+      )}
 
       {/* ============== SCARF ============== */}
       <g className="potter__scarf" stroke={OUTLINE} strokeWidth="2.6">
@@ -178,15 +236,16 @@ export default function Potter({
           <rect x="44" y="59" width="6" height="14" fill={SCARF_G} />
           <rect x="57" y="59" width="6" height="14" fill={SCARF_G} />
           <rect x="70" y="59" width="6" height="14" fill={SCARF_G} />
-          {/* top highlight + bottom shade give the wool volume */}
-          <path d="M37 58h46a8 8 0 0 1 4 1.2C83 62 72 63 60 63s-23-1-27-3.8A8 8 0 0 1 37 58Z" fill="#fff" opacity=".22" />
-          <path d="M33 70c5 3 16 4 27 4s22-1 27-4a8 8 0 0 1-4 4H37a8 8 0 0 1-4-4Z" fill={SCARF_R_D} opacity=".8" />
         </g>
-        <g className="potter__tail">
-          <path d="M78 70c10 7 15 17 15 29l-12 2c0-11-4-19-11-24Z" fill={SCARF_R} />
-          <g stroke="none">
-            <path d="M84 82c3 4 5 9 5 15l-7 1c0-6-2-11-5-14Z" fill={SCARF_G} />
-            <path d="M81 99l12-2 1 6-12 2Z" fill={SCARF_R_D} />
+        {/* the wrapper takes the riding tilt: the tail itself is animated from
+            CSS, and a CSS transform would win over an attribute on that node */}
+        <g transform={riding ? "rotate(-28 78 72)" : undefined}>
+          <g className="potter__tail">
+            <path d="M78 70c10 7 15 17 15 29l-12 2c0-11-4-19-11-24Z" fill={SCARF_R} />
+            <g stroke="none">
+              <path d="M84 82c3 4 5 9 5 15l-7 1c0-6-2-11-5-14Z" fill={SCARF_G} />
+              <path d="M81 99l12-2 1 6-12 2Z" fill={SCARF_R_D} />
+            </g>
           </g>
         </g>
       </g>
@@ -203,26 +262,19 @@ export default function Potter({
         <ellipse cx="17" cy="40" rx="6" ry="8" fill={SKIN_MID} stroke={OUTLINE} strokeWidth="2.4" />
         <ellipse cx="103" cy="40" rx="6" ry="8" fill={SKIN_MID} stroke={OUTLINE} strokeWidth="2.4" />
 
-        {/* face */}
-        <rect x="17" y="4" width="86" height="62" rx="29" fill={`url(#${u}-face)`} stroke={OUTLINE} strokeWidth="2.8" />
-        {/* shadow cast by the hair onto the forehead — the strongest depth cue */}
-        <path d="M20 26c8-6 20-9 40-9s32 3 40 9c-3-10-8-16-14-19H34c-6 3-11 9-14 19Z" fill={SKIN_DEEP} opacity=".38" />
-        {/* jaw shading */}
-        <path d="M22 44c6 14 21 22 38 22s32-8 38-22c-2 15-16 25-38 25S24 59 22 44Z" fill={SKIN_MID} opacity=".5" />
+        {/* face — one solid fill, no modelling */}
+        <rect x="17" y="4" width="86" height="62" rx="29" fill={SKIN} stroke={OUTLINE} strokeWidth="2.8" />
 
         {/* hair: big rounded mop with a spiky fringe */}
         <path
           d="M14 40C10 15 29 1 60 1s50 14 46 39c-2-11-7-19-13-23l2-8-9 5-3-8-7 6-5-7-6 7-7-6-3 8-9-5 2 8c-6 4-11 12-13 23Z"
-          fill={`url(#${u}-hair)`}
+          fill={HAIR}
           stroke={OUTLINE}
           strokeWidth="2.8"
           strokeLinejoin="round"
         />
-        {/* specular sweep across the top of the hair */}
-        <path d="M32 14c8-7 18-10 30-10-11 2-20 6-26 13Z" fill="#fff" opacity=".28" />
-        <path d="M84 9c8 5 13 14 14 25-3-11-8-19-17-23Z" fill={HAIR_DARK} opacity=".6" />
-        {/* loose strands */}
-        <path d="M38 20c-4 5-6 11-5 17M52 15c-3 6-4 12-3 18" stroke={HAIR_DARK} strokeWidth="3.4" strokeLinecap="round" fill="none" opacity=".75" />
+        {/* the head's single flat shadow tone: the far side of the mop */}
+        <path d="M83 8c9 5 15 14 16 26-3-12-8-20-18-23Z" fill={HAIR_DARK} />
 
         {/* the scar */}
         <path d="M40 22l4-5-2 6 4-4" stroke="#b8543f" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
@@ -241,8 +293,8 @@ export default function Potter({
 
         {/* glasses — big, round, the signature */}
         <g className="potter__specs">
-          <circle cx="42" cy="44" r="15" fill={`url(#${u}-lens)`} stroke={OUTLINE} strokeWidth="3.2" />
-          <circle cx="78" cy="44" r="15" fill={`url(#${u}-lens)`} stroke={OUTLINE} strokeWidth="3.2" />
+          <circle cx="42" cy="44" r="15" fill={LENS} stroke={OUTLINE} strokeWidth="3.2" />
+          <circle cx="78" cy="44" r="15" fill={LENS} stroke={OUTLINE} strokeWidth="3.2" />
           <path d="M57 42c2-2 4-2 6 0" stroke={OUTLINE} strokeWidth="3.2" fill="none" strokeLinecap="round" />
           <path d="M27 42l-9-4M93 42l9-4" stroke={OUTLINE} strokeWidth="3" strokeLinecap="round" />
 
@@ -261,14 +313,12 @@ export default function Potter({
                 <circle cx="78" cy="45" r="4" fill={OUTLINE} />
                 <circle cx="44.6" cy="42" r="2.6" fill="#fff" />
                 <circle cx="80.6" cy="42" r="2.6" fill="#fff" />
-                <circle cx="39.4" cy="48" r="1.3" fill="#fff" opacity=".7" />
-                <circle cx="75.4" cy="48" r="1.3" fill="#fff" opacity=".7" />
               </>
             )}
           </g>
-          {/* glass glints last, over everything */}
-          <path d="M33 37a12 12 0 0 1 9-6" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" fill="none" opacity=".95" />
-          <path d="M69 37a12 12 0 0 1 9-6" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" fill="none" opacity=".55" />
+          {/* one crisp glint per lens, drawn last */}
+          <path d="M33 37a12 12 0 0 1 9-6" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" fill="none" />
+          <path d="M69 37a12 12 0 0 1 9-6" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" fill="none" />
         </g>
 
         {/* nose + mouth */}
@@ -282,26 +332,40 @@ export default function Potter({
           }
           stroke={OUTLINE} strokeWidth="3" fill="none" strokeLinecap="round"
         />
-        {happy && <path d="M53 60c4 4 10 4 14 0Z" fill="#b8465a" opacity=".6" />}
+        {happy && <path d="M53 60c4 4 10 4 14 0Z" fill="#b8465a" />}
 
         <g className="potter__cheeks">
-          <ellipse cx="26" cy="55" rx="7.5" ry="4.2" fill="#e8848a" opacity=".55" />
-          <ellipse cx="94" cy="55" rx="7.5" ry="4.2" fill="#e8848a" opacity=".55" />
+          <ellipse cx="26" cy="55" rx="7.5" ry="4.2" fill="#f0a3a6" />
+          <ellipse cx="94" cy="55" rx="7.5" ry="4.2" fill="#f0a3a6" />
         </g>
       </g>
 
-      {/* ============== HANDS gripping the ledge at y=74 ============== */}
-      <g className="potter__hands" stroke={OUTLINE} strokeWidth="2.6">
-        <rect x="12" y="66" width="26" height="17" rx="8" fill={SKIN} />
-        <rect x="82" y="66" width="26" height="17" rx="8" fill={SKIN} />
-        <g stroke={SKIN_DEEP} strokeWidth="1.8" strokeLinecap="round">
-          <path d="M18 70.5v8M24 69.5v9M30 70.5v8" />
-          <path d="M88 70.5v8M94 69.5v9M100 70.5v8" />
+      {/* ============== HANDS ==============
+          On the broom handle when riding (same tilt as the broom), otherwise
+          gripping the ledge at y=74. Drawn last so they sit over the handle. */}
+      {riding ? (
+        <g className="potter__hands" transform="rotate(6 60 100)" stroke={OUTLINE} strokeWidth="2.6">
+          <rect x="33" y="92" width="17" height="14" rx="6.5" fill={SKIN} />
+          <rect x="69" y="92" width="17" height="14" rx="6.5" fill={SKIN} />
+          <g stroke={SKIN_DEEP} strokeWidth="1.8" strokeLinecap="round">
+            <path d="M38 96.5v5M42.5 95.5v7M47 96.5v5" />
+            <path d="M74 96.5v5M78.5 95.5v7M83 96.5v5" />
+          </g>
         </g>
-      </g>
+      ) : (
+        <g className="potter__hands" stroke={OUTLINE} strokeWidth="2.6">
+          <rect x="12" y="66" width="26" height="17" rx="8" fill={SKIN} />
+          <rect x="82" y="66" width="26" height="17" rx="8" fill={SKIN} />
+          <g stroke={SKIN_DEEP} strokeWidth="1.8" strokeLinecap="round">
+            <path d="M18 70.5v8M24 69.5v9M30 70.5v8" />
+            <path d="M88 70.5v8M94 69.5v9M100 70.5v8" />
+          </g>
+        </g>
+      )}
 
-      {/* contact shadow beneath the hands */}
-      <ellipse cx="60" cy="84" rx="52" ry="7" fill={`url(#${u}-shadow)`} />
+      {/* flat contact shadow beneath the hands — he floats without it, but a
+          rider is meant to float, so it only exists in the perched pose */}
+      {!riding && <ellipse cx="60" cy="84" rx="48" ry="6" fill="#0d1024" opacity=".16" />}
 
       {!thoughtsOn && (
         <g className="potter__muted">
@@ -309,10 +373,11 @@ export default function Potter({
           <path d="M97 14h10" stroke="var(--muted)" strokeWidth="2.6" strokeLinecap="round" />
         </g>
       )}
+      </g>
     </svg>
   );
 
-  const classes = `potter potter--${mood} ${tapped ? "potter--tapped" : ""} ${className}`;
+  const classes = `potter potter--${mood} ${riding ? "potter--riding" : ""} ${tapped ? "potter--tapped" : ""} ${className}`;
 
   if (!onToggle) {
     return (
