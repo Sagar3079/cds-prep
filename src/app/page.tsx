@@ -3,6 +3,7 @@ import HomeStats, {
   HomeSetChip,
   HomeStartActions,
 } from "@/components/HomeStats";
+import PotterPerch from "@/components/potter/PotterPerch";
 import TopicInsight from "@/components/TopicInsight";
 import { MARKING, dailyCycleDays } from "@/lib/daily";
 import questionsData from "@/data/questions.json";
@@ -29,10 +30,14 @@ export default function Home() {
           </h1>
         </header>
 
+        {/* `relative` is Potter's anchor: he perches on this card's top edge,
+            and the card paints over his lower half. `isolate` keeps that
+            overlap inside this card's stacking context. */}
         <section
           aria-labelledby="today-heading"
-          className="card flex flex-col items-center gap-4 text-center"
+          className="card relative isolate flex flex-col items-center gap-4 text-center"
         >
+          <PotterPerch />
           <HomeSetChip cycleDays={cycleDays} />
 
           {/* decorative preview of the test clock — the live one lives on /test */}

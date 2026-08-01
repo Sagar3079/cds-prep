@@ -39,6 +39,8 @@ scripts/ocr_log.txt
 .DS_Store
 .env
 .env.*
+# but the template carries no secrets and should be committed
+!.env.example
 .vercel
 .ui-design/
 

@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import type { Question } from "@/types";
+import PotterCoach from "./potter/PotterCoach";
 import QuestionCard from "./QuestionCard";
 import Timer from "./Timer";
 import {
@@ -628,8 +629,19 @@ export default function TestClient({
           Question {idx + 1} of {quiz.length}
         </h2>
         {/* Keyed on idx so the slide replays on every move; `.back` flips it
-            when travelling backwards. */}
-        <div key={idx} className={`q-in${dir < 0 ? " back" : ""}`}>
+            when travelling backwards. `relative isolate` anchors Potter to the
+            question card's top edge. */}
+        <div
+          key={idx}
+          className={`relative isolate q-in${dir < 0 ? " back" : ""}`}
+        >
+          <PotterCoach
+            index={idx}
+            total={quiz.length}
+            answered={quiz.length - blanks.length}
+            secondsLeft={seconds}
+            justAnswered={answers[idx] !== null}
+          />
           <QuestionCard
             question={q}
             index={idx}

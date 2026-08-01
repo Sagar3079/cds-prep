@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
+import PotterRider from "@/components/potter/PotterRider";
 import QuestionCard from "@/components/QuestionCard";
 import ScoreRing, { formatScore } from "@/components/ScoreRing";
 import { MARKING, scoreAnswers } from "@/lib/daily";
@@ -504,10 +505,21 @@ export default function ResultsPage() {
         </div>
       </div>
 
-      <ol className="space-y-3.5">
+      {/* Potter rides this list — `relative` is what he measures against. */}
+      <ol className="relative space-y-3.5">
+        <PotterRider
+          containerSelector=".panel-body > main"
+          itemSelector="[data-review-card]"
+          items={visible.map(({ q, i }) => ({
+            correct: set.answers[i] === q.answer,
+            skipped: set.answers[i] === null,
+            official: q.answerSource === OFFICIAL_KEY_SOURCE,
+          }))}
+        />
         {visible.map(({ q, i }, position) => (
           <li
             key={`${onlyMissed ? "missed" : "all"}-${i}-${q.id}`}
+            data-review-card=""
             className="fade-up"
             /* animation-delay cannot come from a Tailwind utility here: the
                  unlayered `.fade-up` shorthand in globals.css would reset it. */

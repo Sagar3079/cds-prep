@@ -527,3 +527,128 @@ mark.target-word {
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }
+
+/* ============================================================
+   POTTER — the study companion
+   Depth is real CSS 3D: every layer sits at its own translateZ
+   inside a preserve-3d scene, so the head parallaxes against the
+   body when he turns rather than sliding flat.
+   ============================================================ */
+.potter {
+  position: relative;
+  pointer-events: none;
+  user-select: none;
+}
+.potter__scene {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  animation: potterBreathe 4.2s ease-in-out infinite;
+  transition: transform 0.6s var(--ease);
+}
+@keyframes potterBreathe {
+  0%, 100% { transform: translateY(0) rotateZ(0deg); }
+  50%      { transform: translateY(-2.5%) rotateZ(-0.8deg); }
+}
+.potter__layer {
+  position: absolute;
+  transform-style: preserve-3d;
+  transition: transform 0.6s var(--ease), opacity 0.4s var(--ease);
+}
+.potter__body  { left: 6%;  bottom: 0;   width: 88%;  height: 58%; transform: translateZ(0); }
+.potter__head  { left: 10%; top: 0;      width: 80%;  height: 62%; }
+.potter__scarf { left: 20%; top: 44%;    width: 60%;  height: 40%; transform: translateZ(10px);
+                 transform-origin: 50% 10%; animation: potterScarf 3.6s ease-in-out infinite; }
+@keyframes potterScarf {
+  0%, 100% { transform: translateZ(10px) rotateZ(0deg); }
+  35%      { transform: translateZ(10px) rotateZ(4.5deg); }
+  70%      { transform: translateZ(10px) rotateZ(-3deg); }
+}
+.potter__hands {
+  left: 0; bottom: -6%; width: 100%; height: 18%;
+  transform: translateZ(24px) translateY(60%);
+  opacity: 0;
+}
+/* only grips the ledge when he is actually perched on one */
+.potter--peek .potter__hands { opacity: 1; transform: translateZ(24px) translateY(0); }
+
+.potter__cheeks { opacity: 0; transition: opacity 0.45s var(--ease); }
+.potter--excited .potter__cheeks,
+.potter--cheer .potter__cheeks,
+.potter--impressed .potter__cheeks { opacity: 1; }
+
+.potter__specs { transition: transform 0.5s var(--spring); transform-origin: 50% 55%; }
+.potter--impressed .potter__specs { transform: translateY(2.5px) rotateZ(-2deg); }
+
+/* mood posture — the whole scene leans, which sells it more than the face does */
+.potter--thinking .potter__scene { transform: rotateZ(-5deg) translateX(-2%); }
+.potter--excited .potter__scene  { animation: potterBounce 0.85s var(--spring) infinite; }
+.potter--cheer .potter__scene    { animation: potterCheer 0.7s var(--spring) infinite; }
+.potter--wince .potter__scene    { transform: rotateZ(4deg) translateY(4%); }
+@keyframes potterBounce {
+  0%, 100% { transform: translateY(0) rotateZ(0deg); }
+  50%      { transform: translateY(-11%) rotateZ(2deg); }
+}
+@keyframes potterCheer {
+  0%, 100% { transform: translateY(0) rotateZ(-3deg); }
+  50%      { transform: translateY(-14%) rotateZ(3deg); }
+}
+
+/* ---- the perch: half behind the card, half above it ---- */
+.potter-perch {
+  position: absolute;
+  right: 18px;
+  bottom: 100%;
+  /* Below the card, so his lower half is genuinely occluded by it rather
+     than faked with a mask. */
+  z-index: 0;
+  margin-bottom: -22px;
+  transition: transform 0.7s var(--ease);
+}
+
+/* ---- thought bubble ---- */
+.potter-thought {
+  position: absolute;
+  right: calc(100% + 8px);
+  bottom: 34%;
+  max-width: 178px;
+  padding: 9px 12px;
+  border-radius: 14px 14px 4px 14px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink);
+  text-wrap: balance;
+  transform-origin: 100% 100%;
+  animation: thoughtIn 0.45s var(--spring) both;
+}
+.potter-thought::after {
+  content: "";
+  position: absolute;
+  right: 10px; bottom: -7px;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+@keyframes thoughtIn {
+  from { opacity: 0; transform: scale(0.7) translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.potter-thought[data-leaving="true"] {
+  animation: thoughtOut 0.28s var(--ease) both;
+}
+@keyframes thoughtOut {
+  to { opacity: 0; transform: scale(0.85) translateY(4px); }
+}
+
+/* ---- the reviewer: rides the scroll down the answer list ---- */
+.potter-rider {
+  position: absolute;
+  right: -6px;
+  z-index: 20;
+  will-change: transform;
+}
