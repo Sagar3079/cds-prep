@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+@theme {
+  --color-lavender-50: #f8f7ff;
+  --color-lavender-100: #efeafc;
+  --color-lavender-200: #ddd4f7;
+  --color-lavender-300: #c4b5f0;
+  --color-lavender-400: #a78be6;
+  --color-lavender-500: #8b6ad9;
+  --color-lavender-600: #7350c4;
+  --color-lavender-700: #5e3fa3;
+  --color-lavender-800: #4e3585;
+  --color-lavender-900: #412e6c;
+
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+  --color-warn: #d97706;
+}
+
+body {
+  background: linear-gradient(160deg, #f8f7ff 0%, #f3efff 40%, #ffffff 100%);
+  min-height: 100vh;
+  color: #1e1b2e;
+}
+
+.card {
+  background: white;
+  border-radius: 1rem;
+  border: 1px solid var(--color-lavender-200);
+  box-shadow: 0 4px 20px -8px rgba(115, 80, 196, 0.15);
+  padding: 1.5rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-lavender-500), var(--color-lavender-700));
+  color: white;
+  padding: 0.85rem 1.75rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 4px 14px -4px rgba(115, 80, 196, 0.5);
+  transition: transform 0.15s, box-shadow 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px -4px rgba(115, 80, 196, 0.55);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  transform: none;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  background: white;
+  color: var(--color-lavender-700);
+  border: 1px solid var(--color-lavender-300);
+  padding: 0.65rem 1.25rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.btn-ghost:hover {
+  background: var(--color-lavender-100);
+}
+
+.option-btn {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.9rem 1rem;
+  border-radius: 0.75rem;
+  border: 1.5px solid var(--color-lavender-200);
+  background: white;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.option-btn:hover:not(:disabled) {
+  border-color: var(--color-lavender-400);
+  background: var(--color-lavender-50);
+}
+
+.option-btn.selected {
+  border-color: var(--color-lavender-500);
+  background: var(--color-lavender-100);
+  box-shadow: 0 0 0 3px rgba(139, 106, 217, 0.15);
+}
+
+.option-btn.correct {
+  border-color: var(--color-success);
+  background: #f0fdf4;
+}
+
+.option-btn.wrong {
+  border-color: var(--color-danger);
+  background: #fef2f2;
+}
+
+.timer-urgent {
+  color: var(--color-danger);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.progress-dot {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 9999px;
+  background: var(--color-lavender-200);
+  transition: all 0.2s;
+}
+
+.progress-dot.active {
+  background: var(--color-lavender-500);
+  transform: scale(1.25);
+}
+
+.progress-dot.answered {
+  background: var(--color-lavender-400);
+}
+
+mark.target-word {
+  background: linear-gradient(180deg, transparent 55%, #ddd4f7 55%);
+  color: var(--color-lavender-800);
+  font-weight: 700;
+  padding: 0 0.15em;
+  border-radius: 0.15em;
+  font-style: italic;
+  text-decoration: underline;
+  text-decoration-color: var(--color-lavender-500);
+  text-underline-offset: 3px;
+}

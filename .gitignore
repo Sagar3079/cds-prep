@@ -1,0 +1,38 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# next.js
+.next/
+out/
+build/
+next-env.d.ts
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# source exam PDFs — NOT redistributed.
+# ~222 MB of UPSC previous-year papers. Fetch them yourself into pdfs/
+# (see README "Data pipeline"). pdfs/_manifest.json lists what is expected.
+pdfs/*
+!pdfs/_manifest.json
+
+# scraped answer-key images from third-party coaching sites — not redistributed.
+# The derived keys.json / manual_keys.json ARE tracked.
+answer_keys/*.jpg
+answer_keys/*.jpeg
+answer_keys/*.png
+answer_keys/*.pdf
+
+# logs & local artifacts
+scripts/ocr_log.txt
+*.log
+.DS_Store
+.env
+.env.*
+.vercel
+.ui-design/
