@@ -41,3 +41,6 @@ scripts/ocr_log.txt
 .env.*
 .vercel
 .ui-design/
+
+# typescript incremental build cache
+*.tsbuildinfo

@@ -35,6 +35,9 @@ export function shuffleQuestionOptions(
   if (!q.options || q.options.length !== 4 || q.answer === null || q.answer === undefined) {
     return q;
   }
+  // Stem labels its own fragments, or an option names the letters — reordering
+  // would make the question contradict itself even though scoring stays correct.
+  if (q.fixedOptions) return q;
   const idxs = [0, 1, 2, 3];
   shuffleInPlace(idxs, rng);
   const newOptions = idxs.map((i) => q.options[i]);
@@ -52,38 +55,85 @@ function answeredPool(all: Question[]): Question[] {
   );
 }
 
+/** Fixed — the canonical order must depend on neither the user nor the date */
+const CANON_SEED = 0x5cd5c0de;
+const DAY_MS = 86400000;
+
+function dayIndex(date: string): number {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(date);
+  if (!m) return hashString(date);
+  return Math.round(Date.UTC(+m[1], +m[2] - 1, +m[3]) / DAY_MS);
+}
+
+/** Days of distinct daily sets before the bank comes round again */
+export function dailyCycleDays(all: Question[], count = 10): number {
+  const len = answeredPool(all).length;
+  return Math.max(1, Math.floor(len / Math.max(1, count)));
+}
+
+/**
+ * Deterministic per date and identical for every user: the whole answered bank is
+ * ordered once from a fixed seed, and the date only picks which window of it is
+ * today's. Per-user state must never enter this path — `excludeIds` is accepted
+ * for call compatibility and deliberately ignored (see pickRandomQuestions for
+ * the per-user path). Repeats are a cycle, not a silent collapse: the bank runs
+ * dry after `dailyCycleDays(all, count)` days and then restarts in the same order.
+ */
 export function pickDailyQuestions(
   all: Question[],
   date: string,
   count = 10,
   excludeIds: string[] = []
 ): Question[] {
-  const withAnswers = answeredPool(all);
-  const exclude = new Set(excludeIds);
-  let pool = withAnswers.filter((q) => !exclude.has(q.id));
-  if (pool.length < count) pool = withAnswers;
+  const pool = answeredPool(all);
+  if (!pool.length) return [];
+  const n = Math.min(count, pool.length);
+  const canonical = shuffleInPlace([...pool], mulberry32(CANON_SEED));
+  const cycle = Math.max(1, Math.floor(canonical.length / n));
+  const idx = dayIndex(date);
+  const start = (((idx % cycle) + cycle) % cycle) * n;
 
   const rng = mulberry32(hashString(date));
-  const shuffled = shuffleInPlace([...pool], rng);
-  return shuffled
-    .slice(0, Math.min(count, shuffled.length))
-    .map((q) => shuffleQuestionOptions(q, rng));
+  return shuffleInPlace(canonical.slice(start, start + n), rng).map((q) =>
+    shuffleQuestionOptions(q, rng)
+  );
 }
 
-/** Fresh random set every call — options shuffled each time */
+/** Answered questions the user has not been served yet */
+export function unseenCount(all: Question[], excludeIds: string[] = []): number {
+  const exclude = new Set(excludeIds);
+  return answeredPool(all).filter((q) => !exclude.has(q.id)).length;
+}
+
+/**
+ * Fresh random set every call — options shuffled each time. Unseen questions come
+ * first; once they run out the set is topped up from seen ones rather than
+ * dropping the exclusion wholesale. Callers can detect exhaustion with
+ * unseenCount() and tell the user.
+ */
 export function pickRandomQuestions(
   all: Question[],
   count = 10,
-  seed?: number
+  seed?: number,
+  excludeIds: string[] = []
 ): Question[] {
   const pool = answeredPool(all);
+  const exclude = new Set(excludeIds);
   const rng = mulberry32(
     seed ?? (Date.now() ^ (Math.random() * 0xffffffff)) >>> 0
   );
-  const shuffled = shuffleInPlace([...pool], rng);
-  return shuffled
-    .slice(0, Math.min(count, shuffled.length))
-    .map((q) => shuffleQuestionOptions(q, rng));
+  const picked = shuffleInPlace(
+    pool.filter((q) => !exclude.has(q.id)),
+    rng
+  ).slice(0, count);
+  if (picked.length < count) {
+    const seen = shuffleInPlace(
+      pool.filter((q) => exclude.has(q.id)),
+      rng
+    );
+    picked.push(...seen.slice(0, count - picked.length));
+  }
+  return picked.map((q) => shuffleQuestionOptions(q, rng));
 }
 
 export const MARKING = {

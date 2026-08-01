@@ -46,7 +46,10 @@ export default function ResultsPage() {
 
   const mins = Math.floor(result.timeTaken / 60);
   const secs = result.timeTaken % 60;
-  const pct = Math.round((result.correct / result.total) * 100);
+  // Accuracy must mean the same thing here as it does in getStats(): correct as a
+  // share of what you actually answered. Skips are not wrong answers.
+  const answered = result.correct + result.wrong;
+  const accuracy = answered > 0 ? Math.round((result.correct / answered) * 100) : 0;
 
   return (
     <div className="min-h-screen">
@@ -56,7 +59,10 @@ export default function ResultsPage() {
           <p className="text-sm text-lavender-600 mb-1">{result.date}</p>
           <p className="text-5xl font-bold text-lavender-600 mb-2">{result.score}</p>
           <p className="text-lavender-700 font-medium mb-4">
-            out of {result.total} · {pct}% accuracy
+            out of {result.total} ·{" "}
+            {answered > 0
+              ? `${accuracy}% accuracy on ${answered} answered`
+              : "nothing answered"}
           </p>
           <div className="grid grid-cols-3 gap-3 text-sm">
             <div className="rounded-xl bg-green-50 py-3">

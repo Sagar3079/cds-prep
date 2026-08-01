@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Append predicted CDS-style English questions across all major topics."""
 import json
+import re
 from pathlib import Path
 
-OUT = Path.home() / "cds-prep" / "src" / "data" / "questions.json"
+# Resolve from this file, not from $HOME: the repo is not always at ~/cds-prep and
+# a home-relative path silently writes to a phantom directory and reports success.
+OUT = Path(__file__).resolve().parent.parent / "src" / "data" / "questions.json"
 
 # (topic, question, [a,b,c,d], answer_index 0-3, optional passage)
 EXTRA = [
@@ -76,7 +79,8 @@ EXTRA = [
   ("Ordering of Words", "Rearrange: P: is the best Q: honesty R: policy S: in the long run", ["Q P R S", "Q R P S", "R Q P S", "P Q R S"], 0),
   ("Ordering of Words", "Rearrange: P: to succeed Q: one must R: work hard S: in life", ["Q R P S", "Q P R S", "R Q P S", "P Q R S"], 0),
   ("Ordering of Words", "Rearrange: P: a beautiful Q: she bought R: dress S: for the party", ["Q P R S", "P Q R S", "Q R P S", "R Q P S"], 0),
-  ("Ordering of Words", "Rearrange: P: never Q: trust R: a man S: who lies", ["Q R S P", "P Q R S", "Q P R S", "R Q P S"], 0),
+  # "P Q R S" = "never trust a man who lies"; "Q R S P" would read "trust a man who lies never".
+  ("Ordering of Words", "Rearrange: P: never Q: trust R: a man S: who lies", ["Q R S P", "P Q R S", "Q P R S", "R Q P S"], 1),
   ("Ordering of Words", "Rearrange: P: the sun Q: rises R: in the east S: every morning", ["P Q R S", "Q P R S", "P R Q S", "R P Q S"], 0),
   # --- ORDERING OF SENTENCES ---
   ("Ordering of Sentences", "Arrange: S1: Health is wealth. P: A healthy body has a healthy mind. Q: Without health nothing can be enjoyed. R: We must exercise daily. S: Good food is also essential. S6: So take care of your health.", ["Q P R S", "P Q R S", "R S P Q", "Q R S P"], 0),
@@ -180,7 +184,7 @@ EXTRA = [
    "Books are our best friends. They instruct us in our youth and comfort us in old age. They never desert us in times of need. Through books we can travel the world, meet great minds and gain wisdom without leaving our room."),
   # --- PAIRED WORDS / COMMONLY CONFUSED ---
   ("Commonly Confused Words", "Choose correctly: The ______ of the argument was sound.", ["base", "bass", "basis", "basic"], 2),
-  ("Commonly Confused Words", "Choose correctly: He gave me good ______.", ["advise", "advise", "advisee", "advices"], 1),
+  ("Commonly Confused Words", "Choose correctly: He gave me good ______.", ["advise", "advice", "advisee", "advices"], 1),
   ("Commonly Confused Words", "Choose correctly: Please ______ the window.", ["close", "clothes", "cloth", "clause"], 0),
   ("Commonly Confused Words", "Choose correctly: She has a sweet ______.", ["desert", "dessert", "deserve", "deserted"], 1),
   ("Commonly Confused Words", "Choose correctly: I will ______ you at the station.", ["wait", "weight", "wet", "wit"], 0),
@@ -230,6 +234,62 @@ EXTRA = [
 ]
 
 
+# --- target: the stem word a synonym/antonym item is testing -------------------
+# The UI highlights it. Without it the component guesses from the stem and picks
+# the wrong word (e.g. REMARKS instead of CAUSTIC in pred-9011).
+
+# Stems where the tested word cannot be read off mechanically — more than one
+# all-caps word, or the word is embedded in an ordinary sentence.
+TARGET_OVERRIDES = {
+    "His REMARKS were quite CAUSTIC.": "CAUSTIC",
+}
+
+LEAD_IN = re.compile(
+    r"(?:nearest in meaning to|opposite in meaning to|nearest meaning of"
+    r"|meaning of|opposite of|synonym of|antonym of)\s*[:\-]?\s*",
+    re.I,
+)
+CAPS_HEAD = re.compile(r"([A-Z][A-Z'’\-]{2,})")
+CAPS_ANY = re.compile(r"\b([A-Z]{3,})\b")
+NOT_TARGETS = {"CDS", "UPSC"}
+
+
+def derive_target(topic, question):
+    """The stem word the options are a synonym/antonym OF, or None."""
+    if not re.search(r"synonym|antonym", topic, re.I):
+        return None
+    if question in TARGET_OVERRIDES:
+        return TARGET_OVERRIDES[question]
+    lead = LEAD_IN.search(question)
+    if lead:
+        caps = CAPS_HEAD.match(question[lead.end():])
+        if caps:
+            return caps.group(1)
+    caps = CAPS_ANY.search(question)
+    if caps and caps.group(1) not in NOT_TARGETS:
+        return caps.group(1)
+    return None
+
+
+# --- fixedOptions: options whose meaning is bound to their position ------------
+# Either the stem labels the fragments "(a) … / (b) …" and the options repeat
+# them, or an option refers to another option ("Both A and B", "None of the
+# above"). Shuffling these makes the rendered card contradict itself.
+QUANTIFIER = r"(?:[Bb]oth|[Ee]ither|[Nn]either|[Aa]ll|[Nn]one|[Aa]ny)\s+(?:of\s+)?(?:the\s+)?"
+SELF_REF_POSITION = re.compile(QUANTIFIER + r"(?:above|below)\b")
+SELF_REF_LETTER = re.compile(QUANTIFIER + r"(?:\([a-dA-D]\)|[A-D])\b")
+STEM_LABEL = re.compile(r"\(\s*([a-d])\s*\)")
+
+
+def derive_fixed_options(question, options):
+    if len(set(STEM_LABEL.findall(question))) >= 2:
+        return True
+    return any(
+        SELF_REF_POSITION.match(o.strip()) or SELF_REF_LETTER.match(o.strip())
+        for o in options
+    )
+
+
 def main():
     existing = json.loads(OUT.read_text(encoding="utf-8")) if OUT.exists() else []
     by_id = {q["id"]: q for q in existing if q.get("answer") is not None}
@@ -242,24 +302,32 @@ def main():
             topic, q, opts, ans = row
             passage = None
         qid = f"pred-{start + i:04d}"
-        by_id[qid] = {
+        rec = {
             "id": qid,
             "year": 2024,
             "session": 1,
             "qnum": start + i,
             "passage": passage,
             "question": q,
-            "options": opts,
-            "answer": ans,
-            "answerSource": "predicted-cds-pattern",
-            "topic": topic,
         }
+        target = derive_target(topic, q)
+        if target:
+            rec["target"] = target
+        rec["options"] = opts
+        if derive_fixed_options(q, opts):
+            rec["fixedOptions"] = True
+        rec["answer"] = ans
+        rec["answerSource"] = "predicted-cds-pattern"
+        rec["topic"] = topic
+        by_id[qid] = rec
 
     final = sorted(
         by_id.values(),
         key=lambda x: (x.get("year", 0), x.get("session", 0), x.get("qnum") or 0, x["id"]),
     )
-    OUT.write_text(json.dumps(final, indent=2, ensure_ascii=False), encoding="utf-8")
+    # write_bytes, not write_text: text mode rewrites every "\n" as "\r\n" on
+    # Windows and flips the line endings of the whole checked-in file.
+    OUT.write_bytes(json.dumps(final, indent=2, ensure_ascii=False).encode("utf-8"))
     from collections import Counter
     print(f"Total: {len(final)}")
     print(Counter(q.get("topic") for q in final))

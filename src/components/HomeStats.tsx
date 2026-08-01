@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getStats, getAttempts, todayKey } from "@/lib/storage";
+import { getStats, hasAttemptOn, todayKey } from "@/lib/storage";
 import Link from "next/link";
 
 export default function HomeStats() {
@@ -9,13 +9,14 @@ export default function HomeStats() {
     testsTaken: 0,
     avgScore: 0,
     bestStreak: 0,
+    currentStreak: 0,
     accuracy: 0,
   });
   const [doneToday, setDoneToday] = useState(false);
 
   useEffect(() => {
     setStats(getStats());
-    setDoneToday(getAttempts().some((a) => a.date === todayKey()));
+    setDoneToday(hasAttemptOn(todayKey(), "daily"));
   }, []);
 
   return (
@@ -51,7 +52,10 @@ export default function HomeStats() {
           { label: "Tests Taken", value: stats.testsTaken },
           { label: "Avg Score", value: stats.avgScore },
           { label: "Accuracy", value: `${stats.accuracy}%` },
-          { label: "Best Streak", value: `${stats.bestStreak}d` },
+          {
+            label: stats.currentStreak > 0 ? "Current Streak" : "Best Streak",
+            value: `${stats.currentStreak > 0 ? stats.currentStreak : stats.bestStreak}d`,
+          },
         ].map((s) => (
           <div key={s.label} className="card text-center py-5">
             <p className="text-3xl font-bold text-lavender-600">{s.value}</p>

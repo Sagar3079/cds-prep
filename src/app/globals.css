@@ -115,6 +115,16 @@ body {
   50% { opacity: 0.6; }
 }
 
+/* These are unlayered rules, so a Tailwind `motion-reduce:` utility cannot beat
+   them. The guard has to live here. */
+@media (prefers-reduced-motion: reduce) {
+  .timer-urgent { animation: none; }
+  .progress-dot { transition: none; }
+  .progress-dot.active { transform: none; }
+  .option-btn { transition: none; }
+  .btn-primary:hover { transform: none; }
+}
+
 .progress-dot {
   width: 0.65rem;
   height: 0.65rem;

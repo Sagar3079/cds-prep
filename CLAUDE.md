@@ -38,10 +38,19 @@ pdfs/                  gitignored — fetch locally, see README
 
 ### Invariants — do not break these
 
-- **`pickDailyQuestions` must stay deterministic for a given date string.** It seeds
-  `mulberry32` from `hashString(date)`. Everyone gets the same daily set. Never
-  introduce `Date.now()` or `Math.random()` into that path — `pickRandomQuestions` is
-  the separate non-deterministic entry point.
+- **`pickDailyQuestions` must stay deterministic for a given date string, across all
+  users.** The bank is shuffled once from a fixed `CANON_SEED`; the date only selects
+  which window of that canonical order is today's. It accepts an `excludeIds` argument
+  and **deliberately ignores it** — per-user state entering this path is exactly what
+  broke determinism before. Never introduce `Date.now()`, `Math.random()`, or any
+  localStorage read into it. `pickRandomQuestions` is the separate non-deterministic
+  entry point and is where per-user exclusion belongs.
+- **Calendar days are local, never UTC.** Use `dateKey()` / `todayKey()` from
+  `storage.ts`. `toISOString().slice(0,10)` is a bug here — users are in IST, so before
+  05:30 it returns the previous day and attempts overwrite each other.
+- **`saveAttempt` is append-only.** It assigns `attemptNo` and `savedAt` itself; callers
+  must not set them. Never reintroduce overwrite-on-date-match — a retake must not erase
+  the earlier attempt.
 - **`shuffleQuestionOptions` remaps `answer` to follow the shuffled option.** If you
   touch option ordering anywhere, the answer index must move with it, or scoring
   silently breaks.
@@ -54,11 +63,24 @@ pdfs/                  gitignored — fetch locally, see README
 
 ### Answer-quality caveat
 
-Of 427 questions, only 235 have answers traceable to an official or verified key
-(`answerSource` = `verified`, `verified-key`, `verified-pyq-pattern`). The remaining
-**192 are `predicted-cds-pattern` — model-inferred, not authoritative.** Any feature
-that presents answers to a learner should preserve or surface `answerSource`. Do not
-add copy that claims all answers are official.
+**Only 110 of the 427 questions come from a real UPSC paper** (CDS-1 2015–2018). The
+other 317 are hand-typed Python literals in `scripts/expand_bank.py` (192, ids `pred-*`)
+and `scripts/seed_questions.py` (125, ids `seed-*`).
+
+Two things follow, and both matter when writing user-facing copy:
+
+- **`year` and `session` are fabricated for those 317.** They are hardcoded — `pred-*`
+  all claim `2024/1`, `seed-*` all claim `2020/1`. There is no 2020 or 2024 paper
+  content in the bank. Never present those fields as provenance.
+- **The four `answerSource` values are not verification tiers.** All four are
+  unconditional string constants written by the generating script. Only `verified-key`
+  (38 questions) traces to an external artifact — `answer_keys/manual_keys.json`.
+  `answer_keys/keys.json` is an empty object and its code path never fires.
+
+Any feature that shows an answer to a learner must surface `answerSource` honestly, and
+must not imply a hand-written answer carries the authority of an official key. Do not
+write copy claiming the answers are official. See the answer-accuracy section in
+README.md, which documents the real numbers.
 
 ---
 
@@ -71,7 +93,19 @@ Use these proactively — don't wait to be asked.
 | Skill / plugin | Use it for |
 | --- | --- |
 | **`impeccable`** | The design layer. Invoke before writing UI code, not after. `/impeccable craft` for new surfaces, `/impeccable polish` and `/impeccable audit` on existing ones, `/impeccable critique` when a screen feels generic. This is the primary design authority in this repo. |
-| **`frontend-design`** | Taste and UX writing. Brainstorm a token system and critique the plan *before* coding. Its anti-pattern list (cream+serif+terracotta, near-black+acid-green, broadsheet hairline layouts) is a hard no — this app has a deliberate lavender/white identity; keep it and make it sharper, don't drift to defaults. |
+| **`frontend-design`** | Taste and UX writing. Brainstorm a token system and critique the plan *before* coding. Its anti-pattern list (cream+serif+terracotta, near-black+acid-green, broadsheet hairline layouts) is a hard no. |
+
+**Design direction — the answer sheet, not a SaaS dashboard.** The approved mockup lives
+at https://www.figma.com/design/Lc1YFPfOhD6eGUlxYygkGQ (frames 01–06, with a `CDS Tokens`
+variable collection). The visual language is the OMR answer sheet this exam actually
+uses: booklet bands, T.B.C. codes, serial numbers, bubble grids. Deep navy ink
+(`#0A1628`) on cool paper (`#F2F4F7`), one saffron signal (`#E8801A`), plus semantic
+correct/wrong. The timer is the signature element.
+
+The shipped code is still on the old lavender palette — migrating it to these tokens is
+open work. When you touch a screen, move it toward the mockup rather than extending the
+lavender starter look. Note `#5B6B85` muted grey fails AA on the navy bands; use the
+`on-ink-muted` token (`#97A8C4`, 6.2:1) for text on dark.
 | **`ui-design`** — web skills only | Reference depth: `design-system-patterns`, `visual-design-foundations`, `responsive-design`, `web-component-design`, `interaction-design`, `accessibility-compliance`. Commands: `/ui-design:design-review`, `/ui-design:create-component`, `/ui-design:accessibility-audit`. |
 
 Accessibility is not optional here: this is a timed test taken under pressure. Visible
@@ -122,10 +156,13 @@ web app, don't reach for it.
 
 ```bash
 npm install
-npm run dev      # http://localhost:3000
+npm run dev        # http://localhost:3000
 npm run build
-npm run lint
+npm run typecheck  # tsc --noEmit
 ```
+
+There is no `lint` script. `next lint` was removed in Next 16 and eslint is not yet
+configured here — setting it up is an open task, not something to work around.
 
 Data pipeline (Python, needs the gitignored `pdfs/`):
 
@@ -137,8 +174,10 @@ python scripts/seed_questions.py    # rebuild src/data/questions.json
 ## Before saying a change is done
 
 1. `npm run build` passes.
-2. `npm run lint` passes.
+2. `npm run typecheck` passes.
 3. Keyboard-only pass over any screen you touched; focus is visible throughout.
-4. If you touched `daily.ts`: same date still yields the same question set, and a
-   shuffled option still scores correctly.
-5. If you touched anything user-facing: run `/impeccable audit` on it.
+4. If you touched `daily.ts`: the same date still yields the same set *regardless of
+   what is in localStorage*, and a shuffled option still scores correctly.
+5. If you touched `storage.ts`: a second attempt on the same day does not overwrite the
+   first, and a date near midnight IST resolves to the local day.
+6. If you touched anything user-facing: run `/impeccable audit` on it.

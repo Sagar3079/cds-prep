@@ -635,6 +635,7 @@
     "qnum": 1,
     "passage": null,
     "question": "A truly respectable old man is a ripe person.",
+    "target": "ripe",
     "options": [
       "senior",
       "mature",
@@ -652,6 +653,7 @@
     "qnum": 2,
     "passage": null,
     "question": "The soldiers repulsed the enemy.",
+    "target": "repulsed",
     "options": [
       "defeated",
       "destroyed",
@@ -669,6 +671,7 @@
     "qnum": 3,
     "passage": null,
     "question": "She deftly masked her feelings.",
+    "target": "masked",
     "options": [
       "hid",
       "flaunted",
@@ -686,6 +689,7 @@
     "qnum": 4,
     "passage": null,
     "question": "Vendors must have licence.",
+    "target": "Vendors",
     "options": [
       "One who drives a car",
       "One who works in a hospital",
@@ -703,6 +707,7 @@
     "qnum": 5,
     "passage": null,
     "question": "They will not admit children under fourteen.",
+    "target": "admit",
     "options": [
       "avow",
       "receive",
@@ -720,6 +725,7 @@
     "qnum": 6,
     "passage": null,
     "question": "The jewels have been stolen from her bedroom.",
+    "target": "stolen",
     "options": [
       "embezzled",
       "asserted",
@@ -737,6 +743,7 @@
     "qnum": 7,
     "passage": null,
     "question": "The soldier showed an exemplary courage.",
+    "target": "exemplary",
     "options": [
       "flawed",
       "faulty",
@@ -754,6 +761,7 @@
     "qnum": 8,
     "passage": null,
     "question": "They served fruits after the dinner.",
+    "target": "served",
     "options": [
       "assisted",
       "obliged",
@@ -771,6 +779,7 @@
     "qnum": 9,
     "passage": null,
     "question": "The committee should recommend his name to the government.",
+    "target": "recommend",
     "options": [
       "praise",
       "advise",
@@ -788,6 +797,7 @@
     "qnum": 10,
     "passage": null,
     "question": "Can medicines save us from death ?",
+    "target": "save",
     "options": [
       "hide",
       "rescue",
@@ -1145,6 +1155,7 @@
     "qnum": 31,
     "passage": null,
     "question": "It was a mystery as to where the young girl had acquired such a naive belief.",
+    "target": "naive",
     "options": [
       "credulous",
       "childlike",
@@ -1162,6 +1173,7 @@
     "qnum": 32,
     "passage": null,
     "question": "It’s the only treatment suitable for cancer.",
+    "target": "suitable",
     "options": [
       "insufficient",
       "impertinent",
@@ -1179,6 +1191,7 @@
     "qnum": 33,
     "passage": null,
     "question": "Some of the criticisms which they had to put up were very unfair.",
+    "target": "criticisms",
     "options": [
       "scold",
       "scom",
@@ -1196,6 +1209,7 @@
     "qnum": 35,
     "passage": null,
     "question": "It could not have been expected that, with such a bent of mind of the people, there should have been much activity for the cultivation of the physical sciences in this part of the world.",
+    "target": "activity",
     "options": [
       "dull",
       "dormant",
@@ -1213,6 +1227,7 @@
     "qnum": 37,
     "passage": null,
     "question": "The princess charming was the centre of attraction today.",
+    "target": "charming",
     "options": [
       "enchanting",
       "hypnotic",
@@ -1230,6 +1245,7 @@
     "qnum": 38,
     "passage": null,
     "question": "Macbeth is a/an abominable figure.",
+    "target": "abominable",
     "options": [
       "abhorrent",
       "repugnant",
@@ -1247,6 +1263,7 @@
     "qnum": 39,
     "passage": null,
     "question": "Terrorists profess fanatical ideology.",
+    "target": "fanatical",
     "options": [
       "bigoted",
       "militant",
@@ -1264,6 +1281,7 @@
     "qnum": 40,
     "passage": null,
     "question": "Rakesh is vulnerable to political pressure.",
+    "target": "vulnerable",
     "options": [
       "weak",
       "unguarded",
@@ -1474,6 +1492,7 @@
       "over-population",
       "None of the above"
     ],
+    "fixedOptions": true,
     "answer": 2,
     "answerSource": "verified",
     "topic": "Comprehension"
@@ -1729,6 +1748,7 @@
       "rubbish",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -1746,6 +1766,7 @@
       "to jam",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 2,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -1763,6 +1784,7 @@
       "last year's model",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -1876,6 +1898,7 @@
     "qnum": 1,
     "passage": null,
     "question": "Choose the word nearest in meaning to: ABANDON",
+    "target": "ABANDON",
     "options": [
       "forsake",
       "keep",
@@ -1893,6 +1916,7 @@
     "qnum": 2,
     "passage": null,
     "question": "Choose the word nearest in meaning to: CANDID",
+    "target": "CANDID",
     "options": [
       "frank",
       "secretive",
@@ -1910,6 +1934,7 @@
     "qnum": 3,
     "passage": null,
     "question": "Choose the word nearest in meaning to: DILIGENT",
+    "target": "DILIGENT",
     "options": [
       "lazy",
       "industrious",
@@ -1927,6 +1952,7 @@
     "qnum": 4,
     "passage": null,
     "question": "Choose the word nearest in meaning to: ELOQUENT",
+    "target": "ELOQUENT",
     "options": [
       "silent",
       "fluent",
@@ -1944,6 +1970,7 @@
     "qnum": 5,
     "passage": null,
     "question": "Choose the word nearest in meaning to: FEASIBLE",
+    "target": "FEASIBLE",
     "options": [
       "impossible",
       "practicable",
@@ -1961,6 +1988,7 @@
     "qnum": 6,
     "passage": null,
     "question": "Choose the word nearest in meaning to: GREGARIOUS",
+    "target": "GREGARIOUS",
     "options": [
       "solitary",
       "sociable",
@@ -1978,6 +2006,7 @@
     "qnum": 7,
     "passage": null,
     "question": "Choose the word nearest in meaning to: HINDER",
+    "target": "HINDER",
     "options": [
       "help",
       "obstruct",
@@ -1995,6 +2024,7 @@
     "qnum": 8,
     "passage": null,
     "question": "Choose the word nearest in meaning to: IMMINENT",
+    "target": "IMMINENT",
     "options": [
       "distant",
       "impending",
@@ -2012,6 +2042,7 @@
     "qnum": 9,
     "passage": null,
     "question": "Choose the word nearest in meaning to: JUDICIOUS",
+    "target": "JUDICIOUS",
     "options": [
       "foolish",
       "wise",
@@ -2029,6 +2060,7 @@
     "qnum": 10,
     "passage": null,
     "question": "Choose the word nearest in meaning to: KEEN",
+    "target": "KEEN",
     "options": [
       "dull",
       "eager",
@@ -2046,6 +2078,7 @@
     "qnum": 15,
     "passage": null,
     "question": "Choose the word nearest in meaning to: LETHARGY",
+    "target": "LETHARGY",
     "options": [
       "energy",
       "sluggishness",
@@ -2063,6 +2096,7 @@
     "qnum": 16,
     "passage": null,
     "question": "Choose the word nearest in meaning to: MITIGATE",
+    "target": "MITIGATE",
     "options": [
       "aggravate",
       "alleviate",
@@ -2080,6 +2114,7 @@
     "qnum": 17,
     "passage": null,
     "question": "Choose the word nearest in meaning to: NOVICE",
+    "target": "NOVICE",
     "options": [
       "expert",
       "beginner",
@@ -2097,6 +2132,7 @@
     "qnum": 18,
     "passage": null,
     "question": "Choose the word nearest in meaning to: OBSTINATE",
+    "target": "OBSTINATE",
     "options": [
       "flexible",
       "stubborn",
@@ -2114,6 +2150,7 @@
     "qnum": 19,
     "passage": null,
     "question": "Choose the word nearest in meaning to: PRUDENT",
+    "target": "PRUDENT",
     "options": [
       "rash",
       "careful",
@@ -2131,6 +2168,7 @@
     "qnum": 20,
     "passage": null,
     "question": "Choose the word nearest in meaning to: QUIESCENT",
+    "target": "QUIESCENT",
     "options": [
       "active",
       "dormant",
@@ -2148,6 +2186,7 @@
     "qnum": 21,
     "passage": null,
     "question": "Choose the word opposite in meaning to: ABUNDANT",
+    "target": "ABUNDANT",
     "options": [
       "plentiful",
       "scarce",
@@ -2165,6 +2204,7 @@
     "qnum": 22,
     "passage": null,
     "question": "Choose the word opposite in meaning to: BENEVOLENT",
+    "target": "BENEVOLENT",
     "options": [
       "kind",
       "malevolent",
@@ -2182,6 +2222,7 @@
     "qnum": 23,
     "passage": null,
     "question": "Choose the word opposite in meaning to: COURAGEOUS",
+    "target": "COURAGEOUS",
     "options": [
       "brave",
       "timid",
@@ -2199,6 +2240,7 @@
     "qnum": 24,
     "passage": null,
     "question": "Choose the word opposite in meaning to: DESTITUTE",
+    "target": "DESTITUTE",
     "options": [
       "poor",
       "affluent",
@@ -2216,6 +2258,7 @@
     "qnum": 25,
     "passage": null,
     "question": "Choose the word opposite in meaning to: EXPLICIT",
+    "target": "EXPLICIT",
     "options": [
       "clear",
       "implicit",
@@ -2233,6 +2276,7 @@
     "qnum": 26,
     "passage": null,
     "question": "Choose the word opposite in meaning to: FRUGAL",
+    "target": "FRUGAL",
     "options": [
       "thrifty",
       "extravagant",
@@ -2250,6 +2294,7 @@
     "qnum": 27,
     "passage": null,
     "question": "Choose the word opposite in meaning to: GENUINE",
+    "target": "GENUINE",
     "options": [
       "real",
       "counterfeit",
@@ -2267,6 +2312,7 @@
     "qnum": 28,
     "passage": null,
     "question": "Choose the word opposite in meaning to: HOSTILE",
+    "target": "HOSTILE",
     "options": [
       "unfriendly",
       "amicable",
@@ -2284,6 +2330,7 @@
     "qnum": 29,
     "passage": null,
     "question": "Choose the word opposite in meaning to: INNOCENT",
+    "target": "INNOCENT",
     "options": [
       "guiltless",
       "guilty",
@@ -2301,6 +2348,7 @@
     "qnum": 30,
     "passage": null,
     "question": "Choose the word opposite in meaning to: JUBILANT",
+    "target": "JUBILANT",
     "options": [
       "joyful",
       "depressed",
@@ -2318,6 +2366,7 @@
     "qnum": 35,
     "passage": null,
     "question": "Choose the word opposite in meaning to: LENIENT",
+    "target": "LENIENT",
     "options": [
       "mild",
       "strict",
@@ -2335,6 +2384,7 @@
     "qnum": 36,
     "passage": null,
     "question": "Choose the word opposite in meaning to: MEEK",
+    "target": "MEEK",
     "options": [
       "humble",
       "arrogant",
@@ -2352,6 +2402,7 @@
     "qnum": 37,
     "passage": null,
     "question": "Choose the word opposite in meaning to: NOBLE",
+    "target": "NOBLE",
     "options": [
       "honourable",
       "ignoble",
@@ -2369,6 +2420,7 @@
     "qnum": 38,
     "passage": null,
     "question": "Choose the word opposite in meaning to: OPTIMISTIC",
+    "target": "OPTIMISTIC",
     "options": [
       "hopeful",
       "pessimistic",
@@ -2386,6 +2438,7 @@
     "qnum": 39,
     "passage": null,
     "question": "Choose the word opposite in meaning to: PERMANENT",
+    "target": "PERMANENT",
     "options": [
       "lasting",
       "temporary",
@@ -2403,6 +2456,7 @@
     "qnum": 40,
     "passage": null,
     "question": "Choose the word opposite in meaning to: RELUCTANT",
+    "target": "RELUCTANT",
     "options": [
       "unwilling",
       "eager",
@@ -2426,6 +2480,7 @@
       "than that of any other place",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 0,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -2443,6 +2498,7 @@
       "in our team",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -2460,6 +2516,7 @@
       "from the picnic",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -2477,6 +2534,7 @@
       "to postpone the meeting",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -2494,6 +2552,7 @@
       "going there",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -2511,6 +2570,7 @@
       "in the morning",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -2528,6 +2588,7 @@
       "their assignment",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -2545,6 +2606,7 @@
       "come tomorrow",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 0,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -2562,6 +2624,7 @@
       "and shocking",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -2579,6 +2642,7 @@
       "he failed",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 0,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -2596,6 +2660,7 @@
       "English grammar",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -2613,6 +2678,7 @@
       "to America",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 0,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -2630,6 +2696,7 @@
       "are old",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 2,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -2647,6 +2714,7 @@
       "since three days",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 2,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -2664,6 +2732,7 @@
       "a policeman knocked",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -3423,6 +3492,7 @@
     "qnum": 120,
     "passage": null,
     "question": "Choose nearest meaning of: TENACIOUS",
+    "target": "TENACIOUS",
     "options": [
       "weak",
       "persistent",
@@ -3440,6 +3510,7 @@
     "qnum": 121,
     "passage": null,
     "question": "Choose nearest meaning of: VERBOSE",
+    "target": "VERBOSE",
     "options": [
       "concise",
       "wordy",
@@ -3457,6 +3528,7 @@
     "qnum": 122,
     "passage": null,
     "question": "Choose nearest meaning of: WARY",
+    "target": "WARY",
     "options": [
       "careless",
       "cautious",
@@ -3474,6 +3546,7 @@
     "qnum": 123,
     "passage": null,
     "question": "Choose nearest meaning of: ZEALOUS",
+    "target": "ZEALOUS",
     "options": [
       "indifferent",
       "enthusiastic",
@@ -3491,6 +3564,7 @@
     "qnum": 124,
     "passage": null,
     "question": "Choose opposite of: TRANSIENT",
+    "target": "TRANSIENT",
     "options": [
       "temporary",
       "permanent",
@@ -3508,6 +3582,7 @@
     "qnum": 125,
     "passage": null,
     "question": "Choose opposite of: URBANE",
+    "target": "URBANE",
     "options": [
       "polished",
       "rude",
@@ -3525,6 +3600,7 @@
     "qnum": 126,
     "passage": null,
     "question": "Choose opposite of: VIRTUE",
+    "target": "VIRTUE",
     "options": [
       "goodness",
       "vice",
@@ -3542,6 +3618,7 @@
     "qnum": 127,
     "passage": null,
     "question": "Choose opposite of: WISDOM",
+    "target": "WISDOM",
     "options": [
       "knowledge",
       "folly",
@@ -3763,6 +3840,7 @@
     "qnum": 143,
     "passage": null,
     "question": "Choose nearest meaning of: ADVERSITY",
+    "target": "ADVERSITY",
     "options": [
       "prosperity",
       "misfortune",
@@ -3780,6 +3858,7 @@
     "qnum": 144,
     "passage": null,
     "question": "Choose nearest meaning of: BREVITY",
+    "target": "BREVITY",
     "options": [
       "length",
       "conciseness",
@@ -3797,6 +3876,7 @@
     "qnum": 145,
     "passage": null,
     "question": "Choose nearest meaning of: COMPLACENT",
+    "target": "COMPLACENT",
     "options": [
       "dissatisfied",
       "self-satisfied",
@@ -3814,6 +3894,7 @@
     "qnum": 146,
     "passage": null,
     "question": "Choose opposite of: ACCELERATE",
+    "target": "ACCELERATE",
     "options": [
       "hasten",
       "retard",
@@ -3831,6 +3912,7 @@
     "qnum": 147,
     "passage": null,
     "question": "Choose opposite of: BOISTEROUS",
+    "target": "BOISTEROUS",
     "options": [
       "noisy",
       "quiet",
@@ -3848,6 +3930,7 @@
     "qnum": 148,
     "passage": null,
     "question": "Choose opposite of: CONCEAL",
+    "target": "CONCEAL",
     "options": [
       "hide",
       "reveal",
@@ -3905,6 +3988,7 @@
       "are coming",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 2,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -3922,6 +4006,7 @@
       "to climb Everest",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "verified-pyq-pattern",
     "topic": "Spotting Errors"
@@ -4001,6 +4086,7 @@
     "qnum": 9000,
     "passage": null,
     "question": "Choose the word nearest in meaning to: ABATE",
+    "target": "ABATE",
     "options": [
       "increase",
       "diminish",
@@ -4018,6 +4104,7 @@
     "qnum": 9001,
     "passage": null,
     "question": "Choose the word nearest in meaning to: BELLIGERENT",
+    "target": "BELLIGERENT",
     "options": [
       "peaceful",
       "hostile",
@@ -4035,6 +4122,7 @@
     "qnum": 9002,
     "passage": null,
     "question": "Choose the word nearest in meaning to: CONCISE",
+    "target": "CONCISE",
     "options": [
       "lengthy",
       "brief",
@@ -4052,6 +4140,7 @@
     "qnum": 9003,
     "passage": null,
     "question": "Choose the word nearest in meaning to: DEARTH",
+    "target": "DEARTH",
     "options": [
       "abundance",
       "scarcity",
@@ -4069,6 +4158,7 @@
     "qnum": 9004,
     "passage": null,
     "question": "Choose the word nearest in meaning to: EPHEMERAL",
+    "target": "EPHEMERAL",
     "options": [
       "permanent",
       "short-lived",
@@ -4086,6 +4176,7 @@
     "qnum": 9005,
     "passage": null,
     "question": "Choose the word nearest in meaning to: FORTITUDE",
+    "target": "FORTITUDE",
     "options": [
       "cowardice",
       "courage",
@@ -4103,6 +4194,7 @@
     "qnum": 9006,
     "passage": null,
     "question": "Choose the word nearest in meaning to: GARRULOUS",
+    "target": "GARRULOUS",
     "options": [
       "silent",
       "talkative",
@@ -4120,6 +4212,7 @@
     "qnum": 9007,
     "passage": null,
     "question": "Choose the word nearest in meaning to: HAPHAZARD",
+    "target": "HAPHAZARD",
     "options": [
       "planned",
       "random",
@@ -4137,6 +4230,7 @@
     "qnum": 9008,
     "passage": null,
     "question": "Choose the word nearest in meaning to: INEPT",
+    "target": "INEPT",
     "options": [
       "skilful",
       "clumsy",
@@ -4154,6 +4248,7 @@
     "qnum": 9009,
     "passage": null,
     "question": "Choose the word nearest in meaning to: LACONIC",
+    "target": "LACONIC",
     "options": [
       "wordy",
       "terse",
@@ -4171,6 +4266,7 @@
     "qnum": 9010,
     "passage": null,
     "question": "She spoke with great EQUANIMITY during the crisis.",
+    "target": "EQUANIMITY",
     "options": [
       "anger",
       "calmness",
@@ -4188,6 +4284,7 @@
     "qnum": 9011,
     "passage": null,
     "question": "His REMARKS were quite CAUSTIC.",
+    "target": "CAUSTIC",
     "options": [
       "mild",
       "sarcastic",
@@ -4205,6 +4302,7 @@
     "qnum": 9012,
     "passage": null,
     "question": "The plan was PRAGMATIC rather than idealistic.",
+    "target": "PRAGMATIC",
     "options": [
       "impractical",
       "practical",
@@ -4222,6 +4320,7 @@
     "qnum": 9013,
     "passage": null,
     "question": "He tried to ALLEVIATE her suffering.",
+    "target": "ALLEVIATE",
     "options": [
       "increase",
       "relieve",
@@ -4239,6 +4338,7 @@
     "qnum": 9014,
     "passage": null,
     "question": "The evidence was INCONTROVERTIBLE.",
+    "target": "INCONTROVERTIBLE",
     "options": [
       "doubtful",
       "undeniable",
@@ -4256,6 +4356,7 @@
     "qnum": 9015,
     "passage": null,
     "question": "Choose the word opposite in meaning to: ADVERSITY",
+    "target": "ADVERSITY",
     "options": [
       "misfortune",
       "prosperity",
@@ -4273,6 +4374,7 @@
     "qnum": 9016,
     "passage": null,
     "question": "Choose the word opposite in meaning to: BENIGN",
+    "target": "BENIGN",
     "options": [
       "kind",
       "malignant",
@@ -4290,6 +4392,7 @@
     "qnum": 9017,
     "passage": null,
     "question": "Choose the word opposite in meaning to: CREDULOUS",
+    "target": "CREDULOUS",
     "options": [
       "gullible",
       "sceptical",
@@ -4307,6 +4410,7 @@
     "qnum": 9018,
     "passage": null,
     "question": "Choose the word opposite in meaning to: DILIGENT",
+    "target": "DILIGENT",
     "options": [
       "hardworking",
       "lazy",
@@ -4324,6 +4428,7 @@
     "qnum": 9019,
     "passage": null,
     "question": "Choose the word opposite in meaning to: EXTRAVAGANT",
+    "target": "EXTRAVAGANT",
     "options": [
       "wasteful",
       "frugal",
@@ -4341,6 +4446,7 @@
     "qnum": 9020,
     "passage": null,
     "question": "Choose the word opposite in meaning to: FICKLE",
+    "target": "FICKLE",
     "options": [
       "changeable",
       "constant",
@@ -4358,6 +4464,7 @@
     "qnum": 9021,
     "passage": null,
     "question": "Choose the word opposite in meaning to: GREGARIOUS",
+    "target": "GREGARIOUS",
     "options": [
       "sociable",
       "unsociable",
@@ -4375,6 +4482,7 @@
     "qnum": 9022,
     "passage": null,
     "question": "Choose the word opposite in meaning to: HUMBLE",
+    "target": "HUMBLE",
     "options": [
       "modest",
       "arrogant",
@@ -4392,6 +4500,7 @@
     "qnum": 9023,
     "passage": null,
     "question": "Choose the word opposite in meaning to: ILLICIT",
+    "target": "ILLICIT",
     "options": [
       "illegal",
       "lawful",
@@ -4409,6 +4518,7 @@
     "qnum": 9024,
     "passage": null,
     "question": "Choose the word opposite in meaning to: JUVENILE",
+    "target": "JUVENILE",
     "options": [
       "youthful",
       "mature",
@@ -4426,6 +4536,7 @@
     "qnum": 9025,
     "passage": null,
     "question": "He remained STOIC in the face of pain.",
+    "target": "STOIC",
     "options": [
       "unemotional",
       "emotional",
@@ -4443,6 +4554,7 @@
     "qnum": 9026,
     "passage": null,
     "question": "Her answer was AMBIGUOUS.",
+    "target": "AMBIGUOUS",
     "options": [
       "unclear",
       "clear",
@@ -4460,6 +4572,7 @@
     "qnum": 9027,
     "passage": null,
     "question": "The soil was FERTILE.",
+    "target": "FERTILE",
     "options": [
       "productive",
       "barren",
@@ -4477,6 +4590,7 @@
     "qnum": 9028,
     "passage": null,
     "question": "He is a NOVICE in this field.",
+    "target": "NOVICE",
     "options": [
       "beginner",
       "expert",
@@ -4494,6 +4608,7 @@
     "qnum": 9029,
     "passage": null,
     "question": "The crowd was TURBULENT.",
+    "target": "TURBULENT",
     "options": [
       "violent",
       "calm",
@@ -4517,6 +4632,7 @@
       "every year",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "predicted-cds-pattern",
     "topic": "Spotting Errors"
@@ -4534,6 +4650,7 @@
       "in service",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "predicted-cds-pattern",
     "topic": "Spotting Errors"
@@ -4551,6 +4668,7 @@
       "you soon",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "predicted-cds-pattern",
     "topic": "Spotting Errors"
@@ -4568,6 +4686,7 @@
       "was present",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 2,
     "answerSource": "predicted-cds-pattern",
     "topic": "Spotting Errors"
@@ -4585,6 +4704,7 @@
       "hard every day",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "predicted-cds-pattern",
     "topic": "Spotting Errors"
@@ -4602,6 +4722,7 @@
       "insufficient",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 3,
     "answerSource": "predicted-cds-pattern",
     "topic": "Spotting Errors"
@@ -4619,6 +4740,7 @@
       "tomorrow",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "predicted-cds-pattern",
     "topic": "Spotting Errors"
@@ -4636,6 +4758,7 @@
       "at all costs",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "predicted-cds-pattern",
     "topic": "Spotting Errors"
@@ -4653,6 +4776,7 @@
       "the form",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "predicted-cds-pattern",
     "topic": "Spotting Errors"
@@ -4670,6 +4794,7 @@
       "I lived",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 1,
     "answerSource": "predicted-cds-pattern",
     "topic": "Spotting Errors"
@@ -4874,6 +4999,7 @@
       "Both A and B",
       "No improvement"
     ],
+    "fixedOptions": true,
     "answer": 2,
     "answerSource": "predicted-cds-pattern",
     "topic": "Sentence Improvement"
@@ -5078,7 +5204,7 @@
       "Q P R S",
       "R Q P S"
     ],
-    "answer": 0,
+    "answer": 1,
     "answerSource": "predicted-cds-pattern",
     "topic": "Ordering of Words"
   },
@@ -6772,6 +6898,7 @@
     "qnum": 9163,
     "passage": null,
     "question": "Choose the word nearest in meaning to: PROCRASTINATE",
+    "target": "PROCRASTINATE",
     "options": [
       "hurry",
       "delay",
@@ -6789,6 +6916,7 @@
     "qnum": 9164,
     "passage": null,
     "question": "Choose the word nearest in meaning to: SCRUPULOUS",
+    "target": "SCRUPULOUS",
     "options": [
       "careless",
       "conscientious",
@@ -6806,6 +6934,7 @@
     "qnum": 9165,
     "passage": null,
     "question": "Choose the word nearest in meaning to: VORACIOUS",
+    "target": "VORACIOUS",
     "options": [
       "small",
       "greedy",
@@ -6823,6 +6952,7 @@
     "qnum": 9166,
     "passage": null,
     "question": "Choose the word opposite in meaning to: SCARCE",
+    "target": "SCARCE",
     "options": [
       "rare",
       "abundant",
@@ -6840,6 +6970,7 @@
     "qnum": 9167,
     "passage": null,
     "question": "Choose the word opposite in meaning to: TRANSPARENT",
+    "target": "TRANSPARENT",
     "options": [
       "clear",
       "opaque",
@@ -6857,6 +6988,7 @@
     "qnum": 9168,
     "passage": null,
     "question": "Choose the word opposite in meaning to: VOLUNTARY",
+    "target": "VOLUNTARY",
     "options": [
       "willing",
       "compulsory",
@@ -6914,6 +7046,7 @@
       "for a walk",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 0,
     "answerSource": "predicted-cds-pattern",
     "topic": "Spotting Errors"
@@ -6931,6 +7064,7 @@
       "any boy in the class",
       "No error"
     ],
+    "fixedOptions": true,
     "answer": 2,
     "answerSource": "predicted-cds-pattern",
     "topic": "Spotting Errors"
@@ -7231,6 +7365,7 @@
     "qnum": 9190,
     "passage": null,
     "question": "Choose the word opposite in meaning to: FRAGILE",
+    "target": "FRAGILE",
     "options": [
       "delicate",
       "sturdy",
@@ -7248,6 +7383,7 @@
     "qnum": 9191,
     "passage": null,
     "question": "Choose the word nearest in meaning to: PLACID",
+    "target": "PLACID",
     "options": [
       "stormy",
       "calm",
