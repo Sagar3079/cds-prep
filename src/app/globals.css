@@ -565,7 +565,7 @@ mark.target-word {
   display: block;
   overflow: visible;
   animation: potterBreathe 4.4s ease-in-out infinite;
-  transform-origin: 50% 88%;
+  transform-origin: 50% 53%;
 }
 @keyframes potterBreathe {
   0%, 100% { transform: translateY(0) rotate(0deg); }
@@ -581,6 +581,25 @@ mark.target-word {
   0%, 100% { transform: rotate(0deg); }
   40%      { transform: rotate(7deg); }
   75%      { transform: rotate(-5deg); }
+}
+
+.potter__wand {
+  transform-origin: 30px 74px;
+  animation: potterWand 5s ease-in-out infinite;
+}
+@keyframes potterWand {
+  0%, 100% { transform: rotate(0deg); }
+  45%      { transform: rotate(-5deg); }
+  75%      { transform: rotate(3deg); }
+}
+.potter__spark {
+  transform-origin: 6px 59px;
+  animation: potterSpark 2.6s ease-in-out infinite;
+}
+@keyframes potterSpark {
+  0%, 100% { opacity: 0; transform: scale(0.4); }
+  35%      { opacity: .95; transform: scale(1.25); }
+  60%      { opacity: .3; transform: scale(0.8); }
 }
 
 .potter__head, .potter__torso, .potter__hands, .potter__scarf {
@@ -609,9 +628,9 @@ mark.target-word {
    `--potter-h` is his rendered height; 27% of him sits below the ledge and is
    covered by the card, which is a preceding-sibling z-order overlap, not a mask. */
 .potter-perch {
-  --potter-h: 104px;
+  --potter-h: 118px;
   position: absolute;
-  bottom: calc(100% - var(--potter-h) * 0.27);
+  bottom: calc(100% - var(--potter-h) * 0.47);
   z-index: 0;
 }
 .potter-perch--right  { right: 12px; }

@@ -73,7 +73,7 @@ export default function PotterPerch() {
           mood={line.mood === "idle" ? "peek" : line.mood}
           look={look}
           lookY={-0.75}
-          size={104}
+          size={118}
           thoughtsOn={talk}
           onToggle={() => setTalk(toggleThoughts())}
         />

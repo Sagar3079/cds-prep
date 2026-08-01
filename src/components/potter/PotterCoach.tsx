@@ -77,7 +77,7 @@ export default function PotterCoach({
           mood={line?.mood ?? "peek"}
           look={0}
           lookY={-0.7}
-          size={96}
+          size={112}
           thoughtsOn={talk}
           onToggle={() => setTalk(toggleThoughts())}
         />

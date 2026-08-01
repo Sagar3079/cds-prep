@@ -149,7 +149,7 @@ export default function PotterRider({
           mood={say.mood}
           look={-0.5}
           lookY={-0.4}
-          size={80}
+          size={92}
           thoughtsOn={talk}
           onToggle={() => setTalk(toggleThoughts())}
         />
