@@ -28,6 +28,11 @@ answer_keys/*.jpeg
 answer_keys/*.png
 answer_keys/*.pdf
 
+# OCR transcriptions of the exam papers — same content as pdfs/, in text form.
+# Not redistributed, for the same reason the PDFs are not. Regenerate locally
+# with scripts/ocr_and_parse.py.
+scripts/ocr_text/
+
 # logs & local artifacts
 scripts/ocr_log.txt
 *.log

@@ -33,30 +33,74 @@ you only need the data pipeline below if you want to rebuild or extend the quest
 ## Answer accuracy — please read
 
 The question bank is **427 questions**, and the answers are not all equally reliable.
-Every question carries an `answerSource` field:
+**Only 110 of the 427 questions actually come from a UPSC paper.** The other 317 were
+written by hand and are stored as Python literals in `scripts/`.
 
-| `answerSource` | Count | What it means |
+| origin | count | where it comes from |
 | --- | --- | --- |
-| `verified` | 62 | Checked against an official key |
-| `verified-key` | 38 | Taken from a published answer key |
-| `verified-pyq-pattern` | 135 | Matched to a known previous-year answer pattern |
-| `predicted-cds-pattern` | **192** | **Model-inferred. Not authoritative.** |
+| OCR'd from real papers | **110** | CDS-1 2018 (73), CDS-1 2016 (15), CDS-1 2015 (12), CDS-1 2017 (10) |
+| hand-written, id `pred-*` | **192** | literal list in `scripts/expand_bank.py` |
+| hand-written, id `seed-*` | **125** | literal list in `scripts/seed_questions.py` |
 
-So roughly **45% of answers are predictions, not official keys.** Use this app for
-timed practice and exposure to question patterns — not as a source of truth for any
-individual answer. If a question's answer looks wrong to you, it may well be. Corrections
-via PR are very welcome; please include the source you verified against.
+### The `year` and `session` fields lie for 317 questions
+
+The hand-written questions are stamped with a paper they have no connection to —
+`pred-*` records all say `year: 2024, session: 1` and `seed-*` records all say
+`year: 2020, session: 1`, both hardcoded in the scripts. **There is no 2020 or 2024
+paper content in this bank at all.** Do not try to check one of those questions against
+the real paper; it isn't in it.
+
+### The `answerSource` labels are not verification tiers
+
+All four labels are unconditional string constants written by the generating script.
+None of them records how an answer was actually checked:
+
+| `answerSource` | count | what it really means |
+| --- | --- | --- |
+| `verified-key` | 38 | **the only tier backed by an external artifact** (`answer_keys/manual_keys.json`, CDS-1 2018 only) |
+| `verified` | 62 | hand-typed dict in `merge_answered_ocr.py`, with the author's own uncertainty in the comments |
+| `verified-pyq-pattern` | 135 | constant applied to every hand-written `seed-*` record |
+| `predicted-cds-pattern` | 192 | constant applied to every hand-written `pred-*` record — no model runs at any point |
+
+So **38 of 427 answers (8.9%) trace to anything outside the scripts themselves.**
+`answer_keys/keys.json` is an empty object; the code path that would populate it never
+fires.
+
+### Answer positions are heavily skewed
+
+Across the whole bank the correct option sits at index 1 **56.7%** of the time
+(116 / 242 / 44 / 25 across indices 0–3). The 110 OCR-derived questions are statistically
+uniform; the 317 hand-written ones put the answer in slot A or B **93–96%** of the time.
+The app shuffles options before display (`shuffleQuestionOptions` in `src/lib/daily.ts`)
+and correctly remaps the answer index, so this is not exploitable through the UI — but
+`questions.json` ships to the browser in full, answers included.
+
+**Use this for timed practice and question-pattern exposure. Do not treat any individual
+answer as authoritative.** Corrections are the most valuable contribution you can make —
+see *Contributing*.
 
 ## Data pipeline
 
-The source PDFs are **not** included in this repository (see *Exam content* below).
-To rebuild the question bank, first place the papers in `pdfs/` — `pdfs/_manifest.json`
-lists the expected filenames — then:
+⚠️ **The pipeline does not currently reproduce the shipped `questions.json`, and running
+it will destroy data.** Known issues, all open:
 
-```bash
-python scripts/ocr_and_parse.py     # OCR the scanned PDFs (slow)
-python scripts/seed_questions.py    # rebuild src/data/questions.json
-```
+- `scripts/seed_questions.py` overwrites `questions.json` unconditionally, with no merge
+  and no backup. Running it alone drops the bank from 427 to 199 records.
+- `scripts/rebuild_bank.py` filters out every `seed-*` and `pred-*` id and would delete
+  317 questions. It has never been run.
+- `scripts/merge_answered_ocr.py` shells out to `python3` and reads files without an
+  explicit encoding, so it fails on Windows.
+- Every script resolves paths from `Path.home() / "cds-prep"` rather than from
+  `__file__`, so unless the repo sits at exactly `~/cds-prep` they silently write to a
+  phantom directory and report success.
+- `scripts/expand_bank.py` — the de-facto final step — is the only script not documented
+  here, and the shipped JSON has since been hand-edited away from what it generates.
+
+Fixing this is issue #1. Until then, treat `src/data/questions.json` as the source of
+truth and edit it directly.
+
+The source PDFs and their OCR transcriptions are **not** included in this repository
+(see *Exam content* below). `pdfs/_manifest.json` lists the expected filenames.
 
 Sources: [upsc.gov.in](https://upsc.gov.in) for the 2015–2024 papers; 2025 papers were
 mirrored from third-party coaching sites.
