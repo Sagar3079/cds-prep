@@ -12,8 +12,8 @@ export default async function TestPage({
   const questions = questionsData as Question[];
 
   return (
-    <main className="px-4 py-8">
+    <div className="px-4 py-8">
       <TestClient questions={questions} mode={mode} />
-    </main>
+    </div>
   );
 }

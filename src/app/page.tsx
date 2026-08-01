@@ -19,7 +19,7 @@ export default function Home() {
   const minutes = Math.round(MARKING.durationSec / 60);
 
   return (
-    <main className="flex-1 px-4 py-6">
+    <div className="flex-1 px-4 py-6">
       <div className="stagger flex flex-col gap-3.5">
         <header>
           <HomeDate />
@@ -81,6 +81,6 @@ export default function Home() {
           </p>
         </section>
       </div>
-    </main>
+    </div>
   );
 }

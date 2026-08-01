@@ -313,7 +313,7 @@ export default function ResultsPage() {
 
   if (state.status === "loading") {
     return (
-      <main className="px-4 py-6">
+      <div className="px-4 py-6">
         <p role="status" className="sr-only">
           Loading your results…
         </p>
@@ -330,13 +330,13 @@ export default function ResultsPage() {
             <div className="h-16 rounded-xl bg-surface-2" />
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
   if (state.status === "empty") {
     return (
-      <main className="px-4 py-6">
+      <div className="px-4 py-6">
         <div className="card fade-up flex flex-col items-center gap-4 py-12 text-center">
           <p className="text-lg font-bold tracking-tight text-ink">
             No results yet
@@ -349,7 +349,7 @@ export default function ResultsPage() {
             Go to test
           </Link>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -379,7 +379,7 @@ export default function ResultsPage() {
   ].filter((part) => part.length > 0);
 
   return (
-    <main className="space-y-4 px-4 py-6">
+    <div className="space-y-4 px-4 py-6">
       <h1 className="sr-only">Your results</h1>
 
       <div className="relative">
@@ -534,7 +534,7 @@ export default function ResultsPage() {
           Back to home
         </Link>
       </div>
-    </main>
+    </div>
   );
 }
 

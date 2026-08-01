@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
+import PanelScroll from "@/components/PanelScroll";
+import StatusBar from "@/components/StatusBar";
+import TabBar from "@/components/TabBar";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
@@ -32,12 +35,15 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: NO_FLASH }} />
       </head>
       <body className={`${inter.className} antialiased`}>
-        {/* One panel holds the whole app. Every page renders its own <main>
-            into it, so no page mounts its own nav or page-width wrapper. */}
+        {/* One panel holds the whole app — a device, not a page. Pages
+            contribute only their content; the frame, scrolling and navigation
+            all live here so no page mounts its own. */}
         <div className="app-stage">
           <div className="shell app-panel">
+            <StatusBar />
             <Navbar />
-            {children}
+            <PanelScroll>{children}</PanelScroll>
+            <TabBar />
           </div>
         </div>
       </body>

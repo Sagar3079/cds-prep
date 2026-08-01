@@ -127,7 +127,7 @@ export default function HistoryPage() {
   const practised = calendar.filter((d) => d.attempts > 0).length;
 
   return (
-    <main className="space-y-4 px-4 py-6">
+    <div className="space-y-4 px-4 py-6">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <h1 className="text-2xl font-extrabold tracking-tight text-ink">
           History
@@ -275,6 +275,6 @@ export default function HistoryPage() {
           </div>
         </>
       )}
-    </main>
+    </div>
   );
 }

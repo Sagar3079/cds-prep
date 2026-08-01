@@ -191,6 +191,20 @@ body {
   place-items: center;
   padding: 1.5rem;
   overflow: hidden;
+  /* Ambient wash behind the device so it reads as sitting on a surface rather
+     than pasted onto a flat grey. */
+  background:
+    radial-gradient(
+      70rem 34rem at 50% -12%,
+      color-mix(in srgb, var(--accent) 9%, transparent),
+      transparent 68%
+    ),
+    radial-gradient(
+      44rem 30rem at 88% 108%,
+      color-mix(in srgb, var(--streak) 7%, transparent),
+      transparent 70%
+    ),
+    var(--surface);
 }
 .app-panel {
   background: var(--paper);
@@ -204,19 +218,65 @@ body {
   height: min(920px, 100dvh - 3rem);
   overflow: hidden; /* safe now: `main` scrolls, so nothing needs page sticky */
 }
-.app-panel > nav {
+/* The panel holds two navs — the header and the bottom tabs — so these are
+   addressed by their labels rather than by position. */
+.app-panel > nav[aria-label="Main"] {
   flex: none;
   border-top-left-radius: inherit;
   border-top-right-radius: inherit;
+  transition: box-shadow 0.25s var(--ease);
 }
-.app-panel > main {
-  flex: 1;
-  min-height: 0; /* without this a flex child refuses to shrink and won't scroll */
-  overflow-y: auto;
-  overscroll-behavior: contain; /* don't hand the scroll back to the page */
-  background: var(--surface);
+/* depth cue: the header only casts a shadow once content has scrolled under it */
+.app-panel > nav[aria-label="Main"][data-scrolled="true"] {
+  box-shadow: 0 6px 16px -10px rgba(16, 20, 45, 0.4);
+}
+.app-panel > nav[aria-label="Sections"] {
   border-bottom-left-radius: inherit;
   border-bottom-right-radius: inherit;
+}
+
+/* holds the scroll container and the overlay scrollbar together */
+.panel-body {
+  position: relative;
+  flex: 1;
+  min-height: 0; /* a flex child will not shrink below its content without this */
+  background: var(--surface);
+  overflow: hidden;
+}
+/* when the tab bar is hidden (mid-test) the body owns the bottom corners */
+.app-panel > .panel-body:last-child {
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
+.panel-body > main {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain; /* don't hand the scroll back to the page */
+  /* The native bar is a chunky desktop widget that breaks the device
+     illusion. Hidden here and replaced by the overlay thumb below. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.panel-body > main::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* iOS-style overlay scrollbar: invisible at rest, fades in while scrolling */
+.scroll-thumb {
+  position: absolute;
+  right: 3px;
+  width: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 26%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s var(--ease);
+}
+.panel-body[data-scrolling="true"] .scroll-thumb {
+  opacity: 1;
+  transition-duration: 0.12s;
 }
 
 /* On a phone the panel IS the screen — edge to edge, no device frame. */
