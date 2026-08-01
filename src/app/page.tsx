@@ -1,65 +1,91 @@
 import Navbar from "@/components/Navbar";
-import HomeStats from "@/components/HomeStats";
-import Link from "next/link";
+import HomeStats, {
+  HomeDate,
+  HomeSetChip,
+  HomeStartActions,
+} from "@/components/HomeStats";
+import { MARKING, dailyCycleDays } from "@/lib/daily";
+import questionsData from "@/data/questions.json";
+import type { Question } from "@/types";
+
+/** Matches the count TestClient asks pickDailyQuestions / pickRandomQuestions for. */
+const PER_TEST = 10;
+
+const mmss = (s: number) =>
+  `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
 export default function Home() {
+  const questions = questionsData as Question[];
+  const cycleDays = dailyCycleDays(questions, PER_TEST);
+  const minutes = Math.round(MARKING.durationSec / 60);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 max-w-4xl mx-auto px-4 py-12 w-full">
-        <HomeStats />
 
-        <section className="grid md:grid-cols-2 gap-4">
-          <div className="card">
-            <h2 className="font-semibold text-lavender-800 mb-2">How it works</h2>
-            <ul className="text-sm text-lavender-700/80 space-y-2 list-disc pl-4">
-              <li>10 fresh questions drawn from official UPSC CDS English papers</li>
-              <li>10-minute countdown timer</li>
-              <li>+1 for correct · −0.25 for wrong · 0 for skip</li>
-              <li>Instant review with correct answers after submit</li>
-            </ul>
-          </div>
-          <div className="card">
-            <h2 className="font-semibold text-lavender-800 mb-2">Topics covered</h2>
-            <div className="flex flex-wrap gap-2">
-              {[
-                "Synonyms",
-                "Antonyms",
-                "Spotting Errors",
-                "Fill in the Blanks",
-                "Sentence Improvement",
-                "Ordering of Words",
-                "Ordering of Sentences",
-                "Comprehension",
-                "Cloze Test",
-                "Idioms & Phrases",
-                "Prepositions",
-                "Active–Passive",
-                "Direct–Indirect",
-                "One Word Substitution",
-                "Homophones",
-                "Phrasal Verbs",
-              ].map((t) => (
-                <span
-                  key={t}
-                  className="text-xs px-2.5 py-1 rounded-full bg-lavender-100 text-lavender-700 font-medium"
-                >
-                  {t}
-                </span>
-              ))}
+      <main className="shell flex-1 px-4 py-6">
+        <div className="stagger flex flex-col gap-3.5">
+          <header>
+            <HomeDate />
+            <h1 className="mt-0.5 text-[1.6875rem] leading-tight font-extrabold tracking-[-0.025em] text-ink text-balance">
+              Ready for today?
+            </h1>
+          </header>
+
+          <section
+            aria-labelledby="today-heading"
+            className="card flex flex-col items-center gap-4 text-center"
+          >
+            <HomeSetChip cycleDays={cycleDays} />
+
+            {/* decorative preview of the test clock — the live one lives on /test */}
+            <div className="ring-wrap" aria-hidden="true">
+              <svg width="150" height="150" viewBox="0 0 150 150">
+                <circle
+                  className="ring-track"
+                  cx="75"
+                  cy="75"
+                  r="66"
+                  fill="none"
+                  strokeWidth="11"
+                />
+              </svg>
+              <div className="ring-face">
+                <div className="ring-time">{mmss(MARKING.durationSec)}</div>
+                <div className="ring-lab">MINUTES</div>
+              </div>
             </div>
-            <Link
-              href="/history"
-              className="inline-block mt-4 text-sm font-semibold text-lavender-600 hover:text-lavender-800"
-            >
-              View history →
-            </Link>
-          </div>
-        </section>
+
+            <div>
+              <h2 id="today-heading" className="font-bold text-ink">
+                {PER_TEST} questions · {minutes} minutes
+              </h2>
+              <p className="mt-0.5 text-sm text-muted">
+                +{MARKING.correct} correct · −{Math.abs(MARKING.wrong)} wrong ·{" "}
+                {MARKING.skip} blank
+              </p>
+            </div>
+
+            <HomeStartActions />
+          </section>
+
+          <HomeStats />
+
+          <section className="card" aria-labelledby="bank-heading">
+            <h2 id="bank-heading" className="text-[0.9375rem] font-bold text-ink">
+              About the question bank
+            </h2>
+            <p className="mt-1.5 text-sm leading-relaxed text-muted">
+              {questions.length} questions — mostly Synonyms, Antonyms,
+              Comprehension, Idioms and Phrases and Spotting Errors. Only 110 are
+              transcribed from real CDS-1 papers (2015–2018); the rest are
+              hand-written practice items whose year and session labels are
+              placeholders, so treat any single answer as practice rather than an
+              official key.
+            </p>
+          </section>
+        </div>
       </main>
-      <footer className="py-6 text-center text-sm text-lavender-600/70">
-        Powered by official UPSC CDS previous year papers
-      </footer>
     </div>
   );
 }

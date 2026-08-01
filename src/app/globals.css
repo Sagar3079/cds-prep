@@ -1,155 +1,416 @@
 @import "tailwindcss";
 
-@theme {
-  --color-lavender-50: #f8f7ff;
-  --color-lavender-100: #efeafc;
-  --color-lavender-200: #ddd4f7;
-  --color-lavender-300: #c4b5f0;
-  --color-lavender-400: #a78be6;
-  --color-lavender-500: #8b6ad9;
-  --color-lavender-600: #7350c4;
-  --color-lavender-700: #5e3fa3;
-  --color-lavender-800: #4e3585;
-  --color-lavender-900: #412e6c;
+/* ============================================================
+   DESIGN TOKENS
+   Everything is a CSS custom property first, so the whole app
+   themes at the token layer. Tailwind utilities reference these
+   through `@theme inline`, which means a single redefinition
+   under dark mode reskins every utility in the app.
+   ============================================================ */
+:root {
+  --paper: #ffffff;
+  --surface: #f6f7fb;
+  --surface-2: #eef0f7;
+  --ink: #1b1b2f;
+  --muted: #5b6178;   /* 6.0:1 on paper */
+  --line: #e4e7f0;
 
-  --color-success: #16a34a;
-  --color-danger: #dc2626;
-  --color-warn: #d97706;
+  --accent: #2f6bff;      /* fills and buttons only — 4.0:1, not for small text */
+  --accent-ink: #1d4ed8;  /* 5.4:1 — this is the one for blue TEXT */
+  --accent-soft: #e8efff;
+
+  --streak: #ff8a3d;      /* 2.3:1 — fills and icons only, never text */
+  --streak-ink: #b54708;  /* 5.1:1 — streak TEXT */
+  --streak-soft: #fff1e6;
+
+  --ok: #16a34a;
+  --ok-ink: #15803d;
+  --ok-soft: #e8f7ee;
+  --err: #ef4444;
+  --err-ink: #c81e1e;
+  --err-soft: #fdecec;
+  --on-accent: #ffffff;
+
+  --shadow-sm: 0 1px 2px rgba(16, 20, 45, 0.05);
+  --shadow-md: 0 6px 20px -6px rgba(16, 20, 45, 0.12);
+  --shadow-lg: 0 18px 44px -12px rgba(16, 20, 45, 0.2);
+
+  /* --ease: smooth deceleration — hovers, lifts, anything continuous.
+     --spring: slight overshoot — confirmations ONLY (a tick landing, a badge
+     filling, a dialog arriving). On a hover lift it just reads as rubbery. */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  --col: 460px; /* the app column — the layout at every breakpoint */
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #151824;
+    --surface: #0f111a;
+    --surface-2: #1f2333;
+    --ink: #eceef8;
+    --muted: #9aa1bc;
+    --line: #282d40;
+    --accent: #4c7fff;
+    --accent-ink: #9db9ff;
+    --accent-soft: #1b2440;
+    --streak: #ff9752;
+    --streak-ink: #ffb781;
+    --streak-soft: #33220f;
+    --ok: #22c55e;
+    --ok-ink: #5ee092;
+    --ok-soft: #10281b;
+    --err: #f26060;
+    --err-ink: #ff9a9a;
+    --err-soft: #301619;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 6px 20px -6px rgba(0, 0, 0, 0.55);
+    --shadow-lg: 0 18px 44px -12px rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* The in-app toggle stamps data-theme on <html> and must win over the
+   media query in BOTH directions. */
+:root[data-theme="dark"] {
+  --paper: #151824;
+  --surface: #0f111a;
+  --surface-2: #1f2333;
+  --ink: #eceef8;
+  --muted: #9aa1bc;
+  --line: #282d40;
+  --accent: #4c7fff;
+  --accent-ink: #9db9ff;
+  --accent-soft: #1b2440;
+  --streak: #ff9752;
+  --streak-ink: #ffb781;
+  --streak-soft: #33220f;
+  --ok: #22c55e;
+  --ok-ink: #5ee092;
+  --ok-soft: #10281b;
+  --err: #f26060;
+  --err-ink: #ff9a9a;
+  --err-soft: #301619;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 20px -6px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 18px 44px -12px rgba(0, 0, 0, 0.7);
+}
+:root[data-theme="light"] {
+  --paper: #ffffff;
+  --surface: #f6f7fb;
+  --surface-2: #eef0f7;
+  --ink: #1b1b2f;
+  --muted: #5b6178;
+  --line: #e4e7f0;
+  --accent: #2f6bff;
+  --accent-ink: #1d4ed8;
+  --accent-soft: #e8efff;
+  --streak: #ff8a3d;
+  --streak-ink: #b54708;
+  --streak-soft: #fff1e6;
+  --ok: #16a34a;
+  --ok-ink: #15803d;
+  --ok-soft: #e8f7ee;
+  --err: #ef4444;
+  --err-ink: #c81e1e;
+  --err-soft: #fdecec;
+  --shadow-sm: 0 1px 2px rgba(16, 20, 45, 0.05);
+  --shadow-md: 0 6px 20px -6px rgba(16, 20, 45, 0.12);
+  --shadow-lg: 0 18px 44px -12px rgba(16, 20, 45, 0.2);
+}
+
+/* ============================================================
+   TAILWIND THEME
+   `inline` makes these resolve to the custom properties above at
+   use time, so utilities follow the active theme.
+   ============================================================ */
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-streak: var(--streak);
+  --color-streak-ink: var(--streak-ink);
+  --color-streak-soft: var(--streak-soft);
+  --color-ok: var(--ok);
+  --color-ok-ink: var(--ok-ink);
+  --color-ok-soft: var(--ok-soft);
+  --color-err: var(--err);
+  --color-err-ink: var(--err-ink);
+  --color-err-soft: var(--err-soft);
+  --color-on-accent: var(--on-accent);
+
+  --color-success: var(--ok);
+  --color-danger: var(--err);
+  --color-warn: var(--streak-ink);
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+html {
+  color-scheme: light dark;
+}
 body {
-  background: linear-gradient(160deg, #f8f7ff 0%, #f3efff 40%, #ffffff 100%);
-  min-height: 100vh;
-  color: #1e1b2e;
+  background: var(--surface);
+  color: var(--ink);
+  min-height: 100dvh;
+  font-variant-numeric: tabular-nums;
+}
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
+/* the single column the whole app lives in, at every breakpoint */
+.shell {
+  width: 100%;
+  max-width: var(--col);
+  margin-inline: auto;
+}
+@media (min-width: 768px) {
+  :root { --col: 620px; }
+}
+@media (min-width: 1024px) {
+  :root { --col: 460px; }
+}
+
+/* ============================================================
+   COMPONENTS
+   ============================================================ */
 .card {
-  background: white;
-  border-radius: 1rem;
-  border: 1px solid var(--color-lavender-200);
-  box-shadow: 0 4px 20px -8px rgba(115, 80, 196, 0.15);
-  padding: 1.5rem;
+  background: var(--paper);
+  border-radius: 1.25rem;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  padding: 1.125rem;
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, var(--color-lavender-500), var(--color-lavender-700));
-  color: white;
-  padding: 0.85rem 1.75rem;
-  border-radius: 0.75rem;
-  font-weight: 600;
-  box-shadow: 0 4px 14px -4px rgba(115, 80, 196, 0.5);
-  transition: transform 0.15s, box-shadow 0.15s;
+.btn-primary,
+.btn-ghost {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.55rem;
+  padding: 0.95rem 1.4rem;
+  border-radius: 0.875rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: transform 0.18s var(--ease), box-shadow 0.2s, background 0.2s, opacity 0.2s;
 }
-
-.btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px -4px rgba(115, 80, 196, 0.55);
+.btn-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: 0 6px 18px -6px color-mix(in srgb, var(--accent) 75%, transparent);
 }
-
-.btn-primary:disabled {
-  opacity: 0.5;
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px -8px color-mix(in srgb, var(--accent) 80%, transparent);
+}
+.btn-primary:active:not(:disabled) { transform: translateY(0) scale(0.98); }
+.btn-ghost {
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.btn-ghost:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.btn-primary:disabled,
+.btn-ghost:disabled {
+  opacity: 0.45;
   transform: none;
   cursor: not-allowed;
-}
-
-.btn-ghost {
-  background: white;
-  color: var(--color-lavender-700);
-  border: 1px solid var(--color-lavender-300);
-  padding: 0.65rem 1.25rem;
-  border-radius: 0.75rem;
-  font-weight: 600;
-  transition: background 0.15s;
-}
-
-.btn-ghost:hover {
-  background: var(--color-lavender-100);
+  box-shadow: none;
 }
 
 .option-btn {
   display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
+  align-items: center;
+  gap: 0.8rem;
   width: 100%;
   text-align: left;
-  padding: 0.9rem 1rem;
-  border-radius: 0.75rem;
-  border: 1.5px solid var(--color-lavender-200);
-  background: white;
-  transition: all 0.15s;
+  padding: 0.95rem 1rem;
+  border-radius: 0.875rem;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  transition: transform 0.18s var(--ease), border-color 0.18s, background 0.18s,
+    box-shadow 0.18s;
   cursor: pointer;
 }
-
-.option-btn:hover:not(:disabled) {
-  border-color: var(--color-lavender-400);
-  background: var(--color-lavender-50);
+.option-btn:hover:not(:disabled):not([aria-disabled="true"]) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
 }
-
-.option-btn.selected {
-  border-color: var(--color-lavender-500);
-  background: var(--color-lavender-100);
-  box-shadow: 0 0 0 3px rgba(139, 106, 217, 0.15);
+.option-btn:active:not(:disabled) { transform: translateY(0) scale(0.985); }
+.option-btn.selected,
+.option-btn[aria-checked="true"] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  border-width: 2px;
+  padding: calc(0.95rem - 1px) calc(1rem - 1px);
 }
-
 .option-btn.correct {
-  border-color: var(--color-success);
-  background: #f0fdf4;
+  border-color: var(--ok);
+  border-width: 2px;
+  background: var(--ok-soft);
+  padding: calc(0.95rem - 1px) calc(1rem - 1px);
 }
-
 .option-btn.wrong {
-  border-color: var(--color-danger);
-  background: #fef2f2;
+  border-color: var(--err);
+  border-width: 2px;
+  background: var(--err-soft);
+  padding: calc(0.95rem - 1px) calc(1rem - 1px);
 }
 
-.timer-urgent {
-  color: var(--color-danger);
-  animation: pulse 1s ease-in-out infinite;
+/* the letter badge inside an option */
+.opt-badge {
+  flex: none;
+  width: 1.875rem;
+  height: 1.875rem;
+  border-radius: 0.625rem;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 0.8rem;
+  transition: background 0.2s, color 0.2s, transform 0.3s var(--spring);
+}
+.option-btn[aria-checked="true"] .opt-badge,
+.option-btn.selected .opt-badge {
+  background: var(--accent);
+  color: var(--on-accent);
+  transform: scale(1.06);
+}
+.option-btn.correct .opt-badge { background: var(--ok); color: #fff; }
+.option-btn.wrong .opt-badge { background: var(--err); color: #fff; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+}
+.chip-blue { background: var(--accent-soft); color: var(--accent-ink); }
+.chip-green { background: var(--ok-soft); color: var(--ok-ink); }
+.chip-amber {
+  background: var(--streak-soft);
+  color: var(--streak-ink);
+  border: 1px dashed color-mix(in srgb, var(--streak) 55%, transparent);
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+/* ============================================================
+   TIMER RING
+   ============================================================ */
+.ring-wrap { position: relative; width: 150px; height: 150px; margin-inline: auto; }
+.ring-wrap svg { transform: rotate(-90deg); }
+.ring-track { stroke: var(--surface-2); }
+.ring-prog { stroke: var(--accent); stroke-linecap: round; transition: stroke 0.5s var(--ease); }
+.ring-wrap.warn .ring-prog { stroke: var(--streak); }
+.ring-wrap.crit .ring-prog { stroke: var(--err); animation: ringbeat 1s ease-in-out infinite; }
+@keyframes ringbeat { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+.ring-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  gap: 1px;
 }
+.ring-time { font-size: 2.125rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+.ring-lab { font-size: 0.625rem; font-weight: 700; letter-spacing: 0.14em; color: var(--muted); }
+.ring-wrap.crit .ring-time { color: var(--err-ink); }
 
-/* These are unlayered rules, so a Tailwind `motion-reduce:` utility cannot beat
-   them. The guard has to live here. */
-@media (prefers-reduced-motion: reduce) {
-  .timer-urgent { animation: none; }
-  .progress-dot { transition: none; }
-  .progress-dot.active { transform: none; }
-  .option-btn { transition: none; }
-  .btn-primary:hover { transform: none; }
-}
+.timer-urgent { color: var(--err-ink); animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 
+/* ============================================================
+   PROGRESS DOTS — 10px visual, 24px hit area (WCAG 2.5.8)
+   ============================================================ */
 .progress-dot {
-  width: 0.65rem;
-  height: 0.65rem;
+  width: 0.6875rem;
+  height: 0.6875rem;
   border-radius: 9999px;
-  background: var(--color-lavender-200);
-  transition: all 0.2s;
+  background: var(--surface-2);
+  position: relative;
+  transition: transform 0.3s var(--spring), background 0.3s var(--ease);
+}
+.progress-dot::after { content: ""; position: absolute; inset: -0.4rem; }
+.progress-dot.answered { background: var(--accent); }
+.progress-dot.active { background: var(--streak); transform: scale(1.45); }
+.progress-dot:hover { transform: scale(1.3); }
+.progress-dot.active:hover { transform: scale(1.55); }
+
+/* ============================================================
+   MOTION
+   ============================================================ */
+.flame { transform-origin: 50% 90%; animation: flicker 2.4s ease-in-out infinite; }
+@keyframes flicker {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.09, 0.95) rotate(-3deg); }
+  50% { transform: scale(0.95, 1.07) rotate(2deg); }
+  75% { transform: scale(1.05, 0.98) rotate(-1deg); }
 }
 
-.progress-dot.active {
-  background: var(--color-lavender-500);
-  transform: scale(1.25);
+.fade-up { animation: fadeUp 0.5s var(--ease) both; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.stagger > * { animation: fadeUp 0.5s var(--ease) both; }
+.stagger > *:nth-child(1) { animation-delay: 0.02s; }
+.stagger > *:nth-child(2) { animation-delay: 0.07s; }
+.stagger > *:nth-child(3) { animation-delay: 0.12s; }
+.stagger > *:nth-child(4) { animation-delay: 0.17s; }
+.stagger > *:nth-child(5) { animation-delay: 0.22s; }
+.stagger > *:nth-child(6) { animation-delay: 0.27s; }
+
+.q-in { animation: qin 0.4s var(--ease) both; }
+.q-in.back { animation-name: qinBack; }
+@keyframes qin { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
+@keyframes qinBack { from { opacity: 0; transform: translateX(-18px); } to { opacity: 1; transform: none; } }
+
+.sheet-pop { animation: sheetPop 0.32s var(--spring) both; }
+@keyframes sheetPop {
+  from { opacity: 0; transform: translateY(18px) scale(0.95); }
+  to { opacity: 1; transform: none; }
 }
 
-.progress-dot.answered {
-  background: var(--color-lavender-400);
+/* Unlayered rules, so a Tailwind `motion-reduce:` utility cannot beat them —
+   the guard has to live here. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
 
+/* ============================================================
+   TARGET WORD
+   ============================================================ */
 mark.target-word {
-  background: linear-gradient(180deg, transparent 55%, #ddd4f7 55%);
-  color: var(--color-lavender-800);
-  font-weight: 700;
-  padding: 0 0.15em;
-  border-radius: 0.15em;
-  font-style: italic;
-  text-decoration: underline;
-  text-decoration-color: var(--color-lavender-500);
-  text-underline-offset: 3px;
+  background: var(--streak-soft);
+  color: var(--streak-ink);
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 6px;
+  border-bottom: 2px solid var(--streak);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }

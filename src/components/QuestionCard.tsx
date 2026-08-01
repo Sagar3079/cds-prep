@@ -71,10 +71,16 @@ const UNKNOWN_TRUST: Trust = {
   detail: "This item carries no recognised provenance label. Treat the answer as unverified.",
 };
 
+/**
+ * Tier is carried by the wording first and by the border style second — solid
+ * for the two tiers that trace back to a paper, dashed for the ones that record
+ * nothing about verification. Colour only reinforces; it never carries the
+ * distinction on its own.
+ */
 const TRUST_STYLES: Record<TrustTier, string> = {
-  keyed: "bg-green-50 text-green-800 border-green-600",
-  transcribed: "bg-amber-50 text-amber-900 border-amber-500",
-  unverified: "bg-white text-lavender-700 border-lavender-400 border-dashed",
+  keyed: "chip-green border border-ok",
+  transcribed: "border border-streak-ink",
+  unverified: "chip-amber",
 };
 
 /* ── stem formatting ───────────────────────────────────────────────────────── */
@@ -152,7 +158,7 @@ function renderWithBlanks(text: string): ReactNode {
     part === "______" ? (
       <span
         key={i}
-        className="inline-flex justify-center min-w-[4.5rem] mx-1 border-b-2 border-lavender-500 align-baseline"
+        className="inline-flex justify-center min-w-[4.5rem] mx-1 border-b-2 border-accent align-baseline"
       >
         <span className="sr-only">blank</span>
       </span>
@@ -192,6 +198,24 @@ function stemOptionLabels(stem: string, options: string[]): string[] | null {
 
 /* ── icons ─────────────────────────────────────────────────────────────────── */
 
+/** The selection tick that lands in a chosen option. */
+function TickIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="w-[1.125rem] h-[1.125rem]"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={3}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
+
 function CheckIcon() {
   return (
     <svg viewBox="0 0 20 20" className="w-4 h-4 shrink-0" fill="currentColor" aria-hidden="true">
@@ -210,10 +234,25 @@ function CrossIcon() {
 
 /* ── component ─────────────────────────────────────────────────────────────── */
 
-const OPTION_BASE =
-  "flex flex-wrap items-start gap-x-3 gap-y-1.5 w-full text-left px-4 py-3.5 rounded-xl border-2";
-const OPTION_FOCUS =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lavender-600";
+/**
+ * Review rows repeat `.option-btn`'s geometry and its correct/wrong tones, but
+ * deliberately not the class itself: `.option-btn:hover` outranks
+ * `.option-btn.correct`, so a mouse passing over a finished paper would lift the
+ * row and repaint its green border blue. Nothing here is clickable, so the badge
+ * stays neutral too and the verdict is carried by the icon and the words.
+ */
+const REVIEW_ROW =
+  "flex flex-wrap items-start gap-x-3 gap-y-1.5 w-full text-left rounded-[0.875rem] border-2 px-[0.9375rem] py-[0.8875rem]";
+/** The verdict rides beside the option text while both fit, and drops onto its
+ *  own line below ~400px rather than squeezing the text into a sliver. The
+ *  `basis-40` on the text child is what decides that: flex line-breaking reads
+ *  hypothetical main size, and `min-w-0` alone reports zero and never wraps. */
+const REVIEW_STATUS =
+  "ml-auto shrink-0 flex items-center gap-1 text-xs font-semibold";
+/** `globals.css` already paints a 3px accent ring on `:focus-visible`; this
+ *  restates it on the elements that must never lose it. */
+const FOCUS_RING =
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 export default function QuestionCard({
   question,
@@ -309,24 +348,24 @@ export default function QuestionCard({
   };
 
   return (
-    <div className="card space-y-5">
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <span className="text-xs font-semibold uppercase tracking-wide text-lavender-600">
+    <div className="card space-y-4">
+      {/* A plain div, not <header>: outside a sectioning ancestor a <header>
+          becomes a banner landmark, and the results page stacks ten cards. */}
+      <div className="space-y-2.5">
+        <p className="text-[0.6875rem] font-bold uppercase tracking-[0.08em] text-muted">
           Question {index + 1} of {total}
-        </span>
-        <div className="flex gap-2 text-xs flex-wrap justify-end">
+        </p>
+        <div className="flex flex-wrap gap-1.5">
           {question.topic && (
-            <span className="px-2 py-0.5 rounded-full bg-lavender-100 text-lavender-700">
-              {question.topic}
-            </span>
+            <span className="chip chip-blue uppercase">{question.topic}</span>
           )}
           {fromPaper && (
-            <span className="px-2 py-0.5 rounded-full bg-lavender-50 text-lavender-700 border border-lavender-200">
+            <span className="chip uppercase">
               CDS-{question.session} {question.year}
             </span>
           )}
           <span
-            className={`px-2 py-0.5 rounded-full border font-medium ${TRUST_STYLES[trust.tier]}`}
+            className={`chip uppercase ${TRUST_STYLES[trust.tier]}`}
             title={trust.detail}
           >
             {trust.label}
@@ -334,53 +373,50 @@ export default function QuestionCard({
         </div>
       </div>
 
-      {prompt && (
-        <p className="text-sm text-lavender-700 bg-lavender-50 rounded-lg px-3 py-2">
-          {prompt}
-        </p>
-      )}
-
       {question.passage && (
         <div
           role="region"
           aria-label="Reading passage"
           tabIndex={0}
-          className={`text-sm text-lavender-800/80 bg-lavender-50/70 border border-lavender-200 px-4 py-3 rounded-lg max-h-48 overflow-y-auto leading-relaxed ${OPTION_FOCUS}`}
+          className={`text-sm text-ink bg-surface border border-line px-4 py-3 rounded-xl max-h-48 overflow-y-auto leading-relaxed ${FOCUS_RING}`}
         >
           {question.passage}
         </div>
       )}
 
-      <p
-        id={stemId}
-        className="text-lg font-medium text-lavender-900 leading-snug"
-      >
-        {stemNode}
-      </p>
+      <div className="space-y-1.5">
+        {prompt && <p className="text-sm text-muted leading-snug">{prompt}</p>}
+        <p
+          id={stemId}
+          className="text-[1.3125rem] font-medium text-ink leading-[1.45] text-pretty"
+        >
+          {stemNode}
+        </p>
+      </div>
 
       {question.parts && question.parts.length > 0 && (
         <div className="space-y-1.5">
           {question.parts.map((p) => (
             <div
               key={p.label}
-              className={`flex items-start gap-2.5 px-3 py-2 rounded-lg border ${
+              className={`flex items-start gap-2.5 px-3 py-2 rounded-xl border ${
                 p.fixed
-                  ? "bg-lavender-50/60 border-dashed border-lavender-300"
-                  : "bg-white border-lavender-200"
+                  ? "bg-surface border-dashed border-line"
+                  : "bg-paper border-line"
               }`}
             >
               <span
                 className={`shrink-0 min-w-[2rem] h-6 px-1 rounded-md text-xs font-bold flex items-center justify-center ${
                   p.fixed
-                    ? "bg-lavender-200 text-lavender-700"
-                    : "bg-lavender-600 text-white"
+                    ? "bg-surface-2 text-muted"
+                    : "bg-accent-soft text-accent-ink"
                 }`}
               >
                 {p.label}
               </span>
               <span
-                className={`text-[0.95rem] leading-snug pt-0.5 ${
-                  p.fixed ? "text-lavender-600 italic" : "text-lavender-900"
+                className={`min-w-0 text-[0.95rem] leading-snug pt-0.5 ${
+                  p.fixed ? "text-muted italic" : "text-ink"
                 }`}
               >
                 {p.text}
@@ -412,16 +448,24 @@ export default function QuestionCard({
                 aria-checked={isSelected}
                 aria-disabled={locked || undefined}
                 tabIndex={i === rovingIndex ? 0 : -1}
-                className={`option-btn ${OPTION_FOCUS} ${isSelected ? "selected" : ""}`}
+                className={`option-btn group ${FOCUS_RING}`}
                 onClick={() => {
                   if (!locked) onSelect(i);
                 }}
                 onKeyDown={(e) => onOptionKeyDown(e, i)}
               >
-                <span className="shrink-0 w-8 h-7 rounded-md bg-lavender-100 text-lavender-700 text-sm font-bold flex items-center justify-center">
-                  {labels[i]}
+                <span className="opt-badge">{labels[i]}</span>
+                <span className="flex-1 min-w-0 text-base leading-[1.35] break-words">
+                  {option}
                 </span>
-                <span className="text-[0.95rem] leading-snug pt-0.5">{option}</span>
+                {/* The tick holds its space at all times, so selecting an option
+                    tints and ticks it without reflowing the text beside it. */}
+                <span
+                  aria-hidden="true"
+                  className="shrink-0 text-accent-ink opacity-0 scale-50 transition duration-200 group-aria-checked:opacity-100 group-aria-checked:scale-100"
+                >
+                  <TickIcon />
+                </span>
               </button>
             );
           })}
@@ -429,8 +473,9 @@ export default function QuestionCard({
       )}
 
       {showResult && (
-        <p className="text-xs leading-relaxed text-lavender-800 bg-lavender-50 border border-lavender-200 rounded-lg px-3 py-2">
-          <strong className="font-semibold">{trust.label}.</strong> {trust.detail}
+        <p className="text-xs leading-relaxed text-muted bg-surface border border-line rounded-xl px-3 py-2">
+          <strong className="font-semibold text-ink">{trust.label}.</strong>{" "}
+          {trust.detail}
         </p>
       )}
     </div>
@@ -461,20 +506,20 @@ function ReviewOptions({
           const isCorrect = i === answer;
           const isChosen = selected === i;
 
-          let tone = "border-lavender-200 bg-white";
+          let tone = "border-line bg-paper";
           let status: ReactNode = null;
           if (isCorrect) {
-            tone = "border-green-600 bg-green-50";
+            tone = "border-ok bg-ok-soft";
             status = (
-              <span className="ml-auto flex items-center gap-1 text-xs font-semibold text-green-800">
+              <span className={`${REVIEW_STATUS} text-ok-ink`}>
                 <CheckIcon />
                 {isChosen ? "Correct — your answer" : "Correct answer"}
               </span>
             );
           } else if (isChosen) {
-            tone = "border-red-600 bg-red-50";
+            tone = "border-err bg-err-soft";
             status = (
-              <span className="ml-auto flex items-center gap-1 text-xs font-semibold text-red-700">
+              <span className={`${REVIEW_STATUS} text-err-ink`}>
                 <CrossIcon />
                 Your answer — incorrect
               </span>
@@ -482,11 +527,9 @@ function ReviewOptions({
           }
 
           return (
-            <li key={i} className={`${OPTION_BASE} ${tone}`}>
-              <span className="shrink-0 w-8 h-7 rounded-md bg-lavender-100 text-lavender-700 text-sm font-bold flex items-center justify-center">
-                {labels[i]}
-              </span>
-              <span className="flex-1 min-w-0 text-[0.95rem] leading-snug pt-0.5">
+            <li key={i} className={`${REVIEW_ROW} ${tone}`}>
+              <span className="opt-badge">{labels[i]}</span>
+              <span className="grow shrink basis-40 min-w-0 text-base leading-[1.35] break-words text-ink">
                 {option}
               </span>
               {status}
@@ -495,7 +538,7 @@ function ReviewOptions({
         })}
       </ul>
       {selected === null && (
-        <p className="text-xs font-medium text-lavender-700">
+        <p className="text-xs font-medium text-muted">
           You did not answer this question.
         </p>
       )}

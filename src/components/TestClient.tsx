@@ -114,6 +114,24 @@ function mmss(total: number): string {
   return `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
 }
 
+function ArrowLeftIcon() {
+  return (
+    <svg
+      width="17"
+      height="17"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M19 12H5M11 18l-6-6 6-6" />
+    </svg>
+  );
+}
+
 /** Shown in place of /results when a storage write failed, so a score is never lost. */
 interface FinalScore {
   score: number;
@@ -158,6 +176,8 @@ export default function TestClient({
   const [runId, setRunId] = useState(0);
   const [navOffset, setNavOffset] = useState(0);
   const [focusNonce, setFocusNonce] = useState(0);
+  /** Travel direction, so the question slides in from the side it came from. */
+  const [dir, setDir] = useState<1 | -1>(1);
 
   const questionRef = useRef<HTMLElement>(null);
   const submitRef = useRef<HTMLButtonElement>(null);
@@ -375,7 +395,9 @@ export default function TestClient({
   /* --------------------------------------------------------------- handlers */
 
   const goTo = (i: number) => {
-    setIdx(Math.min(Math.max(0, i), quiz.length - 1));
+    const next = Math.min(Math.max(0, i), quiz.length - 1);
+    setDir(next < idx ? -1 : 1);
+    setIdx(next);
     setFocusNonce((n) => n + 1);
   };
 
@@ -428,44 +450,48 @@ export default function TestClient({
 
   if (!ready) {
     return (
-      <div className="card text-center py-16 text-lavender-600">Loading…</div>
+      <div className="shell">
+        <div className="card text-center py-16 text-muted">Loading…</div>
+      </div>
     );
   }
 
   if (finalScore) {
     return (
-      <div className="card max-w-lg mx-auto text-center py-10">
-        <h1 className="text-2xl font-bold text-lavender-900 mb-1">
-          Test submitted
-        </h1>
-        <p className="text-5xl font-bold text-lavender-600 my-3">
-          {finalScore.score}
-        </p>
-        <p className="text-lavender-700 font-medium mb-4">
-          {finalScore.correct} correct · {finalScore.wrong} wrong ·{" "}
-          {finalScore.skipped} blank · out of {finalScore.total}
-        </p>
-        <p
-          role="alert"
-          className="text-sm bg-lavender-100 text-lavender-700 rounded-lg px-3 py-2 mb-5"
-        >
-          {finalScore.persisted
-            ? "Your browser blocked the review handoff, so the answer-by-answer review isn’t available for this attempt. The score is saved in your history."
-            : "Your browser blocked storage, so this attempt could not be added to your history. Your score is above."}
-        </p>
-        <div className="flex flex-wrap gap-3 justify-center">
-          <Link href="/" className="btn-ghost">
-            Home
-          </Link>
-          {finalScore.handedOff ? (
-            <Link href="/results" className="btn-primary">
-              See full review
+      <div className="shell">
+        <div className="card text-center py-10 fade-up">
+          <h1 className="text-2xl font-extrabold tracking-tight text-ink mb-1">
+            Test submitted
+          </h1>
+          <p className="text-5xl font-extrabold tracking-tight text-accent-ink my-3">
+            {finalScore.score}
+          </p>
+          <p className="text-muted font-medium mb-4">
+            {finalScore.correct} correct · {finalScore.wrong} wrong ·{" "}
+            {finalScore.skipped} blank · out of {finalScore.total}
+          </p>
+          <p
+            role="alert"
+            className="text-sm text-left bg-streak-soft text-streak-ink rounded-xl px-3 py-2 mb-5"
+          >
+            {finalScore.persisted
+              ? "Your browser blocked the review handoff, so the answer-by-answer review isn’t available for this attempt. The score is saved in your history."
+              : "Your browser blocked storage, so this attempt could not be added to your history. Your score is above."}
+          </p>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Link href="/" className="btn-ghost">
+              Home
             </Link>
-          ) : (
-            <Link href="/history" className="btn-primary">
-              History
-            </Link>
-          )}
+            {finalScore.handedOff ? (
+              <Link href="/results" className="btn-primary">
+                See full review
+              </Link>
+            ) : (
+              <Link href="/history" className="btn-primary">
+                History
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -473,82 +499,95 @@ export default function TestClient({
 
   if (quiz.length === 0) {
     return (
-      <div className="card text-center py-16">
-        <p className="text-lavender-800 font-medium mb-2">No questions loaded yet</p>
-        <Link href="/" className="btn-ghost">
-          Back home
-        </Link>
+      <div className="shell">
+        <div className="card text-center py-16">
+          <p className="text-ink font-semibold mb-3">No questions loaded yet</p>
+          <Link href="/" className="btn-ghost">
+            Back home
+          </Link>
+        </div>
       </div>
     );
   }
 
   if (!started) {
     return (
-      <div className="card max-w-lg mx-auto text-center py-10">
-        <h1 className="text-2xl font-bold text-lavender-900 mb-2">
-          {isRandom ? "Random Quiz" : "Today's Test"}
-        </h1>
-        <p className="text-lavender-700/80 mb-1">
-          {isRandom ? "New questions & shuffled options every time" : date}
-        </p>
-        <p className="text-sm text-lavender-600 mb-6">
-          {quiz.length} questions · {MARKING.durationSec / 60} min · +
-          {MARKING.correct} / −{penalty}
-        </p>
-        {!isRandom && alreadyDone && (
-          <p className="text-sm bg-lavender-100 text-lavender-700 rounded-lg px-3 py-2 mb-4">
-            Previous score today: <strong>{alreadyDone.score}</strong> (
-            {alreadyDone.correct}/{alreadyDone.total} correct)
+      <div className="shell">
+        <div className="card text-center py-10 fade-up">
+          <h1 className="text-2xl font-extrabold tracking-tight text-ink mb-2">
+            {isRandom ? "Random Quiz" : "Today's Test"}
+          </h1>
+          <p className="text-muted mb-3">
+            {isRandom ? "New questions & shuffled options every time" : date}
           </p>
-        )}
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button type="button" className="btn-primary" onClick={start}>
-            Begin test
-          </button>
-          {isRandom && (
-            <button
-              type="button"
-              className="btn-ghost"
-              onClick={() => setRunId((n) => n + 1)}
-            >
-              Shuffle again
-            </button>
+          <div className="flex flex-wrap gap-2 justify-center mb-6">
+            <span className="chip chip-blue">{quiz.length} QUESTIONS</span>
+            <span className="chip">{MARKING.durationSec / 60} MINUTES</span>
+            <span className="chip chip-amber">
+              +{MARKING.correct} / −{penalty}
+            </span>
+          </div>
+          {!isRandom && alreadyDone && (
+            <p className="text-sm bg-accent-soft text-accent-ink rounded-xl px-3 py-2 mb-4">
+              Previous score today: <strong>{alreadyDone.score}</strong> (
+              {alreadyDone.correct}/{alreadyDone.total} correct)
+            </p>
           )}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button type="button" className="btn-primary" onClick={start}>
+              Begin test
+            </button>
+            {isRandom && (
+              <button
+                type="button"
+                className="btn-ghost"
+                onClick={() => setRunId((n) => n + 1)}
+              >
+                Shuffle again
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
   }
 
   const q = quiz[idx];
+  const onLast = idx === quiz.length - 1;
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-baseline justify-between gap-3">
-        <h1 className="text-lg font-bold text-lavender-900">
+    <div className="shell space-y-4">
+      <div className="flex items-baseline justify-between gap-3 flex-wrap">
+        <h1 className="text-lg font-extrabold tracking-tight text-ink">
           {isRandom ? "Random Quiz" : "Today's Test"}
         </h1>
-        <p className="text-xs text-lavender-600">
+        <p className="text-xs text-muted">
           {isRandom ? "" : `${date} · `}+{MARKING.correct} / −{penalty}
         </p>
       </div>
 
       {resumed && (
-        <p className="text-xs text-lavender-700 bg-lavender-100 rounded-lg px-3 py-2">
+        <p className="text-xs text-accent-ink bg-accent-soft rounded-xl px-3 py-2">
           Resumed the test you had in progress — the clock kept running.
         </p>
       )}
 
-      {/* Offset is measured from the navbar, not guessed: a hardcoded value
+      {/* Ring, dots and the progress line ride together at the top of the run.
+          Offset is measured from the navbar, not guessed: a hardcoded value
           leaves a see-through gap the moment the navbar's height changes. */}
       <div
         style={{ top: navOffset }}
-        className="flex items-center justify-between gap-4 sticky z-40 bg-lavender-50/95 backdrop-blur py-3 -mx-1 px-1"
+        className="card sticky z-40 flex flex-col items-center gap-3"
       >
+        <Timer seconds={seconds} total={MARKING.durationSec} />
+
         <div
           role="group"
           aria-label="Jump to question"
-          className="flex gap-0.5 flex-wrap"
+          className="flex flex-wrap justify-center items-center gap-[13px]"
         >
+          {/* 11px dot, 24px hit area from .progress-dot::after — the 13px gap
+              keeps neighbouring hit areas from overlapping (WCAG 2.5.8). */}
           {quiz.map((_, i) => (
             <button
               key={i}
@@ -558,104 +597,121 @@ export default function TestClient({
               aria-label={`Question ${i + 1}, ${
                 answers[i] !== null ? "answered" : "not answered"
               }`}
-              className="w-6 h-6 flex items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-lavender-600"
-            >
-              <span
-                aria-hidden="true"
-                className={`progress-dot ${i === idx ? "active" : ""} ${
-                  answers[i] !== null
-                    ? "answered"
-                    : "border border-lavender-400"
-                }`}
-              />
-            </button>
+              className={`progress-dot p-0 ${i === idx ? "active" : ""} ${
+                answers[i] !== null ? "answered" : ""
+              }`}
+            />
           ))}
         </div>
-        <Timer seconds={seconds} />
+
+        <p className="text-sm text-muted text-center">
+          Question {idx + 1} of {quiz.length} · {answered} answered
+        </p>
       </div>
 
       <section
         ref={questionRef}
         tabIndex={-1}
         aria-labelledby="current-question"
-        className="rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-lavender-500 focus-visible:ring-offset-2"
       >
         <h2 id="current-question" className="sr-only">
           Question {idx + 1} of {quiz.length}
         </h2>
-        <QuestionCard
-          question={q}
-          index={idx}
-          total={quiz.length}
-          selected={answers[idx]}
-          onSelect={(opt) => {
-            setAnswers((prev) => {
-              const next = [...prev];
-              next[idx] = opt;
-              return next;
-            });
-          }}
-        />
+        {/* Keyed on idx so the slide replays on every move; `.back` flips it
+            when travelling backwards. */}
+        <div key={idx} className={`q-in${dir < 0 ? " back" : ""}`}>
+          <QuestionCard
+            question={q}
+            index={idx}
+            total={quiz.length}
+            selected={answers[idx]}
+            onSelect={(opt) => {
+              setAnswers((prev) => {
+                const next = [...prev];
+                next[idx] = opt;
+                return next;
+              });
+            }}
+          />
+        </div>
       </section>
 
-      <div className="flex items-center justify-between gap-3">
-        <button
-          type="button"
-          className="btn-ghost"
-          disabled={idx === 0}
-          onClick={() => goTo(idx - 1)}
-        >
-          ← Prev
-        </button>
-        <button
-          type="button"
-          className="btn-ghost text-lavender-500"
-          onClick={() => {
-            setAnswers((prev) => {
-              const next = [...prev];
-              next[idx] = null;
-              return next;
-            });
-          }}
-        >
-          Clear
-        </button>
-        <button
-          type="button"
-          className="btn-primary"
-          disabled={idx === quiz.length - 1}
-          onClick={() => goTo(idx + 1)}
-        >
-          Next →
-        </button>
-      </div>
+      {/* Sticky, and Submit is in it on every question — not only the last. */}
+      <div className="sticky bottom-0 z-40 -mx-1 px-1 pt-3 pb-3 border-t border-line bg-paper/95 backdrop-blur">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs mb-2.5">
+          <span className="flex items-center gap-2">
+            <span
+              className={`font-bold ${
+                blanks.length > 0 ? "text-streak-ink" : "text-ok-ink"
+              }`}
+            >
+              {blanks.length > 0
+                ? `${blanks.length} still blank`
+                : `All ${quiz.length} answered`}
+            </span>
+            {/* Un-answering is a scoring decision, not an undo: a blank costs
+                nothing where a wrong guess costs {penalty}. It lives here
+                rather than in the button row, which is spoken for. */}
+            {answers[idx] !== null && (
+              <button
+                type="button"
+                className="text-muted hover:text-ink underline underline-offset-2 px-1.5 py-1.5 -my-1.5"
+                aria-label={`Clear answer to question ${idx + 1}`}
+                onClick={() => {
+                  setAnswers((prev) => {
+                    const next = [...prev];
+                    next[idx] = null;
+                    return next;
+                  });
+                }}
+              >
+                Clear
+              </button>
+            )}
+          </span>
+          <span className="text-muted">
+            Blank scores {MARKING.skip} · wrong costs {penalty}
+          </span>
+        </div>
 
-      {/* Submit is reachable from every question, not only the last one. */}
-      <div className="card flex flex-col sm:flex-row items-center justify-between gap-3 py-4">
-        <p className="text-sm text-lavender-700">
-          <strong>{answered}</strong> of {quiz.length} answered
-          {blanks.length > 0 && (
-            <>
-              {" · "}
-              <span className="font-semibold text-warn">
-                {blanks.length} blank
-              </span>
-            </>
-          )}
-        </p>
-        <button
-          ref={submitRef}
-          type="button"
-          className="btn-primary"
-          onClick={requestSubmit}
-        >
-          Submit test
-        </button>
+        {/* Three buttons at 360px: the icon-only Prev and the short labels keep
+            the row near 260px against ~328px available. flex-wrap is the
+            backstop if a wider font pushes it over. */}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            className="btn-ghost"
+            disabled={idx === 0}
+            aria-label="Previous question"
+            title="Previous question"
+            onClick={() => goTo(idx - 1)}
+          >
+            <ArrowLeftIcon />
+          </button>
+          <button
+            type="button"
+            className="btn-primary flex-1 whitespace-nowrap"
+            disabled={onLast}
+            aria-label="Next question"
+            onClick={() => goTo(idx + 1)}
+          >
+            Next
+          </button>
+          <button
+            ref={submitRef}
+            type="button"
+            className={`${onLast ? "btn-primary flex-1" : "btn-ghost"} whitespace-nowrap`}
+            aria-label="Submit test"
+            onClick={requestSubmit}
+          >
+            Submit
+          </button>
+        </div>
       </div>
 
       {confirmOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-lavender-900/40 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/50 backdrop-blur-sm"
           onClick={(e) => {
             if (e.target === e.currentTarget) setConfirmOpen(false);
           }}
@@ -667,36 +723,60 @@ export default function TestClient({
             aria-labelledby="confirm-title"
             aria-describedby="confirm-desc"
             onKeyDown={onDialogKeyDown}
-            className="card w-full max-w-sm text-left"
+            className="card sheet-pop w-full max-w-sm text-left"
           >
             <h2
               id="confirm-title"
-              className="text-lg font-bold text-lavender-900 mb-2"
+              className="text-lg font-extrabold tracking-tight text-ink mb-2"
             >
-              Submit with {blanks.length} unanswered?
+              {blanks.length} question{blanks.length === 1 ? "" : "s"} still
+              blank
             </h2>
-            <p id="confirm-desc" className="text-sm text-lavender-700 mb-5">
-              {blanks.length === 1
-                ? `Question ${blanks[0] + 1} is still blank.`
-                : `${blanks.length} questions are still blank: ${blanks
-                    .map((b) => b + 1)
-                    .join(", ")}.`}{" "}
-              A blank scores {MARKING.skip}; a wrong answer costs {penalty}. You
-              still have {mmss(seconds)} left.
+            <p id="confirm-desc" className="text-sm text-muted mb-3">
+              {/* The pills below carry this visually; the sentence keeps it in
+                  the description a screen reader reads on open. */}
+              <span className="sr-only">
+                {blanks.length === 1
+                  ? `Question ${blanks[0] + 1} is still blank. `
+                  : `Questions ${blanks
+                      .map((b) => b + 1)
+                      .join(", ")} are still blank. `}
+              </span>
+              A blank scores {MARKING.skip}; a wrong answer costs {penalty} —
+              only answer if you can rule out two options. You still have{" "}
+              {mmss(seconds)} left.
             </p>
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div aria-hidden="true" className="flex flex-wrap gap-1.5 mb-4">
+              {blanks.map((b) => (
+                <span
+                  key={b}
+                  className="min-w-7 h-7 px-1.5 grid place-items-center rounded-lg bg-streak-soft text-streak-ink text-xs font-extrabold"
+                >
+                  {b + 1}
+                </span>
+              ))}
+            </div>
+            <div className="flex flex-col gap-2">
               <button
                 ref={keepWorkingRef}
                 type="button"
-                className="btn-ghost"
+                className="btn-primary w-full"
                 onClick={() => setConfirmOpen(false)}
               >
                 Keep working
               </button>
-              <button type="button" className="btn-ghost" onClick={reviewBlanks}>
+              <button
+                type="button"
+                className="btn-ghost w-full"
+                onClick={reviewBlanks}
+              >
                 Go to first blank
               </button>
-              <button type="button" className="btn-primary" onClick={finalize}>
+              <button
+                type="button"
+                className="btn-ghost w-full"
+                onClick={finalize}
+              >
                 Submit anyway
               </button>
             </div>

@@ -94,19 +94,45 @@ Use these proactively — don't wait to be asked.
 | --- | --- |
 | **`impeccable`** | The design layer. Invoke before writing UI code, not after. `/impeccable craft` for new surfaces, `/impeccable polish` and `/impeccable audit` on existing ones, `/impeccable critique` when a screen feels generic. This is the primary design authority in this repo. |
 | **`frontend-design`** | Taste and UX writing. Brainstorm a token system and critique the plan *before* coding. Its anti-pattern list (cream+serif+terracotta, near-black+acid-green, broadsheet hairline layouts) is a hard no. |
-
-**Design direction — the answer sheet, not a SaaS dashboard.** The approved mockup lives
-at https://www.figma.com/design/Lc1YFPfOhD6eGUlxYygkGQ (frames 01–06, with a `CDS Tokens`
-variable collection). The visual language is the OMR answer sheet this exam actually
-uses: booklet bands, T.B.C. codes, serial numbers, bubble grids. Deep navy ink
-(`#0A1628`) on cool paper (`#F2F4F7`), one saffron signal (`#E8801A`), plus semantic
-correct/wrong. The timer is the signature element.
-
-The shipped code is still on the old lavender palette — migrating it to these tokens is
-open work. When you touch a screen, move it toward the mockup rather than extending the
-lavender starter look. Note `#5B6B85` muted grey fails AA on the navy bands; use the
-`on-ink-muted` token (`#97A8C4`, 6.2:1) for text on dark.
 | **`ui-design`** — web skills only | Reference depth: `design-system-patterns`, `visual-design-foundations`, `responsive-design`, `web-component-design`, `interaction-design`, `accessibility-compliance`. Commands: `/ui-design:design-review`, `/ui-design:create-component`, `/ui-design:accessibility-audit`. |
+
+## Design system
+
+`src/app/globals.css` is the source of truth, not Figma. Every colour is a CSS custom
+property; Tailwind reads them through `@theme inline`, so redefining a token under dark
+mode reskins every utility in the app. Semantic utilities: `paper surface surface-2 ink
+muted line accent accent-ink accent-soft streak streak-ink streak-soft ok ok-ink ok-soft
+err err-ink err-soft on-accent`.
+
+The direction is bright and gamified — a mobile-first column that stays the app at every
+breakpoint while the page grows around it. `.shell` is that column (460 / 620 / 460).
+
+### Contrast rules — not negotiable
+
+- `accent` `#2F6BFF` is **4.0:1**. Fills and buttons only. Blue *text* uses `accent-ink`.
+- `streak` `#FF8A3D` is **2.3:1**. Fills and icons only, never text. Orange *text* uses
+  `streak-ink`.
+
+### Motion
+
+`--ease` for hovers, lifts, anything continuous. `--spring` (slight overshoot) for
+confirmations **only** — a tick landing, a badge filling, a dialog arriving. Overshoot on
+a hover lift reads as rubbery. `globals.css` carries a global `prefers-reduced-motion`
+guard that neutralises all CSS animation and transition, so components must not add their
+own guards for CSS-driven effects. JS-driven animation (the results confetti) still has
+to check `matchMedia` itself.
+
+### Two traps
+
+- The component classes in `globals.css` are **unlayered**, so they beat anything in
+  `@layer utilities`. A Tailwind padding utility will not override `.card` — build from
+  raw utilities instead when you need different padding.
+- The old `lavender-*` palette is **gone**. If you see it in a diff or an older file,
+  it will render as an unknown utility with no style — replace it with a semantic name.
+
+Figma (https://www.figma.com/design/Lc1YFPfOhD6eGUlxYygkGQ, page `v2 — Responsive`) holds
+the static frames this was built from. The `v1 — archived` page is an abandoned navy
+direction — ignore it.
 
 Accessibility is not optional here: this is a timed test taken under pressure. Visible
 keyboard focus, correct radio-group semantics on `QuestionCard`, an accessible live

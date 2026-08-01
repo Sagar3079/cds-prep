@@ -9,6 +9,20 @@ import { useEffect, useState } from "react";
  */
 const ANNOUNCE_AT = [300, 120, 60, 30, 0];
 
+/**
+ * Ring geometry. r=66 inside a 150px box leaves the 11px stroke clear of the
+ * edge; the dash array is the full circumference so `stroke-dashoffset` alone
+ * drives the sweep.
+ */
+const BOX = 150;
+const RADIUS = 66;
+const STROKE = 11;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+
+/** Ring turns `streak` under two minutes and `err` under one. */
+const WARN_AT = 120;
+const CRIT_AT = 60;
+
 function announcementFor(mark: number): string {
   if (mark === 0) return "Time is up. Your test is being submitted.";
   if (mark >= 60) {
@@ -27,29 +41,25 @@ function spokenTime(total: number): string {
 }
 
 /**
- * `.timer-urgent` (globals.css) runs `pulse 1s infinite` unconditionally, and a
- * plain class in an unlayered stylesheet cannot be overridden by a Tailwind
- * `motion-reduce:` utility, so the guard has to happen here: when the user asks
- * for reduced motion we swap the animated class for a static red.
+ * The countdown ring.
+ *
+ * `total` comes from the caller (which reads `MARKING.durationSec`) so the run
+ * length is never restated here. Nothing about the ring is animated from JS:
+ * the colour change and the critical pulse are `.ring-prog` / `.ring-wrap.crit`
+ * in globals.css, which sit behind that file's global
+ * `prefers-reduced-motion` guard — so no motion query is needed in this
+ * component.
  */
-function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setReduced(e.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-  return reduced;
-}
-
-export default function Timer({ seconds }: { seconds: number }) {
+export default function Timer({
+  seconds,
+  total,
+}: {
+  seconds: number;
+  total: number;
+}) {
   const left = Math.max(0, seconds);
   const mins = Math.floor(left / 60);
   const secs = left % 60;
-  const urgent = left <= 60;
-  const reducedMotion = usePrefersReducedMotion();
 
   const [note, setNote] = useState("");
   // Mounting mid-run (a restored attempt) must not replay warnings already passed.
@@ -67,26 +77,51 @@ export default function Timer({ seconds }: { seconds: number }) {
     setNote(announcementFor(Math.min(...due)));
   }, [left, announced]);
 
+  const frac = total > 0 ? Math.min(1, Math.max(0, left / total)) : 0;
+  const urgency = left <= CRIT_AT ? " crit" : left <= WARN_AT ? " warn" : "";
+
   return (
-    <div className="flex items-center gap-2">
-      <span
-        role="timer"
-        aria-label={spokenTime(left)}
-        className={`text-xl font-bold tabular-nums tracking-wider ${
-          urgent
-            ? reducedMotion
-              ? "text-danger"
-              : "timer-urgent"
-            : "text-lavender-700"
-        }`}
-      >
-        <span aria-hidden="true">
-          {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
-        </span>
-      </span>
+    <>
+      <div className={`ring-wrap${urgency}`}>
+        <svg
+          width={BOX}
+          height={BOX}
+          viewBox={`0 0 ${BOX} ${BOX}`}
+          aria-hidden="true"
+        >
+          <circle
+            className="ring-track"
+            cx={BOX / 2}
+            cy={BOX / 2}
+            r={RADIUS}
+            fill="none"
+            strokeWidth={STROKE}
+          />
+          <circle
+            className="ring-prog"
+            cx={BOX / 2}
+            cy={BOX / 2}
+            r={RADIUS}
+            fill="none"
+            strokeWidth={STROKE}
+            strokeDasharray={CIRCUMFERENCE}
+            strokeDashoffset={CIRCUMFERENCE * (1 - frac)}
+          />
+        </svg>
+        <div className="ring-face">
+          <div className="ring-time" role="timer" aria-label={spokenTime(left)}>
+            <span aria-hidden="true">
+              {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
+            </span>
+          </div>
+          <div className="ring-lab">REMAINING</div>
+        </div>
+      </div>
+      {/* Separate from the digits on purpose: only the discrete marks above are
+          ever spoken, so the reader is not interrupted every second. */}
       <p aria-live="polite" aria-atomic="true" className="sr-only">
         {note}
       </p>
-    </div>
+    </>
   );
 }

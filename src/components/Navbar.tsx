@@ -1,36 +1,25 @@
 import Link from "next/link";
+import StreakChip from "./StreakChip";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Navbar() {
   return (
-    <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-lavender-200">
-      <div className="max-w-4xl mx-auto px-4 py-3.5 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-lavender-400 to-lavender-600 flex items-center justify-center text-white text-sm font-bold shadow-sm">
+    <nav
+      aria-label="Main"
+      className="sticky top-0 z-50 bg-paper/90 backdrop-blur border-b border-line"
+    >
+      {/* flex-wrap is load-bearing: without it this row overflowed at 360px */}
+      <div className="shell px-4 py-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <Link href="/" className="flex items-center gap-2.5 min-w-0">
+          <span className="w-8 h-8 shrink-0 rounded-[0.625rem] bg-accent text-on-accent grid place-items-center text-sm font-extrabold">
             C
           </span>
-          <span className="text-lg font-bold text-lavender-800 group-hover:text-lavender-600 transition">
-            CDS English Prep
-          </span>
+          <span className="font-bold text-ink tracking-tight truncate">CDS English</span>
         </Link>
-        <div className="flex gap-1 text-sm font-medium">
-          <Link
-            href="/test"
-            className="px-3 py-1.5 rounded-lg text-lavender-700 hover:bg-lavender-100 transition"
-          >
-            Daily
-          </Link>
-          <Link
-            href="/test?mode=random"
-            className="px-3 py-1.5 rounded-lg text-lavender-700 hover:bg-lavender-100 transition"
-          >
-            Random
-          </Link>
-          <Link
-            href="/history"
-            className="px-3 py-1.5 rounded-lg text-lavender-700 hover:bg-lavender-100 transition"
-          >
-            History
-          </Link>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <StreakChip />
+          <ThemeToggle />
         </div>
       </div>
     </nav>
