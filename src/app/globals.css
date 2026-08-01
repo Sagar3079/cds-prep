@@ -555,9 +555,9 @@ mark.target-word {
   transform-style: preserve-3d;
   transition: transform 0.6s var(--ease), opacity 0.4s var(--ease);
 }
-.potter__body  { left: 6%;  bottom: 0;   width: 88%;  height: 58%; transform: translateZ(0); }
-.potter__head  { left: 10%; top: 0;      width: 80%;  height: 62%; }
-.potter__scarf { left: 20%; top: 44%;    width: 60%;  height: 40%; transform: translateZ(10px);
+.potter__body  { left: 4%;  bottom: 0;   width: 92%;  height: 46%; transform: translateZ(0); }
+.potter__head  { left: 4%;  top: 0;      width: 92%;  height: 66%; }
+.potter__scarf { left: 22%; top: 52%;    width: 56%;  height: 38%; transform: translateZ(10px);
                  transform-origin: 50% 10%; animation: potterScarf 3.6s ease-in-out infinite; }
 @keyframes potterScarf {
   0%, 100% { transform: translateZ(10px) rotateZ(0deg); }
@@ -565,12 +565,14 @@ mark.target-word {
   70%      { transform: translateZ(10px) rotateZ(-3deg); }
 }
 .potter__hands {
-  left: 0; bottom: -6%; width: 100%; height: 18%;
-  transform: translateZ(24px) translateY(60%);
+  left: -4%; bottom: 30%; width: 108%; height: 15%;
+  transform: translateZ(26px) translateY(60%);
   opacity: 0;
 }
 /* only grips the ledge when he is actually perched on one */
-.potter--peek .potter__hands { opacity: 1; transform: translateZ(24px) translateY(0); }
+.potter--peek .potter__hands,
+.potter--thinking .potter__hands,
+.potter--impressed .potter__hands { opacity: 1; transform: translateZ(26px) translateY(0); }
 
 .potter__cheeks { opacity: 0; transition: opacity 0.45s var(--ease); }
 .potter--excited .potter__cheeks,
@@ -594,42 +596,51 @@ mark.target-word {
   50%      { transform: translateY(-14%) rotateZ(3deg); }
 }
 
-/* ---- the perch: half behind the card, half above it ---- */
+/* ---- the perch: he leans OVER the card's top edge, not above it ----
+   Roughly the lower 45% of him sits behind the card. The occlusion is real
+   z-order inside the card's stacking context, not a mask, so it holds at any
+   card height. */
 .potter-perch {
   position: absolute;
-  right: 18px;
-  bottom: 100%;
-  /* Below the card, so his lower half is genuinely occluded by it rather
-     than faked with a mask. */
+  right: 10px;
+  bottom: calc(100% - 34px);
   z-index: 0;
-  margin-bottom: -22px;
   transition: transform 0.7s var(--ease);
 }
+/* he tips forward into the card he is reading */
+.potter-perch .potter__scene { transform: rotateZ(-6deg); }
+.potter-perch .potter--thinking .potter__scene { transform: rotateZ(-9deg) translateX(-3%); }
 
-/* ---- thought bubble ---- */
+/* ---- thought bubble ----
+   `width: max-content` is load-bearing. An absolutely positioned box with only
+   `right` set gets a shrink-to-fit width bounded by the containing block's
+   edge — and the container here is only as wide as Potter, so the text
+   collapsed into a one-word column. */
 .potter-thought {
   position: absolute;
-  right: calc(100% + 8px);
-  bottom: 34%;
-  max-width: 178px;
-  padding: 9px 12px;
+  right: calc(100% - 6px);
+  bottom: 46%;
+  width: max-content;
+  max-width: 172px;
+  padding: 8px 11px;
   border-radius: 14px 14px 4px 14px;
   background: var(--paper);
   border: 1px solid var(--line);
   box-shadow: var(--shadow-md);
   font-size: 0.75rem;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.4;
   color: var(--ink);
   text-wrap: balance;
+  z-index: 2;
   transform-origin: 100% 100%;
   animation: thoughtIn 0.45s var(--spring) both;
 }
 .potter-thought::after {
   content: "";
   position: absolute;
-  right: 10px; bottom: -7px;
-  width: 9px; height: 9px;
+  right: 12px; bottom: -6px;
+  width: 8px; height: 8px;
   border-radius: 50%;
   background: var(--paper);
   border: 1px solid var(--line);
@@ -638,12 +649,8 @@ mark.target-word {
   from { opacity: 0; transform: scale(0.7) translateY(8px); }
   to   { opacity: 1; transform: none; }
 }
-.potter-thought[data-leaving="true"] {
-  animation: thoughtOut 0.28s var(--ease) both;
-}
-@keyframes thoughtOut {
-  to { opacity: 0; transform: scale(0.85) translateY(4px); }
-}
+.potter-thought[data-leaving="true"] { animation: thoughtOut 0.28s var(--ease) both; }
+@keyframes thoughtOut { to { opacity: 0; transform: scale(0.85) translateY(4px); } }
 
 /* ---- the reviewer: rides the scroll down the answer list ---- */
 .potter-rider {

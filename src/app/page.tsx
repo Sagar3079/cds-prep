@@ -30,46 +30,50 @@ export default function Home() {
           </h1>
         </header>
 
-        {/* `relative` is Potter's anchor: he perches on this card's top edge,
-            and the card paints over his lower half. `isolate` keeps that
-            overlap inside this card's stacking context. */}
-        <section
-          aria-labelledby="today-heading"
-          className="card relative isolate flex flex-col items-center gap-4 text-center"
-        >
+        {/* Potter is a PRECEDING SIBLING of the card, not a child. A child
+            cannot be occluded by its own parent — the parent's background
+            paints beneath its children. As an earlier sibling in the same
+            stacking context, the card (z-10) genuinely covers his lower half. */}
+        <div className="relative">
           <PotterPerch />
-          <HomeSetChip cycleDays={cycleDays} />
 
-          {/* decorative preview of the test clock — the live one lives on /test */}
-          <div className="ring-wrap" aria-hidden="true">
-            <svg width="150" height="150" viewBox="0 0 150 150">
-              <circle
-                className="ring-track"
-                cx="75"
-                cy="75"
-                r="66"
-                fill="none"
-                strokeWidth="11"
-              />
-            </svg>
-            <div className="ring-face">
-              <div className="ring-time">{mmss(MARKING.durationSec)}</div>
-              <div className="ring-lab">MINUTES</div>
+          <section
+            aria-labelledby="today-heading"
+            className="card relative z-10 flex flex-col items-center gap-4 text-center"
+          >
+            <HomeSetChip cycleDays={cycleDays} />
+
+            {/* decorative preview of the test clock — the live one lives on /test */}
+            <div className="ring-wrap" aria-hidden="true">
+              <svg width="150" height="150" viewBox="0 0 150 150">
+                <circle
+                  className="ring-track"
+                  cx="75"
+                  cy="75"
+                  r="66"
+                  fill="none"
+                  strokeWidth="11"
+                />
+              </svg>
+              <div className="ring-face">
+                <div className="ring-time">{mmss(MARKING.durationSec)}</div>
+                <div className="ring-lab">MINUTES</div>
+              </div>
             </div>
-          </div>
 
-          <div>
-            <h2 id="today-heading" className="font-bold text-ink">
-              {PER_TEST} questions · {minutes} minutes
-            </h2>
-            <p className="mt-0.5 text-sm text-muted">
-              +{MARKING.correct} correct · −{Math.abs(MARKING.wrong)} wrong ·{" "}
-              {MARKING.skip} blank
-            </p>
-          </div>
+            <div>
+              <h2 id="today-heading" className="font-bold text-ink">
+                {PER_TEST} questions · {minutes} minutes
+              </h2>
+              <p className="mt-0.5 text-sm text-muted">
+                +{MARKING.correct} correct · −{Math.abs(MARKING.wrong)} wrong ·{" "}
+                {MARKING.skip} blank
+              </p>
+            </div>
 
-          <HomeStartActions />
-        </section>
+            <HomeStartActions />
+          </section>
+        </div>
 
         <HomeStats />
 

@@ -629,12 +629,11 @@ export default function TestClient({
           Question {idx + 1} of {quiz.length}
         </h2>
         {/* Keyed on idx so the slide replays on every move; `.back` flips it
-            when travelling backwards. `relative isolate` anchors Potter to the
-            question card's top edge. */}
-        <div
-          key={idx}
-          className={`relative isolate q-in${dir < 0 ? " back" : ""}`}
-        >
+            when travelling backwards.
+            Potter is a preceding SIBLING of the question, and the question is
+            lifted to z-10 — a child can never be occluded by its own parent,
+            because the parent's background paints beneath its children. */}
+        <div key={idx} className={`relative q-in${dir < 0 ? " back" : ""}`}>
           <PotterCoach
             index={idx}
             total={quiz.length}
@@ -642,19 +641,21 @@ export default function TestClient({
             secondsLeft={seconds}
             justAnswered={answers[idx] !== null}
           />
-          <QuestionCard
-            question={q}
-            index={idx}
-            total={quiz.length}
-            selected={answers[idx]}
-            onSelect={(opt) => {
-              setAnswers((prev) => {
-                const next = [...prev];
-                next[idx] = opt;
-                return next;
-              });
-            }}
-          />
+          <div className="relative z-10">
+            <QuestionCard
+              question={q}
+              index={idx}
+              total={quiz.length}
+              selected={answers[idx]}
+              onSelect={(opt) => {
+                setAnswers((prev) => {
+                  const next = [...prev];
+                  next[idx] = opt;
+                  return next;
+                });
+              }}
+            />
+          </div>
         </div>
       </section>
 

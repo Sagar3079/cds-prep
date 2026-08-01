@@ -62,7 +62,14 @@ export default function PotterPerch() {
   return (
     <div ref={hostRef} className="potter-perch">
       <div className="relative">
-        <Potter mood={line.mood === "idle" ? "peek" : line.mood} look={look} size={92} />
+        {/* lookY is negative: he is leaning over a ledge, so he is looking DOWN
+            into the card, not out at the reader. */}
+        <Potter
+          mood={line.mood === "idle" ? "peek" : line.mood}
+          look={look}
+          lookY={-0.75}
+          size={104}
+        />
         <p className="potter-thought">{line.text}</p>
       </div>
     </div>
