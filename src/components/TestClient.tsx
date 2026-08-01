@@ -12,11 +12,14 @@ import type { Question } from "@/types";
 import QuestionCard from "./QuestionCard";
 import Timer from "./Timer";
 import {
+  availableTopics,
+  pickAdaptiveQuestions,
   pickDailyQuestions,
   pickRandomQuestions,
   MARKING,
   scoreAnswers,
 } from "@/lib/daily";
+import { getMastery, recordAttempt, topicWeights } from "@/lib/mastery";
 import {
   getAskedIds,
   getAttemptsForDate,
@@ -187,7 +190,21 @@ export default function TestClient({
 
   const buildQuiz = useCallback(() => {
     if (isRandom) {
-      return pickRandomQuestions(questions, 10);
+      // Practice adapts to you: topics you get wrong come up more, topics you
+      // have shown you can do come up less (damped, never dropped). The daily
+      // set below deliberately does NOT do this — it has to stay identical for
+      // every user on a given date.
+      const mastery = getMastery();
+      if (Object.keys(mastery).length === 0) {
+        return pickRandomQuestions(questions, 10, undefined, getAskedIds());
+      }
+      const weights = Object.fromEntries(
+        topicWeights(availableTopics(questions), mastery).map((t) => [
+          t.topic,
+          t.weight,
+        ])
+      );
+      return pickAdaptiveQuestions(questions, 10, weights, getAskedIds());
     }
     return pickDailyQuestions(questions, date, 10, getAskedIds());
   }, [questions, date, isRandom]);
@@ -285,6 +302,9 @@ export default function TestClient({
     // full localStorage can no longer abort the submit before the score lands.
     const persisted = saveAttempt(attempt);
     if (!isRandom) markAsked(attempt.questionIds);
+    // Feeds the per-topic weighting that shapes future practice sets. Also
+    // non-throwing — a failure here must not cost the user their score.
+    recordAttempt(quiz, answers);
 
     let handedOff = false;
     try {

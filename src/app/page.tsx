@@ -3,6 +3,7 @@ import HomeStats, {
   HomeSetChip,
   HomeStartActions,
 } from "@/components/HomeStats";
+import TopicInsight from "@/components/TopicInsight";
 import { MARKING, dailyCycleDays } from "@/lib/daily";
 import questionsData from "@/data/questions.json";
 import type { Question } from "@/types";
@@ -66,6 +67,8 @@ export default function Home() {
         </section>
 
         <HomeStats />
+
+        <TopicInsight />
 
         <section className="card" aria-labelledby="bank-heading">
           <h2 id="bank-heading" className="text-[0.9375rem] font-bold text-ink">

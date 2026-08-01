@@ -136,6 +136,77 @@ export function pickRandomQuestions(
   return picked.map((q) => shuffleQuestionOptions(q, rng));
 }
 
+/**
+ * Practice set weighted by topic mastery: more of what you get wrong, less of
+ * what you have already shown you can do.
+ *
+ * This is the per-user path on purpose. `pickDailyQuestions` must stay identical
+ * for every user on a given date, so adaptation lives here and never there.
+ *
+ * Selection is weighted sampling WITHOUT replacement across topics: a topic's
+ * weight decides how likely it is to be drawn next, and every draw removes that
+ * question from the pool. Unseen questions are preferred; the set is topped up
+ * from seen ones rather than coming back short.
+ */
+export function pickAdaptiveQuestions(
+  all: Question[],
+  count: number,
+  weightByTopic: Record<string, number>,
+  excludeIds: string[] = [],
+  seed?: number
+): Question[] {
+  const pool = answeredPool(all);
+  if (!pool.length) return [];
+
+  const rng = mulberry32(seed ?? ((Date.now() ^ (Math.random() * 0xffffffff)) >>> 0));
+  const exclude = new Set(excludeIds);
+  const weightOf = (q: Question) => {
+    const w = weightByTopic[q.topic?.trim() ?? ""];
+    return typeof w === "number" && w > 0 ? w : 1;
+  };
+
+  const draw = (candidates: Question[], n: number): Question[] => {
+    const remaining = [...candidates];
+    const out: Question[] = [];
+    while (out.length < n && remaining.length > 0) {
+      let total = 0;
+      for (const q of remaining) total += weightOf(q);
+      let r = rng() * total;
+      let idx = remaining.length - 1;
+      for (let i = 0; i < remaining.length; i++) {
+        r -= weightOf(remaining[i]);
+        if (r <= 0) {
+          idx = i;
+          break;
+        }
+      }
+      out.push(remaining[idx]);
+      // splice, so nothing can be drawn twice
+      remaining.splice(idx, 1);
+    }
+    return out;
+  };
+
+  const unseen = pool.filter((q) => !exclude.has(q.id));
+  const picked = draw(unseen, count);
+  if (picked.length < count) {
+    const seen = pool.filter((q) => exclude.has(q.id));
+    picked.push(...draw(seen, count - picked.length));
+  }
+
+  return shuffleInPlace(picked, rng).map((q) => shuffleQuestionOptions(q, rng));
+}
+
+/** Distinct topics present among answerable questions. */
+export function availableTopics(all: Question[]): string[] {
+  const set = new Set<string>();
+  for (const q of answeredPool(all)) {
+    const t = q.topic?.trim();
+    if (t) set.add(t);
+  }
+  return [...set].sort();
+}
+
 export const MARKING = {
   correct: 1,
   wrong: -0.25,
