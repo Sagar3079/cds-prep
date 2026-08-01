@@ -11,11 +11,11 @@ import type { Question, QuestionPart } from "@/types";
 const STORAGE_KEY = "cds-last-result";
 
 /**
- * The only `answerSource` backed by anything outside the generating scripts —
- * 38 of the 427 answers in the bank (see the answer-accuracy section of
- * README.md). Everything else was hand-written or hand-transcribed.
+ * Answers read from the answer key UPSC actually published for that paper —
+ * 88 of the 427 in the bank (see the answer-accuracy section of README.md).
+ * Everything else was hand-written, or hand-transcribed without a key.
  */
-const OFFICIAL_KEY_SOURCE = "verified-key";
+const OFFICIAL_KEY_SOURCE = "official-key";
 
 /* ── the handoff payload ───────────────────────────────────────────────────── */
 

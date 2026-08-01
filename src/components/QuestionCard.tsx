@@ -39,11 +39,26 @@ interface Trust {
  * arguing with.
  */
 const ANSWER_TRUST: Record<string, Trust> = {
-  "verified-key": {
+  "official-key": {
     tier: "keyed",
-    label: "Matched to answer key",
+    label: "Official UPSC key",
     detail:
-      "Checked against the published CDS-1 2018 answer key — the only external key behind any answer in this bank.",
+      "Read from the answer key UPSC published for this paper (Series A). This is the strongest provenance in the bank.",
+  },
+  "official-key-void": {
+    tier: "transcribed",
+    label: "No single answer",
+    detail:
+      "UPSC either dropped this question or accepted more than one option, so there is no single correct answer to mark against.",
+  },
+  // Legacy label. It was backed by a hand-typed transcription of the 2018 key
+  // that disagreed with the official key on 13 of its 63 entries, so anything
+  // still carrying it was never re-derived and is weaker than its name suggests.
+  "verified-key": {
+    tier: "transcribed",
+    label: "Hand-typed key",
+    detail:
+      "Taken from a hand-typed copy of an answer key that proved wrong on about a fifth of its entries. Treat it as likely, not settled.",
   },
   verified: {
     tier: "transcribed",
