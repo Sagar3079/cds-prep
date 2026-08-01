@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Potter from "./Potter";
+import type { CSSProperties } from "react";
+import Potter, { LEDGE_RATIO } from "./Potter";
+
+const SIZE = 118;
 import { homeLine } from "@/lib/potter";
 import { getStats, hasAttemptOn, todayKey } from "@/lib/storage";
 import { onThoughtsChange, thoughtsOn, toggleThoughts } from "@/lib/potterPrefs";
@@ -51,7 +54,10 @@ export default function PotterPerch() {
       const ev = e as PointerEvent;
       const box = host!.getBoundingClientRect();
       const cx = box.left + box.width / 2;
-      setLook(Math.max(-1, Math.min(1, (ev.clientX - cx) / 190)));
+      // Quantised to 0.1: setLook on every pointermove re-rendered the whole
+      // SVG at pointer rate for sub-pixel changes nobody can see.
+      const next = Math.round(Math.max(-1, Math.min(1, (ev.clientX - cx) / 190)) * 10) / 10;
+      setLook((cur) => (cur === next ? cur : next));
     };
     const onLeave = () => setLook(0);
     scope.addEventListener("pointermove", onMove);
@@ -65,7 +71,17 @@ export default function PotterPerch() {
   if (!ready) return null;
 
   return (
-    <div ref={hostRef} className="potter-perch potter-perch--right">
+    <div
+      ref={hostRef}
+      className="potter-perch potter-perch--right"
+      // Ties the perch offset to the rendered height so the two cannot drift.
+      style={
+        {
+          "--potter-h": `${SIZE}px`,
+          "--potter-below": 1 - LEDGE_RATIO,
+        } as CSSProperties
+      }
+    >
       <div className="relative">
         {/* lookY is negative: he is leaning over a ledge, so he is looking DOWN
             into the card, not out at the reader. */}
@@ -73,11 +89,13 @@ export default function PotterPerch() {
           mood={line.mood === "idle" ? "peek" : line.mood}
           look={look}
           lookY={-0.75}
-          size={118}
+          size={SIZE}
           thoughtsOn={talk}
           onToggle={() => setTalk(toggleThoughts())}
         />
-        {talk && <p className="potter-thought">{line.text}</p>}
+        {talk && <p className="potter-thought" aria-hidden="true">
+          {line.text}
+        </p>}
       </div>
     </div>
   );

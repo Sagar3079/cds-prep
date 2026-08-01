@@ -3,7 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import Potter, { type Mood } from "./Potter";
 import { reviewLine } from "@/lib/potter";
-import { onThoughtsChange, thoughtsOn, toggleThoughts } from "@/lib/potterPrefs";
+import {
+  onThoughtsChange,
+  thoughtsOn,
+  toggleThoughts,
+} from "@/lib/potterPrefs";
 
 export interface RiderItem {
   correct: boolean;
@@ -120,12 +124,28 @@ export default function PotterRider({
   const hi = useRef(1e6); //  … and the bottom
   const itemsRef = useRef(items);
   itemsRef.current = items;
+  /** Lets the filter-change effect re-run the measurement without re-subscribing. */
+  const measureRef = useRef<(() => void) | null>(null);
+
+  /** Live gates. Evaluated once at mount, he never appeared on a widened window. */
+  const [roomToFly, setRoomToFly] = useState(false);
+  useEffect(() => {
+    const wide = window.matchMedia("(min-width: 620px)");
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const apply = () => setRoomToFly(wide.matches && !still.matches);
+    apply();
+    wide.addEventListener("change", apply);
+    still.addEventListener("change", apply);
+    return () => {
+      wide.removeEventListener("change", apply);
+      still.removeEventListener("change", apply);
+    };
+  }, []);
 
   useEffect(() => {
     setTalk(thoughtsOn());
     if (typeof window === "undefined") return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (window.innerWidth < 620) return; // no room beside the column
+    if (!roomToFly) return;
 
     const host = hostRef.current;
     const scroller = document.querySelector<HTMLElement>(containerSelector);
@@ -137,26 +157,39 @@ export default function PotterRider({
 
     /** Scroll position → where he is trying to be, in list coordinates. */
     const measure = () => {
-      const cards = Array.from(scroller.querySelectorAll<HTMLElement>(itemSelector));
+      const cards = Array.from(
+        scroller.querySelectorAll<HTMLElement>(itemSelector),
+      );
       if (!cards.length) return;
 
       const view = scroller.getBoundingClientRect();
       const originY = parent.getBoundingClientRect().top;
-      const anchors = cards.map((c) => c.getBoundingClientRect().top - originY - PERCH);
+      const anchors = cards.map(
+        (c) => c.getBoundingClientRect().top - originY - PERCH,
+      );
       const last = anchors.length - 1;
-      const pitch = last > 0 ? (anchors[last] - anchors[0]) / last : cards[0].offsetHeight + 14;
+      const pitch =
+        last > 0
+          ? (anchors[last] - anchors[0]) / last
+          : cards[0].offsetHeight + 14;
 
       base.current = anchors[0];
       wave.current = Math.min(1600, Math.max(420, pitch * WAVE_CARDS));
       // Edge to edge of the column, plus a little overhang at both ends so the
       // extremes of the sweep clear the cards rather than resting on them.
-      amp.current = Math.max(0, parent.clientWidth - host.offsetWidth + EDGE * 2);
+      amp.current = Math.max(
+        0,
+        parent.clientWidth - host.offsetWidth + EDGE * 2,
+      );
 
       // The range of list positions that still has him inside the panel, so the
       // loop can hold him there without doing any layout reads of its own.
       const top = originY - view.top; // list origin, relative to the panel top
       lo.current = MARGIN - top;
-      hi.current = Math.max(lo.current, view.height - host.offsetHeight - MARGIN - top);
+      hi.current = Math.max(
+        lo.current,
+        view.height - host.offsetHeight - MARGIN - top,
+      );
 
       // The reading line, as a distance down the list. Continuous in scrollTop:
       // this is what makes him travel rather than snap.
@@ -215,7 +248,8 @@ export default function PotterRider({
       const dt = Math.min(0.034, Math.max(0.0005, (now - prev) / 1000));
       prev = now;
 
-      vel.current += ((target.current - y.current) * STIFF - vel.current * DAMP) * dt;
+      vel.current +=
+        ((target.current - y.current) * STIFF - vel.current * DAMP) * dt;
       y.current += vel.current * dt;
 
       // A spring this heavy trails a flick-scroll by a couple of hundred px —
@@ -240,6 +274,7 @@ export default function PotterRider({
       raf = requestAnimationFrame(step);
     };
 
+    measureRef.current = measure;
     measure();
     y.current = target.current; // seed once, on first mount only
     paint();
@@ -260,7 +295,18 @@ export default function PotterRider({
       cancelAnimationFrame(raf);
     };
     // Intentionally NOT depending on the current index — see the note above.
-  }, [containerSelector, itemSelector]);
+  }, [containerSelector, itemSelector, roomToFly]);
+
+  /**
+   * The review filter swaps which question sits at each index without changing
+   * the index itself, so the line has to be recomputed explicitly — otherwise
+   * he praises a question you got wrong, on the one screen whose entire job is
+   * honest feedback.
+   */
+  useEffect(() => {
+    idx.current = -1;
+    measureRef.current?.();
+  }, [items]);
 
   useEffect(() => onThoughtsChange(setTalk), []);
 
@@ -287,7 +333,11 @@ export default function PotterRider({
         {/* A wrapper the loop can fade: `.potter-thought`'s own entry animation
             fills forwards, so its opacity cannot be driven from here. */}
         <div ref={sayRef} className="potter-rider__say">
-          {talk && say.text && <p className="potter-thought">{say.text}</p>}
+          {talk && say.text && (
+            <p className="potter-thought" aria-hidden="true">
+              {say.text}
+            </p>
+          )}
         </div>
       </div>
     </div>

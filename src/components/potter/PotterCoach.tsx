@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Potter from "./Potter";
+import type { CSSProperties } from "react";
+import Potter, { LEDGE_RATIO } from "./Potter";
 import { testLine, type Line } from "@/lib/potter";
 import { onThoughtsChange, thoughtsOn, toggleThoughts } from "@/lib/potterPrefs";
 
+const SIZE = 112;
+const SHOW_MS = 4200;
+
 /**
- * Potter during a run: perched on the question card, reacting to how it is
- * going. He comments on *pace and situation only* — never on whether an answer
- * is right, because nothing is marked until submit and a hint would corrupt
- * the score.
+ * Potter during a run: perched on the timer card, reacting to how it is going.
+ * He comments on *pace and situation only* — never on whether an answer looks
+ * right, because nothing is marked until submit and a hint would corrupt the
+ * score.
  */
 export default function PotterCoach({
   index,
@@ -26,68 +30,102 @@ export default function PotterCoach({
 }) {
   const [line, setLine] = useState<Line | null>(null);
   const [leaving, setLeaving] = useState(false);
-  const [enabled, setEnabled] = useState(false);
+  const [motionOk, setMotionOk] = useState(true);
   const [talk, setTalk] = useState(true);
   const enteredAt = useRef(Date.now());
   const hideTimer = useRef<number | null>(null);
 
+  /**
+   * The clock ticks once a second. These are read through refs to keep them OUT
+   * of the cadence effect's dependencies: when `secondsLeft` was a dependency
+   * the effect was torn down and rebuilt every second, so the 2.5s interval was
+   * destroyed before it ever fired, and the hide timer was cleared and re-armed
+   * on every tick — which is why the bubble never went away.
+   */
+  const secondsRef = useRef(secondsLeft);
+  secondsRef.current = secondsLeft;
+  const answeredRef = useRef(answered);
+  answeredRef.current = answered;
+
+  // Live, not one-shot — changing the OS setting used to require a remount.
   useEffect(() => {
-    setEnabled(!window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-    setTalk(thoughtsOn());
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const apply = () => setMotionOk(!mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
   }, []);
 
-  useEffect(() => onThoughtsChange(setTalk), []);
+  useEffect(() => {
+    setTalk(thoughtsOn());
+    return onThoughtsChange(setTalk);
+  }, []);
 
   useEffect(() => {
     enteredAt.current = Date.now();
   }, [index]);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!motionOk) return;
+
     const tick = () => {
       const next = testLine({
         index,
         total,
-        answered,
-        secondsLeft,
+        answered: answeredRef.current,
+        secondsLeft: secondsRef.current,
         dwellMs: Date.now() - enteredAt.current,
         justAnswered,
       });
+
+      // Armed unconditionally. Arming it only when a line existed meant the
+      // last thought froze on screen for the rest of the test the moment
+      // testLine returned null — which it does often.
+      if (hideTimer.current !== null) window.clearTimeout(hideTimer.current);
+      hideTimer.current = window.setTimeout(() => setLeaving(true), SHOW_MS);
+
       if (!next) return;
       setLine((cur) => (cur?.text === next.text ? cur : next));
       setLeaving(false);
-      if (hideTimer.current !== null) window.clearTimeout(hideTimer.current);
-      // A thought that never leaves stops being a reaction and becomes decor.
-      hideTimer.current = window.setTimeout(() => setLeaving(true), 4200);
     };
+
     tick();
     const id = window.setInterval(tick, 2500);
     return () => {
       window.clearInterval(id);
       if (hideTimer.current !== null) window.clearTimeout(hideTimer.current);
     };
-  }, [enabled, index, total, answered, secondsLeft, justAnswered]);
-
-  if (!enabled) return null;
+  }, [motionOk, index, total, justAnswered]);
 
   return (
-    <div className="potter-perch potter-perch--centre">
+    <div
+      className="potter-perch potter-perch--centre"
+      // Keeps the perch offset tied to the rendered height. Hardcoding one in
+      // CSS let them drift apart and left him floating above the card.
+      style={
+        {
+          "--potter-h": `${SIZE}px`,
+          "--potter-below": 1 - LEDGE_RATIO,
+        } as CSSProperties
+      }
+    >
       <div className="relative">
         <Potter
-          mood={line?.mood ?? "peek"}
+          // Reduced motion should quieten him, not delete him.
+          mood={motionOk ? (line?.mood ?? "peek") : "peek"}
           look={0}
           lookY={-0.7}
-          size={112}
+          size={SIZE}
           thoughtsOn={talk}
           onToggle={() => setTalk(toggleThoughts())}
         />
-        {talk && line && !leaving && (
-          <p className="potter-thought potter-thought--left">{line.text}</p>
-        )}
-        {talk && line && leaving && (
+        {talk && motionOk && line && (
           <p
             className="potter-thought potter-thought--left"
-            data-leaving="true"
+            // Decorative: the text mutates on its own and would otherwise be
+            // announced at random.
+            aria-hidden="true"
+            data-leaving={leaving ? "true" : undefined}
           >
             {line.text}
           </p>

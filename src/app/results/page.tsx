@@ -505,8 +505,11 @@ export default function ResultsPage() {
         </div>
       </div>
 
-      {/* Potter rides this list — `relative` is what he measures against. */}
-      <ol className="relative space-y-3.5">
+      {/* Potter is a SIBLING of the list, not a child: <ol> may only contain
+          <li>, and a stray <div> breaks the list role mapping and puts his
+          button ahead of question 1 in the reading order. The wrapper is what
+          he measures against. */}
+      <div className="relative">
         <PotterRider
           containerSelector=".panel-body > main"
           itemSelector="[data-review-card]"
@@ -516,30 +519,33 @@ export default function ResultsPage() {
             official: q.answerSource === OFFICIAL_KEY_SOURCE,
           }))}
         />
-        {visible.map(({ q, i }, position) => (
-          <li
-            key={`${onlyMissed ? "missed" : "all"}-${i}-${q.id}`}
-            data-review-card=""
-            className="fade-up"
-            /* animation-delay cannot come from a Tailwind utility here: the
+
+        <ol className="space-y-3.5">
+          {visible.map(({ q, i }, position) => (
+            <li
+              key={`${onlyMissed ? "missed" : "all"}-${i}-${q.id}`}
+              data-review-card=""
+              className="fade-up"
+              /* animation-delay cannot come from a Tailwind utility here: the
                  unlayered `.fade-up` shorthand in globals.css would reset it. */
-            style={
-              reducedMotion
-                ? undefined
-                : { animationDelay: `${Math.min(position, 9) * 45}ms` }
-            }
-          >
-            <QuestionCard
-              question={q}
-              index={i}
-              total={set.total}
-              selected={set.answers[i]}
-              onSelect={() => {}}
-              showResult
-            />
-          </li>
-        ))}
-      </ol>
+              style={
+                reducedMotion
+                  ? undefined
+                  : { animationDelay: `${Math.min(position, 9) * 45}ms` }
+              }
+            >
+              <QuestionCard
+                question={q}
+                index={i}
+                total={set.total}
+                selected={set.answers[i]}
+                onSelect={() => {}}
+                showResult
+              />
+            </li>
+          ))}
+        </ol>
+      </div>
 
       <div className="flex justify-center pt-1">
         <Link href="/" className="btn-ghost">

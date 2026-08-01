@@ -53,6 +53,21 @@ export interface PotterProps {
  */
 export const LEDGE_RATIO = 74 / 140;
 
+/**
+ * Idle beats. He plays one every 5–12s so he is never merely breathing.
+ * `nudge` is him pushing his glasses back up his nose — the most characterful
+ * of the four, so it gets two entries and comes up twice as often.
+ */
+type Gesture = "none" | "nudge" | "nod" | "glance" | "shiver";
+const GESTURES: Gesture[] = ["nudge", "nudge", "nod", "glance", "shiver"];
+const GESTURE_MS: Record<Gesture, number> = {
+  none: 0,
+  nudge: 900,
+  nod: 800,
+  glance: 1400,
+  shiver: 700,
+};
+
 const OUTLINE = "#1b1720";
 const HAIR = "#6d6733";
 const HAIR_DARK = "#4c4722";
@@ -82,37 +97,110 @@ export default function Potter({
 }: PotterProps) {
   const [blink, setBlink] = useState(false);
   const [tapped, setTapped] = useState(false);
-  const t = useRef<number | null>(null);
+  /** Small idle beats. Stillness is what reads as dead, so he is never fully still. */
+  const [gesture, setGesture] = useState<Gesture>("none");
+  /** Eye drift between blinks — a fixed stare is the single deadest thing a face can do. */
+  const [drift, setDrift] = useState({ x: 0, y: 0 });
 
+  // Every timeout registers here so unmount can clear it. Ids are removed as
+  // they fire — an append-only list grows by thousands on a page left open.
+  const timers = useRef<Set<number>>(new Set());
+  const later = (fn: () => void, ms: number) => {
+    const id = window.setTimeout(() => {
+      timers.current.delete(id);
+      fn();
+    }, ms);
+    timers.current.add(id);
+    return id;
+  };
+
+  useEffect(
+    () => () => {
+      timers.current.forEach(window.clearTimeout);
+      timers.current.clear();
+    },
+    []
+  );
+
+  // Blinks. Irregular, and occasionally a double — a metronome reads as a machine.
   useEffect(() => {
     let dead = false;
     const loop = () => {
       if (dead) return;
-      t.current = window.setTimeout(
+      later(
         () => {
+          if (dead) return;
           setBlink(true);
-          window.setTimeout(() => setBlink(false), 105);
+          later(() => setBlink(false), 95);
+          if (Math.random() < 0.22) {
+            later(() => setBlink(true), 230);
+            later(() => setBlink(false), 325);
+          }
           loop();
         },
-        1900 + Math.random() * 3300
+        1700 + Math.random() * 3200
       );
     };
     loop();
     return () => {
       dead = true;
-      if (t.current !== null) window.clearTimeout(t.current);
     };
   }, []);
 
-  const lx = Math.max(-1, Math.min(1, look));
-  const ly = Math.max(-1, Math.min(1, lookY));
+  // Saccades: eyes flick somewhere and hold, rather than tracking smoothly.
+  useEffect(() => {
+    let dead = false;
+    const loop = () => {
+      if (dead) return;
+      later(
+        () => {
+          if (dead) return;
+          setDrift({ x: (Math.random() - 0.5) * 0.7, y: (Math.random() - 0.5) * 0.5 });
+          // settle back to centre before the next flick, so he isn't cross-eyed
+          later(() => setDrift({ x: 0, y: 0 }), 900 + Math.random() * 1200);
+          loop();
+        },
+        2400 + Math.random() * 3800
+      );
+    };
+    loop();
+    return () => {
+      dead = true;
+    };
+  }, []);
+
+  // Idle gestures. Suppressed while riding — he is busy flying.
+  useEffect(() => {
+    if (riding) return;
+    let dead = false;
+    const loop = () => {
+      if (dead) return;
+      later(
+        () => {
+          if (dead) return;
+          const g = GESTURES[Math.floor(Math.random() * GESTURES.length)];
+          setGesture(g);
+          later(() => setGesture("none"), GESTURE_MS[g]);
+          loop();
+        },
+        5200 + Math.random() * 6500
+      );
+    };
+    loop();
+    return () => {
+      dead = true;
+    };
+  }, [riding]);
+
+  const lx = Math.max(-1, Math.min(1, look + drift.x));
+  const ly = Math.max(-1, Math.min(1, lookY + drift.y));
   const shut = blink || mood === "cheer";
   const happy = mood === "excited" || mood === "cheer" || mood === "impressed";
 
   const handleTap = () => {
     if (!onToggle) return;
     setTapped(true);
-    window.setTimeout(() => setTapped(false), 420);
+    later(() => setTapped(false), 420);
     onToggle();
   };
 
@@ -120,16 +208,24 @@ export default function Potter({
   // LEFT. On the rightward half of the review weave that means flying
   // backwards. Mirror the whole figure when he is heading right.
   //
+  // Reads `look`, NOT the drifted `lx`: eye saccades add up to +-0.35 of noise,
+  // which at the edges of the weave is enough to decide the sign on its own and
+  // spin him 180 degrees while hovering.
+  //
+  // Bare scale(-1,1) — the CSS gives this group transform-origin: 60px 70px, so
+  // the usual translate(w,0) scale(-1,1) idiom (which assumes origin 0 0) would
+  // compose to a mirror about x=120 and shift him a whole viewBox to the right.
+  //
   // Done as an SVG group rather than a CSS transform on `.potter__svg`: that
   // element already carries the breathing/mood keyframes, and a CSS transform
   // would be overwritten by them.
-  const facingRight = riding && lx > 0.05;
+  const facingRight = riding && look > 0.05;
 
   const art = (
     <svg viewBox="0 0 120 140" width="100%" height="100%" className="potter__svg">
       <g
         className="potter__facing"
-        transform={facingRight ? "translate(120,0) scale(-1,1)" : undefined}
+        transform={facingRight ? "scale(-1,1)" : undefined}
       >
       {/* ============== WAND, held out to the side ==============
           Both hands are on the broom when riding, so the wand is put away. */}
@@ -251,6 +347,11 @@ export default function Potter({
       </g>
 
       {/* ============== HEAD ============== */}
+      {/* Two nested groups on purpose. A CSS animation beats the style
+          attribute in the cascade, so an infinite idle bob on the SAME element
+          silently overrides the inline look transform — that is why his head
+          never turned. The bob owns the outer group; the turn owns the inner. */}
+      <g className="potter__head-bob">
       <g
         className="potter__head"
         style={{
@@ -265,16 +366,20 @@ export default function Potter({
         {/* face — one solid fill, no modelling */}
         <rect x="17" y="4" width="86" height="62" rx="29" fill={SKIN} stroke={OUTLINE} strokeWidth="2.8" />
 
-        {/* hair: big rounded mop with a spiky fringe */}
-        <path
-          d="M14 40C10 15 29 1 60 1s50 14 46 39c-2-11-7-19-13-23l2-8-9 5-3-8-7 6-5-7-6 7-7-6-3 8-9-5 2 8c-6 4-11 12-13 23Z"
-          fill={HAIR}
-          stroke={OUTLINE}
-          strokeWidth="2.8"
-          strokeLinejoin="round"
-        />
-        {/* the head's single flat shadow tone: the far side of the mop */}
-        <path d="M83 8c9 5 15 14 16 26-3-12-8-20-18-23Z" fill={HAIR_DARK} />
+        {/* hair: big rounded mop with a spiky fringe. Grouped so it can carry
+            its own slow sway — hair with weight is most of what separates a
+            living character from a decal. */}
+        <g className="potter__hair">
+          <path
+            d="M14 40C10 15 29 1 60 1s50 14 46 39c-2-11-7-19-13-23l2-8-9 5-3-8-7 6-5-7-6 7-7-6-3 8-9-5 2 8c-6 4-11 12-13 23Z"
+            fill={HAIR}
+            stroke={OUTLINE}
+            strokeWidth="2.8"
+            strokeLinejoin="round"
+          />
+          {/* the head's single flat shadow tone: the far side of the mop */}
+          <path d="M83 8c9 5 15 14 16 26-3-12-8-20-18-23Z" fill={HAIR_DARK} />
+        </g>
 
         {/* the scar */}
         <path d="M40 22l4-5-2 6 4-4" stroke="#b8543f" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
@@ -298,8 +403,13 @@ export default function Potter({
           <path d="M57 42c2-2 4-2 6 0" stroke={OUTLINE} strokeWidth="3.2" fill="none" strokeLinecap="round" />
           <path d="M27 42l-9-4M93 42l9-4" stroke={OUTLINE} strokeWidth="3" strokeLinecap="round" />
 
-          {/* eyes, inside the lenses */}
-          <g style={{ transform: `translate(${lx * 3.4}px, ${ly * -2.4}px)`, transition: "transform .5s var(--ease)" }}>
+          {/* Eyes. The transition is on the class, not inline: real saccades
+              snap to a target and hold, so this uses a fast snappy curve rather
+              than the slow glide the rest of him uses. */}
+          <g
+            className="potter__eyes"
+            style={{ transform: `translate(${lx * 3.4}px, ${ly * -2.4}px)` }}
+          >
             {shut ? (
               <>
                 <path d="M36 45c4 5 8 5 12 0" stroke={OUTLINE} strokeWidth="3.2" fill="none" strokeLinecap="round" />
@@ -340,6 +450,8 @@ export default function Potter({
         </g>
       </g>
 
+      </g>
+
       {/* ============== HANDS ==============
           On the broom handle when riding (same tilt as the broom), otherwise
           gripping the ledge at y=74. Drawn last so they sit over the handle. */}
@@ -367,17 +479,27 @@ export default function Potter({
           rider is meant to float, so it only exists in the perched pose */}
       {!riding && <ellipse cx="60" cy="84" rx="48" ry="6" fill="#0d1024" opacity=".16" />}
 
+      </g>
+
       {!thoughtsOn && (
         <g className="potter__muted">
           <circle cx="102" cy="14" r="11" fill="var(--surface-2)" stroke="var(--line)" strokeWidth="1.5" />
           <path d="M97 14h10" stroke="var(--muted)" strokeWidth="2.6" strokeLinecap="round" />
         </g>
       )}
-      </g>
     </svg>
   );
 
-  const classes = `potter potter--${mood} ${riding ? "potter--riding" : ""} ${tapped ? "potter--tapped" : ""} ${className}`;
+  const classes = [
+    "potter",
+    `potter--${mood}`,
+    riding && "potter--riding",
+    tapped && "potter--tapped",
+    gesture !== "none" && `potter--${gesture}`,
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   if (!onToggle) {
     return (
@@ -391,8 +513,11 @@ export default function Potter({
     <button
       type="button"
       onClick={handleTap}
+      // A stable NAME plus a state, not a name that renames itself. With both
+      // flipping, a screen reader announced "Mute Potter's thoughts, pressed",
+      // which reads as though muting were already active.
       aria-pressed={thoughtsOn}
-      aria-label={thoughtsOn ? "Mute Potter's thoughts" : "Let Potter think out loud"}
+      aria-label="Potter's thoughts"
       className={`${classes} potter--tappable`}
       style={{ width: size * 0.86, height: size }}
     >

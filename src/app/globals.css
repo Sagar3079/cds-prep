@@ -530,9 +530,9 @@ mark.target-word {
 
 /* ============================================================
    POTTER — the study companion
-   One SVG with fixed geometry: his hands grip a ledge at 88/120
+   One SVG with fixed geometry: his hands grip a ledge at 74/140
    of his height, so the placement below offsets him by exactly the
-   hidden 27% rather than guessing a pixel value.
+   hidden 47% rather than guessing a pixel value.
    ============================================================ */
 .potter {
   position: relative;
@@ -553,13 +553,6 @@ mark.target-word {
 .potter--tappable:hover { filter: drop-shadow(0 8px 14px rgba(16, 20, 45, 0.24)); }
 .potter--tappable:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; border-radius: 14px; }
 /* squash on tap, so the toggle is felt as well as seen */
-.potter--tapped .potter__svg { animation: potterTap 0.42s var(--ease); }
-@keyframes potterTap {
-  0%   { transform: scale(1, 1); }
-  30%  { transform: scale(1.1, 0.9) translateY(3px); }
-  60%  { transform: scale(0.96, 1.05) translateY(-2px); }
-  100% { transform: scale(1, 1); }
-}
 .potter__muted { animation: thoughtIn 0.35s var(--ease) both; }
 .potter__svg {
   display: block;
@@ -625,12 +618,12 @@ mark.target-word {
 }
 
 /* ---- perching on a card's top edge ----
-   `--potter-h` is his rendered height; 27% of him sits below the ledge and is
+   `--potter-h` is his rendered height; 47% of him sits below the ledge and is
    covered by the card, which is a preceding-sibling z-order overlap, not a mask. */
 .potter-perch {
   --potter-h: 118px;
   position: absolute;
-  bottom: calc(100% - var(--potter-h) * 0.47);
+  bottom: calc(100% - var(--potter-h) * var(--potter-below, 0.47));
   z-index: 0;
 }
 .potter-perch--right  { right: 12px; }
@@ -663,7 +656,7 @@ mark.target-word {
   transform-origin: 100% 50%;
   animation: thoughtIn 0.45s var(--spring) both;
 }
-.potter-thought--left { right: auto; left: calc(100% - 10px); border-radius: 13px 13px 13px 3px; transform-origin: 0 50%; }
+.potter-thought--left { right: auto; left: calc(100% - 10px); max-width: min(158px, calc(50vw - 68px)); border-radius: 13px 13px 13px 3px; transform-origin: 0 50%; }
 @keyframes thoughtIn {
   from { opacity: 0; transform: scale(0.72) translateY(6px); }
   to   { opacity: 1; transform: none; }
@@ -714,6 +707,92 @@ mark.target-word {
   transition: transform 0.32s var(--ease);
   transform-origin: 60px 70px;
 }
-/* Flying, not perching — the idle breathe and mood leans would fight the
-   rider's own transform work. */
-.potter--riding .potter__svg { animation: none; }
+/* Flying, not perching. The mood LEANS are dropped (they fight the rider's own
+   roll) but he must keep moving — killing the whole animation here is what made
+   him read as dead on the review screen. */
+.potter--riding .potter__svg { animation: potterFly 2.9s ease-in-out infinite; }
+@keyframes potterFly {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  35%      { transform: translateY(-3.5px) rotate(-1.2deg); }
+  70%      { transform: translateY(2px) rotate(0.8deg); }
+}
+/* the broom bobs on its own axis, a beat behind him */
+.potter--riding .potter__broom { animation: potterBroomBob 3.7s ease-in-out infinite; }
+@keyframes potterBroomBob {
+  0%, 100% { transform: rotate(6deg) translateY(0); }
+  45%      { transform: rotate(4deg) translateY(1.6px); }
+  80%      { transform: rotate(7.5deg) translateY(-1.2px); }
+}
+/* scarf streams harder in flight */
+.potter--riding .potter__tail { animation-duration: 1.5s; }
+
+
+/* ============================================================
+   POTTER — LIFE
+   Every timing here is deliberately non-harmonic (2.9 / 3.4 / 3.7 / 4.4 / 5.3s).
+   Harmonically related loops drift into phase and start pulsing together, which
+   is the exact moment a character stops reading as alive.
+   ============================================================ */
+
+/* head rides a slower beat than the body, so the neck looks springy */
+.potter__head-bob { animation: potterHeadBob 6.1s ease-in-out infinite; }
+@keyframes potterHeadBob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  40%      { transform: translateY(-1.1px) rotate(0.7deg); }
+  75%      { transform: translateY(0.6px) rotate(-0.5deg); }
+}
+/* the mop has weight and lags the head */
+.potter__hair { animation: potterHair 4.1s ease-in-out infinite; transform-origin: 60px 30px; }
+@keyframes potterHair {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  30%      { transform: rotate(-1.4deg) translateY(-0.8px); }
+  65%      { transform: rotate(1deg) translateY(0.5px); }
+}
+
+/* ---- idle beats ---- */
+
+/* pushing his glasses back up his nose */
+.potter--nudge .potter__specs { animation: potterNudge 0.9s var(--ease); }
+@keyframes potterNudge {
+  0%, 100% { transform: translateY(0); }
+  25%      { transform: translateY(2.4px) rotate(-1deg); }
+  55%      { transform: translateY(-1.2px); }
+}
+/* a small "mm-hm" nod */
+.potter--nod .potter__head-bob { animation: potterNod 0.8s var(--ease); }
+@keyframes potterNod {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  30%      { transform: translateY(2.6px) rotate(1.4deg); }
+  65%      { transform: translateY(-1px) rotate(-0.6deg); }
+}
+
+/* checking something off to the side */
+.potter--glance .potter__head-bob { animation: potterGlance 1.4s var(--ease); }
+@keyframes potterGlance {
+  0%, 100% { transform: rotate(0deg) translateX(0); }
+  30%, 55% { transform: rotate(-4deg) translateX(-2.5px); }
+}
+
+/* a quick shake, like shrugging off a hard question */
+.potter--shiver .potter__svg { animation: potterShiver 0.7s var(--ease); }
+@keyframes potterShiver {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  20%      { transform: translateX(-1.8px) rotate(-1.2deg); }
+  45%      { transform: translateX(1.6px) rotate(1deg); }
+  70%      { transform: translateX(-0.9px) rotate(-0.5deg); }
+}
+
+/* eyes move as a flick-and-hold, not a smooth glide — real saccades snap */
+.potter__eyes { transition: transform 0.14s cubic-bezier(0.2, 0.9, 0.3, 1); }
+
+
+/* Tap feedback must outrank every mood and gesture rule that also targets
+   .potter__svg — they are all (0,2,0) and were winning purely on source order,
+   which left the squash dead in most moods and always on the review screen. */
+.potter.potter--tapped .potter__svg { animation: potterTap 0.42s var(--ease); }
+@keyframes potterTap {
+  0%   { transform: scale(1, 1); }
+  30%  { transform: scale(1.1, 0.9) translateY(3px); }
+  60%  { transform: scale(0.96, 1.05) translateY(-2px); }
+  100% { transform: scale(1, 1); }
+}

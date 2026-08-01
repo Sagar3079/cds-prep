@@ -181,6 +181,10 @@ export default function TestClient({
   const [focusNonce, setFocusNonce] = useState(0);
   /** Travel direction, so the question slides in from the side it came from. */
   const [dir, setDir] = useState<1 | -1>(1);
+  /** When a selection was last made, so Potter reacts to the act, not the state. */
+  const [lastPick, setLastPick] = useState<{ idx: number; at: number } | null>(
+    null,
+  );
 
   const questionRef = useRef<HTMLElement>(null);
   const submitRef = useRef<HTMLButtonElement>(null);
@@ -203,7 +207,7 @@ export default function TestClient({
         topicWeights(availableTopics(questions), mastery).map((t) => [
           t.topic,
           t.weight,
-        ])
+        ]),
       );
       return pickAdaptiveQuestions(questions, 10, weights, getAskedIds());
     }
@@ -224,8 +228,8 @@ export default function TestClient({
             (a.savedAt ?? 0) >= saved.startedAt &&
             sameIds(
               a.questionIds,
-              saved.quiz.map((q) => q.id)
-            )
+              saved.quiz.map((q) => q.id),
+            ),
         ));
 
     if (saved && !stale) {
@@ -311,7 +315,7 @@ export default function TestClient({
     try {
       sessionStorage.setItem(
         "cds-last-result",
-        JSON.stringify({ ...attempt, questions: quiz, mode })
+        JSON.stringify({ ...attempt, questions: quiz, mode }),
       );
       handedOff = true;
     } catch {
@@ -399,9 +403,17 @@ export default function TestClient({
 
   /* --------------------------------------------------------------- derived */
 
+  // True only briefly after an actual selection on THIS question.
+  // `answers[idx] !== null` meant "is answered", so returning to an answered
+  // question fired the speed-praise and streak lines when nothing was clicked.
+  const justAnswered =
+    lastPick !== null &&
+    lastPick.idx === idx &&
+    Date.now() - lastPick.at < 2500;
+
   const blanks = answers.reduce<number[]>(
     (acc, a, i) => (a === null ? [...acc, i] : acc),
-    []
+    [],
   );
   const answered = answers.length - blanks.length;
   const penalty = Math.abs(MARKING.wrong);
@@ -446,7 +458,7 @@ export default function TestClient({
     }
     if (e.key !== "Tab") return;
     const focusables = dialogRef.current?.querySelectorAll<HTMLElement>(
-      "button:not([disabled])"
+      "button:not([disabled])",
     );
     if (!focusables || focusables.length === 0) return;
     const first = focusables[0];
@@ -586,51 +598,54 @@ export default function TestClient({
         </p>
       )}
 
-      {/* Potter perches on the timer card, centred at the top of the run.
-          He is a preceding sibling and the card is z-40, so the card genuinely
-          covers his lower half — a child can never be occluded by its parent. */}
+      {/* Potter and the timer card share ONE relative box, so his `bottom:
+          calc(100% - …)` resolves against the card's height. In his own wrapper
+          that box was 0px tall and space-y pushed the card 16px lower again,
+          leaving him gripping thin air. The card is z-40 and he is not, so it
+          covers his lower half. */}
       <div className="relative">
         <PotterCoach
           index={idx}
           total={quiz.length}
           answered={quiz.length - blanks.length}
           secondsLeft={seconds}
-          justAnswered={answers[idx] !== null}
+          // "was JUST answered", not "is answered" — see justAnswered below.
+          justAnswered={justAnswered}
         />
-      </div>
 
-      {/* Ring, dots and the progress line ride together at the top of the run.
-          `top-0` is correct rather than lucky: the scroll container is the
-          panel's <main>, and the navbar sits outside it. */}
-      <div className="card sticky top-0 z-40 flex flex-col items-center gap-3">
-        <Timer seconds={seconds} total={MARKING.durationSec} />
+        {/* Ring, dots and the progress line ride together at the top of the run.
+            `top-0` is correct rather than lucky: the scroll container is the
+            panel's <main>, and the navbar sits outside it. */}
+        <div className="card sticky top-0 z-40 flex flex-col items-center gap-3">
+          <Timer seconds={seconds} total={MARKING.durationSec} />
 
-        <div
-          role="group"
-          aria-label="Jump to question"
-          className="flex flex-wrap justify-center items-center gap-[13px]"
-        >
-          {/* 11px dot, 24px hit area from .progress-dot::after — the 13px gap
+          <div
+            role="group"
+            aria-label="Jump to question"
+            className="flex flex-wrap justify-center items-center gap-[13px]"
+          >
+            {/* 11px dot, 24px hit area from .progress-dot::after — the 13px gap
               keeps neighbouring hit areas from overlapping (WCAG 2.5.8). */}
-          {quiz.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => goTo(i)}
-              aria-current={i === idx ? "step" : undefined}
-              aria-label={`Question ${i + 1}, ${
-                answers[i] !== null ? "answered" : "not answered"
-              }`}
-              className={`progress-dot p-0 ${i === idx ? "active" : ""} ${
-                answers[i] !== null ? "answered" : ""
-              }`}
-            />
-          ))}
-        </div>
+            {quiz.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => goTo(i)}
+                aria-current={i === idx ? "step" : undefined}
+                aria-label={`Question ${i + 1}, ${
+                  answers[i] !== null ? "answered" : "not answered"
+                }`}
+                className={`progress-dot p-0 ${i === idx ? "active" : ""} ${
+                  answers[i] !== null ? "answered" : ""
+                }`}
+              />
+            ))}
+          </div>
 
-        <p className="text-sm text-muted text-center">
-          Question {idx + 1} of {quiz.length} · {answered} answered
-        </p>
+          <p className="text-sm text-muted text-center">
+            Question {idx + 1} of {quiz.length} · {answered} answered
+          </p>
+        </div>
       </div>
 
       <section
@@ -659,6 +674,7 @@ export default function TestClient({
                   next[idx] = opt;
                   return next;
                 });
+                setLastPick({ idx, at: Date.now() });
               }}
             />
           </div>
