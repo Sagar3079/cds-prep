@@ -181,43 +181,56 @@ body {
   :root { --col: 460px; }
 }
 
-/* The app is one contained panel floating on the surface — nav inside it, not
-   a full-bleed bar above it. Deliberately NOT `overflow:hidden`: that would
-   kill `position:sticky` for the nav and the test screen's timer card, so the
-   corners are rounded on the children instead. */
+/* The app is one contained panel — a device, not a page. It has a FIXED
+   height and the content scrolls inside it, so on a desktop it reads as a
+   phone you are holding rather than a narrow website.
+   The page itself never scrolls; `main` is the scroll container. */
 .app-stage {
-  min-height: 100dvh;
-  padding-block: 2rem;
+  height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  overflow: hidden;
 }
 .app-panel {
   background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: 1.5rem;
+  border-radius: 2rem;
   box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - 4rem);
+  /* ~2:1 against the 460px column, which is roughly a modern handset, but it
+     never outgrows the viewport on a short laptop screen. */
+  height: min(920px, 100dvh - 3rem);
+  overflow: hidden; /* safe now: `main` scrolls, so nothing needs page sticky */
 }
 .app-panel > nav {
+  flex: none;
   border-top-left-radius: inherit;
   border-top-right-radius: inherit;
 }
 .app-panel > main {
   flex: 1;
+  min-height: 0; /* without this a flex child refuses to shrink and won't scroll */
+  overflow-y: auto;
+  overscroll-behavior: contain; /* don't hand the scroll back to the page */
   background: var(--surface);
   border-bottom-left-radius: inherit;
   border-bottom-right-radius: inherit;
 }
 
-/* On a phone the panel IS the screen — edge to edge, no floating card. */
+/* On a phone the panel IS the screen — edge to edge, no device frame. */
 @media (max-width: 640px) {
-  .app-stage { padding-block: 0; }
+  .app-stage {
+    padding: 0;
+    place-items: stretch;
+  }
   .app-panel {
+    height: 100dvh;
     border-radius: 0;
     border-left: 0;
     border-right: 0;
     box-shadow: none;
-    min-height: 100dvh;
   }
 }
 

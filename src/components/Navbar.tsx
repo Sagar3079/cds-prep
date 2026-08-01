@@ -6,7 +6,9 @@ export default function Navbar() {
   return (
     <nav
       aria-label="Main"
-      className="sticky top-0 z-50 bg-paper/90 backdrop-blur border-b border-line"
+      /* Not sticky: the nav is a fixed sibling above the panel's scroll
+         container, so it is always on screen without it. */
+      className="bg-paper border-b border-line"
     >
       {/* flex-wrap is load-bearing: without it this row overflowed at 360px.
           No width wrapper here — the panel around it is already the column. */}

@@ -174,7 +174,6 @@ export default function TestClient({
   const [finalScore, setFinalScore] = useState<FinalScore | null>(null);
   const [alreadyDone, setAlreadyDone] = useState<Attempt | null>(null);
   const [runId, setRunId] = useState(0);
-  const [navOffset, setNavOffset] = useState(0);
   const [focusNonce, setFocusNonce] = useState(0);
   /** Travel direction, so the question slides in from the side it came from. */
   const [dir, setDir] = useState<1 | -1>(1);
@@ -355,7 +354,8 @@ export default function TestClient({
   useEffect(() => {
     if (!started || submitted || !ready) return;
     questionRef.current?.focus({ preventScroll: true });
-    window.scrollTo({ top: 0 });
+    // The panel scrolls, not the window — `main` is the scroll container.
+    questionRef.current?.closest("main")?.scrollTo({ top: 0 });
   }, [idx, focusNonce, started, submitted, ready]);
 
   useEffect(() => {
@@ -371,17 +371,10 @@ export default function TestClient({
     skipConfirmRestore.current = false;
   }, [confirmOpen]);
 
-  /* ----------------------------------------------- sticky offset under nav */
-
-  useEffect(() => {
-    const nav = document.querySelector("nav");
-    if (!nav) return;
-    const measure = () => setNavOffset(nav.getBoundingClientRect().height);
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(nav);
-    return () => ro.disconnect();
-  }, []);
+  /* The nav used to sit inside the scrolling page, so the timer card had to be
+     offset by its measured height. The nav is now a fixed sibling above the
+     scroll container, so the card sticks to the top of `main` at 0 and the
+     ResizeObserver that measured it is gone. */
 
   /* --------------------------------------------------------------- derived */
 
@@ -573,12 +566,9 @@ export default function TestClient({
       )}
 
       {/* Ring, dots and the progress line ride together at the top of the run.
-          Offset is measured from the navbar, not guessed: a hardcoded value
-          leaves a see-through gap the moment the navbar's height changes. */}
-      <div
-        style={{ top: navOffset }}
-        className="card sticky z-40 flex flex-col items-center gap-3"
-      >
+          `top-0` is correct rather than lucky: the scroll container is the
+          panel's <main>, and the navbar sits outside it. */}
+      <div className="card sticky top-0 z-40 flex flex-col items-center gap-3">
         <Timer seconds={seconds} total={MARKING.durationSec} />
 
         <div
