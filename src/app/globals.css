@@ -181,6 +181,46 @@ body {
   :root { --col: 460px; }
 }
 
+/* The app is one contained panel floating on the surface — nav inside it, not
+   a full-bleed bar above it. Deliberately NOT `overflow:hidden`: that would
+   kill `position:sticky` for the nav and the test screen's timer card, so the
+   corners are rounded on the children instead. */
+.app-stage {
+  min-height: 100dvh;
+  padding-block: 2rem;
+}
+.app-panel {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 4rem);
+}
+.app-panel > nav {
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+.app-panel > main {
+  flex: 1;
+  background: var(--surface);
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
+
+/* On a phone the panel IS the screen — edge to edge, no floating card. */
+@media (max-width: 640px) {
+  .app-stage { padding-block: 0; }
+  .app-panel {
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    box-shadow: none;
+    min-height: 100dvh;
+  }
+}
+
 /* ============================================================
    COMPONENTS
    ============================================================ */

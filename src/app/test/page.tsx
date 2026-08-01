@@ -1,4 +1,3 @@
-import Navbar from "@/components/Navbar";
 import TestClient from "@/components/TestClient";
 import type { Question } from "@/types";
 import questionsData from "@/data/questions.json";
@@ -13,11 +12,8 @@ export default async function TestPage({
   const questions = questionsData as Question[];
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <main className="max-w-2xl mx-auto px-4 py-8">
-        <TestClient questions={questions} mode={mode} />
-      </main>
-    </div>
+    <main className="px-4 py-8">
+      <TestClient questions={questions} mode={mode} />
+    </main>
   );
 }

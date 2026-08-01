@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
 import QuestionCard from "@/components/QuestionCard";
 import ScoreRing, { formatScore } from "@/components/ScoreRing";
 import { MARKING, scoreAnswers } from "@/lib/daily";
@@ -72,7 +71,9 @@ function toQuestion(v: unknown): Question | null {
     options,
     // `answer` is legitimately nullable in the bank; don't coerce it to a number.
     answer:
-      typeof v.answer === "number" && Number.isInteger(v.answer) ? v.answer : null,
+      typeof v.answer === "number" && Number.isInteger(v.answer)
+        ? v.answer
+        : null,
     answerSource: typeof v.answerSource === "string" ? v.answerSource : "",
     topic: typeof v.topic === "string" ? v.topic : undefined,
   };
@@ -117,7 +118,7 @@ function parseReviewSet(raw: unknown): ReviewSet | null {
     mode: raw.mode === "random" ? "random" : "daily",
     timeTaken: Math.max(
       0,
-      Math.min(MARKING.durationSec, Math.round(finite(raw.timeTaken)))
+      Math.min(MARKING.durationSec, Math.round(finite(raw.timeTaken))),
     ),
     questions,
     answers,
@@ -151,8 +152,20 @@ function verdictFor(score: number, total: number): string {
 
 /* ── confetti ──────────────────────────────────────────────────────────────── */
 
-const CONFETTI_TOKENS = ["--accent", "--streak", "--ok", "--accent-ink", "--streak-soft"];
-const CONFETTI_FALLBACK = ["#2f6bff", "#ff8a3d", "#16a34a", "#9db9ff", "#ffc49b"];
+const CONFETTI_TOKENS = [
+  "--accent",
+  "--streak",
+  "--ok",
+  "--accent-ink",
+  "--streak-soft",
+];
+const CONFETTI_FALLBACK = [
+  "#2f6bff",
+  "#ff8a3d",
+  "#16a34a",
+  "#9db9ff",
+  "#ffc49b",
+];
 
 interface Particle {
   x: number;
@@ -168,9 +181,9 @@ interface Particle {
 
 function confettiColors(): string[] {
   const style = getComputedStyle(document.documentElement);
-  const picked = CONFETTI_TOKENS.map((t) => style.getPropertyValue(t).trim()).filter(
-    (c) => c.length > 0
-  );
+  const picked = CONFETTI_TOKENS.map((t) =>
+    style.getPropertyValue(t).trim(),
+  ).filter((c) => c.length > 0);
   return picked.length > 0 ? picked : CONFETTI_FALLBACK;
 }
 
@@ -267,7 +280,7 @@ export default function ResultsPage() {
 
   useEffect(() => {
     setReducedMotion(
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     );
     let parsed: ReviewSet | null = null;
     try {
@@ -300,46 +313,43 @@ export default function ResultsPage() {
 
   if (state.status === "loading") {
     return (
-      <div className="min-h-screen">
-        <Navbar />
-        <main className="shell px-4 py-6">
-          <p role="status" className="sr-only">
-            Loading your results…
-          </p>
-          <div className="card flex flex-col items-center gap-4" aria-hidden="true">
-            <div className="h-3 w-48 max-w-full rounded-full bg-surface-2" />
-            <div className="h-[150px] w-[150px] rounded-full border-[11px] border-surface-2" />
-            <div className="h-4 w-32 rounded-full bg-surface-2" />
-            <div className="grid w-full grid-cols-3 gap-2.5">
-              <div className="h-16 rounded-xl bg-surface-2" />
-              <div className="h-16 rounded-xl bg-surface-2" />
-              <div className="h-16 rounded-xl bg-surface-2" />
-            </div>
+      <main className="px-4 py-6">
+        <p role="status" className="sr-only">
+          Loading your results…
+        </p>
+        <div
+          className="card flex flex-col items-center gap-4"
+          aria-hidden="true"
+        >
+          <div className="h-3 w-48 max-w-full rounded-full bg-surface-2" />
+          <div className="h-[150px] w-[150px] rounded-full border-[11px] border-surface-2" />
+          <div className="h-4 w-32 rounded-full bg-surface-2" />
+          <div className="grid w-full grid-cols-3 gap-2.5">
+            <div className="h-16 rounded-xl bg-surface-2" />
+            <div className="h-16 rounded-xl bg-surface-2" />
+            <div className="h-16 rounded-xl bg-surface-2" />
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
     );
   }
 
   if (state.status === "empty") {
     return (
-      <div className="min-h-screen">
-        <Navbar />
-        <main className="shell px-4 py-6">
-          <div className="card fade-up flex flex-col items-center gap-4 py-12 text-center">
-            <p className="text-lg font-bold tracking-tight text-ink">
-              No results yet
-            </p>
-            <p className="max-w-[26ch] text-sm leading-relaxed text-muted">
-              Your last review lives in this tab only. Take today&apos;s test and
-              it will appear here.
-            </p>
-            <Link href="/test" className="btn-primary">
-              Go to test
-            </Link>
-          </div>
-        </main>
-      </div>
+      <main className="px-4 py-6">
+        <div className="card fade-up flex flex-col items-center gap-4 py-12 text-center">
+          <p className="text-lg font-bold tracking-tight text-ink">
+            No results yet
+          </p>
+          <p className="max-w-[26ch] text-sm leading-relaxed text-muted">
+            Your last review lives in this tab only. Take today&apos;s test and
+            it will appear here.
+          </p>
+          <Link href="/test" className="btn-primary">
+            Go to test
+          </Link>
+        </div>
+      </main>
     );
   }
 
@@ -354,7 +364,7 @@ export default function ResultsPage() {
   const negative = set.score < 0;
   const celebrate = set.total > 0 && set.score >= set.total * 0.7;
   const unofficial = set.questions.filter(
-    (q) => q.answerSource !== OFFICIAL_KEY_SOURCE
+    (q) => q.answerSource !== OFFICIAL_KEY_SOURCE,
   ).length;
   const day = formatDay(set.date);
   const headline = negative
@@ -369,162 +379,162 @@ export default function ResultsPage() {
   ].filter((part) => part.length > 0);
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <main className="shell space-y-4 px-4 py-6">
-        <h1 className="sr-only">Your results</h1>
+    <main className="space-y-4 px-4 py-6">
+      <h1 className="sr-only">Your results</h1>
 
-        <div className="relative">
-          <ConfettiBurst active={celebrate} />
-          <section className="card stagger flex flex-col items-center gap-3.5 text-center">
-            <p className="text-[0.6875rem] font-bold uppercase leading-relaxed tracking-[0.12em] text-muted">
-              {meta.join(" · ")}
+      <div className="relative">
+        <ConfettiBurst active={celebrate} />
+        <section className="card stagger flex flex-col items-center gap-3.5 text-center">
+          <p className="text-[0.6875rem] font-bold uppercase leading-relaxed tracking-[0.12em] text-muted">
+            {meta.join(" · ")}
+          </p>
+
+          <ScoreRing
+            score={set.score}
+            total={set.total}
+            caption={negative ? "net score" : `out of ${set.total}`}
+            label={headline}
+            reducedMotion={reducedMotion}
+          />
+
+          <div>
+            <p className="text-[1.0625rem] font-extrabold tracking-tight text-ink">
+              {verdictFor(set.score, set.total)}
             </p>
-
-            <ScoreRing
-              score={set.score}
-              total={set.total}
-              caption={negative ? "net score" : `out of ${set.total}`}
-              label={headline}
-              reducedMotion={reducedMotion}
-            />
-
-            <div>
-              <p className="text-[1.0625rem] font-extrabold tracking-tight text-ink">
-                {verdictFor(set.score, set.total)}
-              </p>
-              <p className="mt-1 text-sm leading-relaxed text-muted">
-                {answered > 0
-                  ? `${accuracy}% accuracy on ${answered} answered`
-                  : "Nothing answered — every question scored 0"}
-              </p>
-            </div>
-
-            <div className="grid w-full grid-cols-3 gap-2.5">
-              <div className="rounded-xl bg-ok-soft px-1 py-3">
-                <p className="text-xl font-extrabold text-ok-ink">{set.correct}</p>
-                <p className="text-[0.6875rem] font-semibold text-muted">correct</p>
-              </div>
-              <div className="rounded-xl bg-err-soft px-1 py-3">
-                <p className="text-xl font-extrabold text-err-ink">{set.wrong}</p>
-                <p className="text-[0.6875rem] font-semibold text-muted">wrong</p>
-              </div>
-              <div className="rounded-xl bg-surface-2 px-1 py-3">
-                <p className="text-xl font-extrabold text-ink">{set.skipped}</p>
-                <p className="text-[0.6875rem] font-semibold text-muted">blank</p>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        <p role="status" className="sr-only">
-          {`${headline} ${set.correct} correct, ${set.wrong} wrong, ${set.skipped} blank.`}
-        </p>
-
-        <p className="text-center text-xs text-muted">
-          +{MARKING.correct} correct · −{Math.abs(MARKING.wrong)} wrong ·{" "}
-          {MARKING.skip} blank
-        </p>
-
-        <div className="flex flex-wrap justify-center gap-3">
-          <Link href="/test" className="btn-ghost">
-            Retake
-          </Link>
-          <Link href="/" className="btn-primary">
-            Home
-          </Link>
-        </div>
-
-        {unofficial > 0 && (
-          <div className="flex gap-3 rounded-2xl border border-dashed border-streak/55 bg-streak-soft px-4 py-3.5">
-            <svg
-              viewBox="0 0 24 24"
-              className="mt-0.5 h-[1.0625rem] w-[1.0625rem] shrink-0 text-streak-ink"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="12" r="9" />
-              <path d="M12 8v5M12 16.5v.01" />
-            </svg>
-            <p className="text-[0.8125rem] leading-relaxed text-ink">
-              <strong className="font-bold">
-                {unofficial} of these {set.total} answers were never checked
-                against an official key.
-              </strong>{" "}
-              They were written or transcribed by hand for practice, and the tag
-              on each question below says which is which. Where the answer looks
-              wrong, it may well be.
+            <p className="mt-1 text-sm leading-relaxed text-muted">
+              {answered > 0
+                ? `${accuracy}% accuracy on ${answered} answered`
+                : "Nothing answered — every question scored 0"}
             </p>
           </div>
-        )}
 
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <h2 className="text-lg font-extrabold tracking-tight text-ink">Review</h2>
-          <div
-            role="group"
-            aria-label="Filter the review"
-            className="flex flex-wrap gap-2"
+          <div className="grid w-full grid-cols-3 gap-2.5">
+            <div className="rounded-xl bg-ok-soft px-1 py-3">
+              <p className="text-xl font-extrabold text-ok-ink">
+                {set.correct}
+              </p>
+              <p className="text-[0.6875rem] font-semibold text-muted">
+                correct
+              </p>
+            </div>
+            <div className="rounded-xl bg-err-soft px-1 py-3">
+              <p className="text-xl font-extrabold text-err-ink">{set.wrong}</p>
+              <p className="text-[0.6875rem] font-semibold text-muted">wrong</p>
+            </div>
+            <div className="rounded-xl bg-surface-2 px-1 py-3">
+              <p className="text-xl font-extrabold text-ink">{set.skipped}</p>
+              <p className="text-[0.6875rem] font-semibold text-muted">blank</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <p role="status" className="sr-only">
+        {`${headline} ${set.correct} correct, ${set.wrong} wrong, ${set.skipped} blank.`}
+      </p>
+
+      <p className="text-center text-xs text-muted">
+        +{MARKING.correct} correct · −{Math.abs(MARKING.wrong)} wrong ·{" "}
+        {MARKING.skip} blank
+      </p>
+
+      <div className="flex flex-wrap justify-center gap-3">
+        <Link href="/test" className="btn-ghost">
+          Retake
+        </Link>
+        <Link href="/" className="btn-primary">
+          Home
+        </Link>
+      </div>
+
+      {unofficial > 0 && (
+        <div className="flex gap-3 rounded-2xl border border-dashed border-streak/55 bg-streak-soft px-4 py-3.5">
+          <svg
+            viewBox="0 0 24 24"
+            className="mt-0.5 h-[1.0625rem] w-[1.0625rem] shrink-0 text-streak-ink"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            aria-hidden="true"
           >
-            <FilterPill
-              active={!onlyMissed}
-              onClick={() => setOnlyMissed(false)}
-            >
-              All {set.total}
-            </FilterPill>
-            <FilterPill
-              active={onlyMissed}
-              disabled={missed.size === 0}
-              title={
-                missed.size === 0
-                  ? "Nothing to review — you got every question right"
-                  : `Show only the ${missed.size} you answered wrong or left blank`
-              }
-              onClick={() => setOnlyMissed(true)}
-            >
-              {/* Not "mistakes": this set includes blanks, and under −0.25
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 8v5M12 16.5v.01" />
+          </svg>
+          <p className="text-[0.8125rem] leading-relaxed text-ink">
+            <strong className="font-bold">
+              {unofficial} of these {set.total} answers were never checked
+              against an official key.
+            </strong>{" "}
+            They were written or transcribed by hand for practice, and the tag
+            on each question below says which is which. Where the answer looks
+            wrong, it may well be.
+          </p>
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+        <h2 className="text-lg font-extrabold tracking-tight text-ink">
+          Review
+        </h2>
+        <div
+          role="group"
+          aria-label="Filter the review"
+          className="flex flex-wrap gap-2"
+        >
+          <FilterPill active={!onlyMissed} onClick={() => setOnlyMissed(false)}>
+            All {set.total}
+          </FilterPill>
+          <FilterPill
+            active={onlyMissed}
+            disabled={missed.size === 0}
+            title={
+              missed.size === 0
+                ? "Nothing to review — you got every question right"
+                : `Show only the ${missed.size} you answered wrong or left blank`
+            }
+            onClick={() => setOnlyMissed(true)}
+          >
+            {/* Not "mistakes": this set includes blanks, and under −0.25
                   marking leaving a question blank is often the right call.
                   Labelling it a mistake contradicts the strategy the rest of
                   the app teaches. */}
-              Wrong or blank · {missed.size}
-            </FilterPill>
-          </div>
+            Wrong or blank · {missed.size}
+          </FilterPill>
         </div>
+      </div>
 
-        <ol className="space-y-3.5">
-          {visible.map(({ q, i }, position) => (
-            <li
-              key={`${onlyMissed ? "missed" : "all"}-${i}-${q.id}`}
-              className="fade-up"
-              /* animation-delay cannot come from a Tailwind utility here: the
+      <ol className="space-y-3.5">
+        {visible.map(({ q, i }, position) => (
+          <li
+            key={`${onlyMissed ? "missed" : "all"}-${i}-${q.id}`}
+            className="fade-up"
+            /* animation-delay cannot come from a Tailwind utility here: the
                  unlayered `.fade-up` shorthand in globals.css would reset it. */
-              style={
-                reducedMotion
-                  ? undefined
-                  : { animationDelay: `${Math.min(position, 9) * 45}ms` }
-              }
-            >
-              <QuestionCard
-                question={q}
-                index={i}
-                total={set.total}
-                selected={set.answers[i]}
-                onSelect={() => {}}
-                showResult
-              />
-            </li>
-          ))}
-        </ol>
+            style={
+              reducedMotion
+                ? undefined
+                : { animationDelay: `${Math.min(position, 9) * 45}ms` }
+            }
+          >
+            <QuestionCard
+              question={q}
+              index={i}
+              total={set.total}
+              selected={set.answers[i]}
+              onSelect={() => {}}
+              showResult
+            />
+          </li>
+        ))}
+      </ol>
 
-        <div className="flex justify-center pt-1">
-          <Link href="/" className="btn-ghost">
-            Back to home
-          </Link>
-        </div>
-      </main>
-    </div>
+      <div className="flex justify-center pt-1">
+        <Link href="/" className="btn-ghost">
+          Back to home
+        </Link>
+      </div>
+    </main>
   );
 }
 
