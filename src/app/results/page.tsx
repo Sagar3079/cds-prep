@@ -484,7 +484,11 @@ export default function ResultsPage() {
               }
               onClick={() => setOnlyMissed(true)}
             >
-              Only my mistakes · {missed.size}
+              {/* Not "mistakes": this set includes blanks, and under −0.25
+                  marking leaving a question blank is often the right call.
+                  Labelling it a mistake contradicts the strategy the rest of
+                  the app teaches. */}
+              Wrong or blank · {missed.size}
             </FilterPill>
           </div>
         </div>
