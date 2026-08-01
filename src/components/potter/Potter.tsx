@@ -19,30 +19,32 @@ export interface PotterProps {
   lookY?: number;
   size?: number;
   className?: string;
+  /** Tapping him toggles his thoughts. Omit to render him inert. */
+  onToggle?: () => void;
+  thoughtsOn?: boolean;
 }
 
 /**
- * Potter — the study companion.
+ * Potter — the study companion. A scruffy, bespectacled young wizard.
  *
- * ONE svg, not stacked layers. The previous version positioned four absolute
- * layers independently, which made it impossible to reason about where his
- * hands were relative to the card edge — they drifted and read as loose blobs.
+ * Deliberately NOT the trademarked character: no lightning scar, no house
+ * crest, no school branding. Round glasses, messy black hair and a striped
+ * scarf carry the idea; the specific marks are Warner Bros. property and this
+ * repo is public.
  *
- * The geometry is now fixed and documented:
- *
- *   viewBox is 120 wide x 120 tall
- *   LEDGE_Y = 88  — the line his hands grip; everything below is meant to be
- *                   hidden behind whatever he is perched on
- *
- * `LEDGE_RATIO` is exported so the CSS placement can offset him by exactly the
- * hidden portion instead of guessing a pixel value.
+ * ONE svg with fixed geometry. LEDGE_Y = 88 of 120 is the line his hands grip;
+ * everything below is meant to sit behind whatever he is perched on, and
+ * LEDGE_RATIO is exported so the CSS can offset him by exactly that amount
+ * rather than a guessed pixel value.
  */
-export const LEDGE_RATIO = 88 / 120; // 0.733 of his height sits above the ledge
+export const LEDGE_RATIO = 88 / 120;
 
 const SKIN = "#f7d3ab";
-const SKIN_SHADE = "#e8b98a";
-const HAIR = "#241f2e";
-const HAIR_HI = "#3d3553";
+const SHADE = "#e7b587";
+const DEEP = "#d99f6f";
+const HAIR = "#211c2b";
+const HAIR_HI = "#443a5e";
+const ROBE_DARK = "#1e2a52";
 
 export default function Potter({
   mood = "idle",
@@ -50,8 +52,11 @@ export default function Potter({
   lookY = 0,
   size = 100,
   className = "",
+  onToggle,
+  thoughtsOn = true,
 }: PotterProps) {
   const [blink, setBlink] = useState(false);
+  const [tapped, setTapped] = useState(false);
   const t = useRef<number | null>(null);
 
   useEffect(() => {
@@ -64,7 +69,7 @@ export default function Potter({
           window.setTimeout(() => setBlink(false), 100);
           loop();
         },
-        2000 + Math.random() * 3400
+        1900 + Math.random() * 3400
       );
     };
     loop();
@@ -79,152 +84,209 @@ export default function Potter({
   const shut = blink || mood === "cheer";
   const happy = mood === "excited" || mood === "cheer" || mood === "impressed";
 
-  const pupil = { x: lx * 3.6, y: ly * -2.6 };
-  const headTilt = lx * 5;
+  const handleTap = () => {
+    if (!onToggle) return;
+    setTapped(true);
+    window.setTimeout(() => setTapped(false), 420);
+    onToggle();
+  };
+
+  const art = (
+    <svg viewBox="0 0 120 120" width="100%" height="100%" className="potter__svg">
+      <defs>
+        <linearGradient id="pt-robe" x1=".2" y1="0" x2=".85" y2="1">
+          <stop offset="0%" stopColor="var(--accent)" />
+          <stop offset="100%" stopColor={ROBE_DARK} />
+        </linearGradient>
+        <radialGradient id="pt-face" cx="40%" cy="30%" r="72%">
+          <stop offset="0%" stopColor="#fff1e0" />
+          <stop offset="70%" stopColor={SKIN} />
+          <stop offset="100%" stopColor={SHADE} />
+        </radialGradient>
+        <linearGradient id="pt-lens" x1="0" y1="0" x2=".6" y2="1">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity=".55" />
+          <stop offset="55%" stopColor="#cfe0ff" stopOpacity=".18" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity=".05" />
+        </linearGradient>
+      </defs>
+
+      {/* ================= TORSO ================= */}
+      <g className="potter__torso">
+        <path d="M60 66c19 0 33 11 36 27l3 27H21l3-27c3-16 17-27 36-27Z" fill="url(#pt-robe)" />
+        {/* robe opening + inner shadow, so it reads as cloth not a bib */}
+        <path d="M60 74 48 120h24Z" fill={ROBE_DARK} opacity=".55" />
+        <path d="M44 78c-4 12-6 26-6 42h-4c0-17 3-31 7-43Z" fill="#000" opacity=".13" />
+        {/* collar */}
+        <path d="M47 67c4 8 9 12 13 12s9-4 13-12l-6-4c-4 6-10 6-14 0Z" fill="#fdfdff" />
+        {/* tie */}
+        <path d="M60 79l-5 5 5 22 5-22Z" fill="#8c2f39" />
+        <path d="M60 79l-5 5 5 4 5-4Z" fill="#a63a45" />
+        {/* arms up onto the ledge */}
+        <path d="M28 80c-8 4-11 10-10 18l2 9 17-3-3-16Z" fill={ROBE_DARK} />
+        <path d="M92 80c8 4 11 10 10 18l-2 9-17-3 3-16Z" fill={ROBE_DARK} />
+        {/* cuffs */}
+        <path d="M20 92l16-3 1 6-16 3Z" fill="#fdfdff" opacity=".85" />
+        <path d="M100 92l-16-3-1 6 16 3Z" fill="#fdfdff" opacity=".85" />
+      </g>
+
+      {/* ================= SCARF ================= */}
+      <g className="potter__scarf">
+        <path d="M40 63h40a7.5 7.5 0 0 1 0 15H40a7.5 7.5 0 0 1 0-15Z" fill="var(--streak)" />
+        <g fill="#fff" opacity=".3">
+          <rect x="46" y="64" width="4.5" height="13" />
+          <rect x="58" y="64" width="4.5" height="13" />
+          <rect x="70" y="64" width="4.5" height="13" />
+        </g>
+        <path d="M40 63h40a7.5 7.5 0 0 1 3 .6C81 66 72 67 60 67s-21-1-23-3.4a7.5 7.5 0 0 1 3-.6Z" fill="#fff" opacity=".18" />
+        <g className="potter__tail">
+          <path d="M75 74c9 6 13 14 13 24l-10 2c0-9-3-15-9-19Z" fill="var(--streak)" />
+          {/* fringe */}
+          <path d="M78 100l10-2 1 5-10 2Z" fill="var(--streak-ink)" opacity=".55" />
+        </g>
+      </g>
+
+      {/* ================= HEAD ================= */}
+      <g
+        className="potter__head"
+        style={{
+          transform: `rotate(${lx * 5}deg) translateY(${ly * -1.6}px)`,
+          transformOrigin: "60px 62px",
+        }}
+      >
+        <ellipse cx="18" cy="43" rx="6.5" ry="8.5" fill={SHADE} />
+        <ellipse cx="102" cy="43" rx="6.5" ry="8.5" fill={SHADE} />
+        <path d="M16 41a4 4 0 0 1 4 4" stroke={DEEP} strokeWidth="1.6" fill="none" strokeLinecap="round" />
+        <path d="M104 41a4 4 0 0 0-4 4" stroke={DEEP} strokeWidth="1.6" fill="none" strokeLinecap="round" />
+
+        <rect x="20" y="6" width="80" height="66" rx="30" fill="url(#pt-face)" />
+        {/* jaw + neck shadow give the head volume */}
+        <path d="M25 52c6 15 20 23 35 23s29-8 35-23c-1 16-15 27-35 27S26 68 25 52Z" fill={SHADE} opacity=".45" />
+        <path d="M47 70h26c-3 5-8 8-13 8s-10-3-13-8Z" fill={DEEP} opacity=".35" />
+
+        {/* hair */}
+        <path
+          d="M20 37C16 15 33 1 60 1s44 14 40 36c-3-7-8-11-13-13l4-10-11 7-2-10-8 8-5-9-6 9-8-7-3 9-10-6 3 10c-6 2-11 7-14 14Z"
+          fill={HAIR}
+        />
+        <path d="M77 6c11 5 17 14 17 25-3-10-10-19-21-22Z" fill={HAIR_HI} />
+        <path d="M31 14c-6 6-9 14-9 22 1-10 4-17 11-23Z" fill={HAIR_HI} opacity=".7" />
+        {/* loose strands over the brow */}
+        <path d="M36 24c-4 4-5 10-4 15M48 20c-3 5-3 11-2 16" stroke={HAIR} strokeWidth="4.5" strokeLinecap="round" fill="none" />
+
+        {/* brows */}
+        <g style={{ transform: `translateY(${happy ? -3 : mood === "wince" ? 2.5 : 0}px)`, transition: "transform .4s var(--ease)" }}>
+          <path
+            d={mood === "thinking" ? "M31 32c5-5 12-5 17 0" : mood === "wince" ? "M31 29c5 2 12 3 17 5" : "M31 31c5-4 12-4 17 0"}
+            stroke={HAIR} strokeWidth="3.6" fill="none" strokeLinecap="round"
+          />
+          <path
+            d={mood === "thinking" ? "M72 32c5-5 12-5 17 0" : mood === "wince" ? "M72 34c5-2 12-3 17-5" : "M72 31c5-4 12-4 17 0"}
+            stroke={HAIR} strokeWidth="3.6" fill="none" strokeLinecap="round"
+          />
+        </g>
+
+        {/* glasses — the defining feature, so they get the most detail */}
+        <g className="potter__specs">
+          <circle cx="43" cy="46" r="14.5" fill="url(#pt-lens)" />
+          <circle cx="77" cy="46" r="14.5" fill="url(#pt-lens)" />
+          <circle cx="43" cy="46" r="14.5" fill="none" stroke={HAIR} strokeWidth="3.4" />
+          <circle cx="77" cy="46" r="14.5" fill="none" stroke={HAIR} strokeWidth="3.4" />
+          <circle cx="43" cy="46" r="11.5" fill="none" stroke="#000" strokeWidth="1" opacity=".18" />
+          <circle cx="77" cy="46" r="11.5" fill="none" stroke="#000" strokeWidth="1" opacity=".18" />
+          {/* bridge, wrapped over the nose */}
+          <path d="M57.5 44c1.6-1.6 3.4-1.6 5 0" stroke={HAIR} strokeWidth="3.4" fill="none" strokeLinecap="round" />
+          <path d="M28.5 44l-8-4M91.5 44l8-4" stroke={HAIR} strokeWidth="3.2" strokeLinecap="round" />
+          {/* twin glints sell glass */}
+          <path d="M35 39a11 11 0 0 1 9-5" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" fill="none" opacity=".95" />
+          <path d="M69 39a11 11 0 0 1 9-5" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" fill="none" opacity=".6" />
+        </g>
+
+        {/* nose */}
+        <path d="M60 48c-1.5 4-2.5 6-1 7.5 1 1 2 1 3 .3" stroke={DEEP} strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+
+        {/* eyes */}
+        <g style={{ transform: `translate(${lx * 3.6}px, ${ly * -2.6}px)`, transition: "transform .5s var(--ease)" }}>
+          {shut ? (
+            <>
+              <path d="M37 47c4 4.5 8 4.5 12 0" stroke={HAIR} strokeWidth="3.4" fill="none" strokeLinecap="round" />
+              <path d="M71 47c4 4.5 8 4.5 12 0" stroke={HAIR} strokeWidth="3.4" fill="none" strokeLinecap="round" />
+            </>
+          ) : (
+            <>
+              <ellipse cx="43" cy="47" rx="6" ry="6.4" fill="#25412c" />
+              <ellipse cx="77" cy="47" rx="6" ry="6.4" fill="#25412c" />
+              <circle cx="43" cy="47" r="3.1" fill={HAIR} />
+              <circle cx="77" cy="47" r="3.1" fill={HAIR} />
+              <circle cx="45.2" cy="44.6" r="2.1" fill="#fff" />
+              <circle cx="79.2" cy="44.6" r="2.1" fill="#fff" />
+              <circle cx="40.6" cy="49.6" r="1" fill="#fff" opacity=".65" />
+              <circle cx="74.6" cy="49.6" r="1" fill="#fff" opacity=".65" />
+            </>
+          )}
+        </g>
+
+        <path
+          d={
+            happy ? "M50 60c4 6.5 16 6.5 20 0"
+            : mood === "wince" ? "M52 63c4-4 12-4 16 0"
+            : mood === "thinking" ? "M54 61h12"
+            : "M52 60c4 4 12 4 16 0"
+          }
+          stroke={HAIR} strokeWidth="3.4" fill="none" strokeLinecap="round"
+        />
+        {happy && <path d="M53 61c4 4 10 4 14 0Z" fill="#b8465a" opacity=".55" />}
+
+        <g className="potter__cheeks">
+          <ellipse cx="29" cy="57" rx="7.5" ry="4.2" fill="var(--streak)" opacity=".45" />
+          <ellipse cx="91" cy="57" rx="7.5" ry="4.2" fill="var(--streak)" opacity=".45" />
+        </g>
+      </g>
+
+      {/* ================= HANDS — last, gripping the ledge at y=88 ================= */}
+      <g className="potter__hands">
+        <g fill={SKIN}>
+          <rect x="13" y="79" width="27" height="18" rx="8.5" />
+          <rect x="80" y="79" width="27" height="18" rx="8.5" />
+        </g>
+        <g stroke={DEEP} strokeWidth="1.9" strokeLinecap="round" opacity=".9">
+          <path d="M19 83.5v8M25.5 82.5v9M32 83.5v8" />
+          <path d="M86 83.5v8M92.5 82.5v9M99 83.5v8" />
+        </g>
+        {/* thumbs tucked under the edge */}
+        <rect x="34" y="88" width="9" height="7" rx="3.5" fill={SHADE} />
+        <rect x="77" y="88" width="9" height="7" rx="3.5" fill={SHADE} />
+      </g>
+
+      {/* muted indicator — a small "shh" puff when his thoughts are off */}
+      {!thoughtsOn && (
+        <g className="potter__muted">
+          <circle cx="99" cy="20" r="11" fill="var(--surface-2)" stroke="var(--line)" strokeWidth="1.5" />
+          <path d="M94 20h10" stroke="var(--muted)" strokeWidth="2.6" strokeLinecap="round" />
+        </g>
+      )}
+    </svg>
+  );
+
+  const classes = `potter potter--${mood} ${tapped ? "potter--tapped" : ""} ${className}`;
+
+  if (!onToggle) {
+    return (
+      <div className={classes} style={{ width: size, height: size }} aria-hidden="true">
+        {art}
+      </div>
+    );
+  }
 
   return (
-    <div
-      className={`potter potter--${mood} ${className}`}
+    <button
+      type="button"
+      onClick={handleTap}
+      aria-pressed={thoughtsOn}
+      aria-label={thoughtsOn ? "Mute Potter's thoughts" : "Let Potter think out loud"}
+      className={`${classes} potter--tappable`}
       style={{ width: size, height: size }}
-      aria-hidden="true"
     >
-      <svg viewBox="0 0 120 120" width="100%" height="100%" className="potter__svg">
-        <defs>
-          <linearGradient id="pt-robe" x1=".25" y1="0" x2=".8" y2="1">
-            <stop offset="0%" stopColor="var(--accent)" />
-            <stop offset="100%" stopColor="var(--accent-ink)" />
-          </linearGradient>
-          <radialGradient id="pt-face" cx="42%" cy="34%" r="70%">
-            <stop offset="0%" stopColor="#ffeeda" />
-            <stop offset="100%" stopColor={SKIN} />
-          </radialGradient>
-        </defs>
-
-        {/* ================= BODY (behind everything) ================= */}
-        <g className="potter__torso">
-          {/* shoulders, running past the ledge so nothing floats */}
-          <path
-            d="M60 66c19 0 33 11 36 27l3 27H21l3-27c3-16 17-27 36-27Z"
-            fill="url(#pt-robe)"
-          />
-          {/* arms reaching up onto the ledge */}
-          <path d="M28 80c-7 3-10 9-9 16l2 10 16-3-3-15Z" fill="var(--accent-ink)" />
-          <path d="M92 80c7 3 10 9 9 16l-2 10-16-3 3-15Z" fill="var(--accent-ink)" />
-          {/* collar */}
-          <path d="M48 68c4 7 8 10 12 10s8-3 12-10l-5-3c-4 5-10 5-14 0Z" fill="#fff" opacity=".9" />
-        </g>
-
-        {/* ================= SCARF — small, at the neck ================= */}
-        <g className="potter__scarf">
-          <path d="M40 64h40a7 7 0 0 1 0 14H40a7 7 0 0 1 0-14Z" fill="var(--streak)" />
-          <g fill="#fff" opacity=".28">
-            <rect x="47" y="65" width="4" height="12" />
-            <rect x="58" y="65" width="4" height="12" />
-            <rect x="69" y="65" width="4" height="12" />
-          </g>
-          {/* the tail flicks — it is the only thing that moves on its own */}
-          <path className="potter__tail" d="M74 74c8 5 12 13 12 22l-9 2c0-8-3-14-8-18Z" fill="var(--streak)" />
-        </g>
-
-        {/* ================= HEAD ================= */}
-        <g
-          className="potter__head"
-          style={{
-            transform: `rotate(${headTilt}deg) translateY(${ly * -1.5}px)`,
-            transformOrigin: "60px 62px",
-          }}
-        >
-          {/* ears */}
-          <ellipse cx="19" cy="42" rx="6" ry="8" fill={SKIN_SHADE} />
-          <ellipse cx="101" cy="42" rx="6" ry="8" fill={SKIN_SHADE} />
-
-          {/* face */}
-          <rect x="20" y="6" width="80" height="66" rx="30" fill="url(#pt-face)" />
-          {/* jaw shading, so the head reads round rather than flat */}
-          <path d="M24 50c6 14 20 22 36 22s30-8 36-22c-2 14-16 24-36 24S26 64 24 50Z" fill={SKIN_SHADE} opacity=".4" />
-
-          {/* hair: silhouette + spikes */}
-          <path
-            d="M20 36C17 16 33 2 60 2s43 14 40 34c-3-6-7-10-12-12l3-9-10 6-2-9-7 7-5-8-5 8-7-6-3 8-9-5 2 9c-5 2-10 6-13 13Z"
-            fill={HAIR}
-          />
-          <path d="M76 7c10 4 16 13 16 23-3-9-9-17-19-20Z" fill={HAIR_HI} />
-          <path d="M35 22c-3 4-4 9-3 13" stroke={HAIR} strokeWidth="4" strokeLinecap="round" fill="none" />
-
-          {/* brows */}
-          <g
-            style={{
-              transform: `translateY(${happy ? -3 : mood === "wince" ? 2.5 : 0}px)`,
-              transition: "transform .4s var(--ease)",
-            }}
-          >
-            <path
-              d={mood === "thinking" ? "M31 32c5-5 12-5 17 0" : mood === "wince" ? "M31 29c5 2 12 3 17 5" : "M31 31c5-4 12-4 17 0"}
-              stroke={HAIR} strokeWidth="3.4" fill="none" strokeLinecap="round"
-            />
-            <path
-              d={mood === "thinking" ? "M72 32c5-5 12-5 17 0" : mood === "wince" ? "M72 34c5-2 12-3 17-5" : "M72 31c5-4 12-4 17 0"}
-              stroke={HAIR} strokeWidth="3.4" fill="none" strokeLinecap="round"
-            />
-          </g>
-
-          {/* glasses */}
-          <g>
-            <circle cx="43" cy="46" r="14" fill="#fff" opacity=".38" />
-            <circle cx="77" cy="46" r="14" fill="#fff" opacity=".38" />
-            <circle cx="43" cy="46" r="14" fill="none" stroke={HAIR} strokeWidth="3.2" />
-            <circle cx="77" cy="46" r="14" fill="none" stroke={HAIR} strokeWidth="3.2" />
-            <path d="M57 46h6" stroke={HAIR} strokeWidth="3.2" strokeLinecap="round" />
-            <path d="M29 44l-7-3M91 44l7-3" stroke={HAIR} strokeWidth="3" strokeLinecap="round" />
-            <path d="M36 39a10 10 0 0 1 8-5" stroke="#fff" strokeWidth="3" strokeLinecap="round" fill="none" opacity=".9" />
-          </g>
-
-          {/* eyes */}
-          <g style={{ transform: `translate(${pupil.x}px, ${pupil.y}px)`, transition: "transform .5s var(--ease)" }}>
-            {shut ? (
-              <>
-                <path d="M37 47c4 4 8 4 12 0" stroke={HAIR} strokeWidth="3.2" fill="none" strokeLinecap="round" />
-                <path d="M71 47c4 4 8 4 12 0" stroke={HAIR} strokeWidth="3.2" fill="none" strokeLinecap="round" />
-              </>
-            ) : (
-              <>
-                <circle cx="43" cy="47" r="5.6" fill={HAIR} />
-                <circle cx="77" cy="47" r="5.6" fill={HAIR} />
-                <circle cx="45" cy="45" r="2" fill="#fff" />
-                <circle cx="79" cy="45" r="2" fill="#fff" />
-              </>
-            )}
-          </g>
-
-          <path
-            d={
-              happy ? "M50 60c4 6 16 6 20 0"
-              : mood === "wince" ? "M52 63c4-4 12-4 16 0"
-              : mood === "thinking" ? "M54 61h12"
-              : "M52 60c4 4 12 4 16 0"
-            }
-            stroke={HAIR} strokeWidth="3.2" fill="none" strokeLinecap="round"
-          />
-
-          <g className="potter__cheeks">
-            <ellipse cx="29" cy="57" rx="7" ry="4" fill="var(--streak)" opacity=".45" />
-            <ellipse cx="91" cy="57" rx="7" ry="4" fill="var(--streak)" opacity=".45" />
-          </g>
-        </g>
-
-        {/* ============ HANDS — drawn LAST, gripping the ledge at y=88 ============ */}
-        <g className="potter__hands">
-          <g fill={SKIN}>
-            <rect x="14" y="80" width="26" height="17" rx="8" />
-            <rect x="80" y="80" width="26" height="17" rx="8" />
-          </g>
-          {/* fingers curling over the edge */}
-          <g stroke={SKIN_SHADE} strokeWidth="1.8" strokeLinecap="round" opacity=".9">
-            <path d="M20 84v7M26 83v8M32 84v7" />
-            <path d="M86 84v7M92 83v8M98 84v7" />
-          </g>
-        </g>
-      </svg>
-    </div>
+      {art}
+    </button>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Potter from "./Potter";
 import { homeLine } from "@/lib/potter";
 import { getStats, hasAttemptOn, todayKey } from "@/lib/storage";
+import { onThoughtsChange, thoughtsOn, toggleThoughts } from "@/lib/potterPrefs";
 
 /**
  * Potter perched on the daily card: hands on the top edge, lower half hidden
@@ -21,6 +22,7 @@ export default function PotterPerch() {
     homeLine({ doneToday: false, streak: 0, accuracy: 0, tests: 0 })
   );
   const [look, setLook] = useState(0);
+  const [talk, setTalk] = useState(true);
   const hostRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -33,8 +35,11 @@ export default function PotterPerch() {
         tests: s.testsTaken,
       })
     );
+    setTalk(thoughtsOn());
     setReady(true);
   }, []);
+
+  useEffect(() => onThoughtsChange(setTalk), []);
 
   // His eyes follow the pointer, but only while it is over the panel — a
   // character tracking a cursor that is off in another window is unsettling.
@@ -69,8 +74,10 @@ export default function PotterPerch() {
           look={look}
           lookY={-0.75}
           size={104}
+          thoughtsOn={talk}
+          onToggle={() => setTalk(toggleThoughts())}
         />
-        <p className="potter-thought">{line.text}</p>
+        {talk && <p className="potter-thought">{line.text}</p>}
       </div>
     </div>
   );

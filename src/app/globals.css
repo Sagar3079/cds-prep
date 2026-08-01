@@ -539,7 +539,28 @@ mark.target-word {
   pointer-events: none;
   user-select: none;
   filter: drop-shadow(0 6px 10px rgba(16, 20, 45, 0.16));
+  padding: 0;
+  border: 0;
+  background: none;
 }
+/* Tapping him mutes or unmutes his thoughts. Only the tappable variant takes
+   pointer events — the decorative copies stay inert. */
+.potter--tappable {
+  pointer-events: auto;
+  cursor: pointer;
+  transition: filter 0.25s var(--ease);
+}
+.potter--tappable:hover { filter: drop-shadow(0 8px 14px rgba(16, 20, 45, 0.24)); }
+.potter--tappable:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; border-radius: 14px; }
+/* squash on tap, so the toggle is felt as well as seen */
+.potter--tapped .potter__svg { animation: potterTap 0.42s var(--ease); }
+@keyframes potterTap {
+  0%   { transform: scale(1, 1); }
+  30%  { transform: scale(1.1, 0.9) translateY(3px); }
+  60%  { transform: scale(0.96, 1.05) translateY(-2px); }
+  100% { transform: scale(1, 1); }
+}
+.potter__muted { animation: thoughtIn 0.35s var(--ease) both; }
 .potter__svg {
   display: block;
   overflow: visible;

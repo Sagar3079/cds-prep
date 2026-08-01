@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Potter from "./Potter";
 import { testLine, type Line } from "@/lib/potter";
+import { onThoughtsChange, thoughtsOn, toggleThoughts } from "@/lib/potterPrefs";
 
 /**
  * Potter during a run: perched on the question card, reacting to how it is
@@ -26,12 +27,16 @@ export default function PotterCoach({
   const [line, setLine] = useState<Line | null>(null);
   const [leaving, setLeaving] = useState(false);
   const [enabled, setEnabled] = useState(false);
+  const [talk, setTalk] = useState(true);
   const enteredAt = useRef(Date.now());
   const hideTimer = useRef<number | null>(null);
 
   useEffect(() => {
     setEnabled(!window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    setTalk(thoughtsOn());
   }, []);
+
+  useEffect(() => onThoughtsChange(setTalk), []);
 
   useEffect(() => {
     enteredAt.current = Date.now();
@@ -68,11 +73,18 @@ export default function PotterCoach({
   return (
     <div className="potter-perch potter-perch--centre">
       <div className="relative">
-        <Potter mood={line?.mood ?? "peek"} look={0} lookY={-0.7} size={96} />
-        {line && !leaving && (
+        <Potter
+          mood={line?.mood ?? "peek"}
+          look={0}
+          lookY={-0.7}
+          size={96}
+          thoughtsOn={talk}
+          onToggle={() => setTalk(toggleThoughts())}
+        />
+        {talk && line && !leaving && (
           <p className="potter-thought potter-thought--left">{line.text}</p>
         )}
-        {line && leaving && (
+        {talk && line && leaving && (
           <p
             className="potter-thought potter-thought--left"
             data-leaving="true"

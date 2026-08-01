@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Potter, { type Mood } from "./Potter";
 import { reviewLine } from "@/lib/potter";
+import { onThoughtsChange, thoughtsOn, toggleThoughts } from "@/lib/potterPrefs";
 
 export interface RiderItem {
   correct: boolean;
@@ -37,6 +38,7 @@ export default function PotterRider({
 }) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const [visible, setVisible] = useState(false);
+  const [talk, setTalk] = useState(true);
   const [say, setSay] = useState<{ mood: Mood; text: string }>({
     mood: "peek",
     text: "",
@@ -52,6 +54,7 @@ export default function PotterRider({
   itemsRef.current = items;
 
   useEffect(() => {
+    setTalk(thoughtsOn());
     if (typeof window === "undefined") return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (window.innerWidth < 620) return; // no room beside the column
@@ -131,6 +134,8 @@ export default function PotterRider({
     // Intentionally NOT depending on the current index — see the note above.
   }, [containerSelector, itemSelector]);
 
+  useEffect(() => onThoughtsChange(setTalk), []);
+
   if (items.length === 0) return null;
 
   return (
@@ -138,11 +143,17 @@ export default function PotterRider({
       ref={hostRef}
       className="potter-rider"
       style={{ visibility: visible ? "visible" : "hidden" }}
-      aria-hidden="true"
     >
       <div className="relative">
-        <Potter mood={say.mood} look={-0.5} lookY={-0.4} size={80} />
-        {say.text && <p className="potter-thought">{say.text}</p>}
+        <Potter
+          mood={say.mood}
+          look={-0.5}
+          lookY={-0.4}
+          size={80}
+          thoughtsOn={talk}
+          onToggle={() => setTalk(toggleThoughts())}
+        />
+        {talk && say.text && <p className="potter-thought">{say.text}</p>}
       </div>
     </div>
   );
