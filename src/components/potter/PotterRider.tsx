@@ -11,14 +11,20 @@ export interface RiderItem {
 }
 
 /**
- * Potter riding the review list: as you scroll, he drops from one answer card
- * to the next and comments on it.
+ * Potter riding the review list — he drops from one answer card to the next as
+ * you scroll.
  *
- * The motion is a real spring integrated on rAF, not a CSS transition. A
- * transition restarts from wherever it happens to be each time the target
- * changes, which during a fast scroll produces a stutter; a spring carries its
- * velocity across target changes, so quick scrolling makes him overshoot and
- * settle exactly the way a dropped object does.
+ * The spring is integrated on rAF rather than driven by a CSS transition,
+ * because a transition restarts from wherever it happens to be each time the
+ * target changes; during a fast scroll that reads as stutter. A spring carries
+ * its velocity across target changes, so quick scrolling overshoots and settles
+ * the way a dropped object does.
+ *
+ * The loop is set up ONCE. An earlier version listed the current index in the
+ * effect's dependencies, so every landing tore the loop down and re-seeded
+ * `y = target` — which snapped him into place instantly and meant the fall
+ * never rendered at all. Index now lives in a ref; only the speech bubble is
+ * React state.
  */
 export default function PotterRider({
   containerSelector,
@@ -30,89 +36,88 @@ export default function PotterRider({
   items: RiderItem[];
 }) {
   const hostRef = useRef<HTMLDivElement | null>(null);
-  const [index, setIndex] = useState(0);
-  const [mood, setMood] = useState<Mood>("peek");
-  const [text, setText] = useState("");
-  const [enabled, setEnabled] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [say, setSay] = useState<{ mood: Mood; text: string }>({
+    mood: "peek",
+    text: "",
+  });
 
-  // spring state, kept out of React so the loop never re-renders
+  // physics + index, deliberately outside React so the loop never re-renders
   const y = useRef(0);
-  const v = useRef(0);
+  const vel = useRef(0);
   const target = useRef(0);
-  const raf = useRef<number | null>(null);
-  const landed = useRef(true);
+  const idx = useRef(-1);
+  const settled = useRef(true);
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (window.matchMedia("(max-width: 480px)").matches) return; // no room beside the cards
-    setEnabled(true);
-  }, []);
+    if (window.innerWidth < 620) return; // no room beside the column
 
-  useEffect(() => {
-    if (!enabled) return;
     const host = hostRef.current;
     const scroller = document.querySelector<HTMLElement>(containerSelector);
-    if (!host || !scroller) return;
+    const parent = host?.offsetParent as HTMLElement | null;
+    if (!host || !scroller || !parent) return;
 
-    const parent = host.offsetParent as HTMLElement | null;
-    if (!parent) return;
+    setVisible(true);
+    let raf = 0;
 
     const measure = () => {
-      const cards = Array.from(
-        scroller.querySelectorAll<HTMLElement>(itemSelector)
-      );
+      const cards = Array.from(scroller.querySelectorAll<HTMLElement>(itemSelector));
       if (!cards.length) return;
 
       // the card nearest a focus line a third of the way down the viewport
-      const line = scroller.getBoundingClientRect().top + scroller.clientHeight * 0.34;
+      const line = scroller.getBoundingClientRect().top + scroller.clientHeight * 0.32;
       let best = 0;
       let bestDist = Infinity;
       cards.forEach((c, i) => {
-        const box = c.getBoundingClientRect();
-        const d = Math.abs(box.top + box.height / 2 - line);
+        const b = c.getBoundingClientRect();
+        const d = Math.abs(b.top + Math.min(b.height, 140) / 2 - line);
         if (d < bestDist) {
           bestDist = d;
           best = i;
         }
       });
 
-      const card = cards[best];
-      const pTop = parent.getBoundingClientRect().top;
-      target.current = card.getBoundingClientRect().top - pTop + 6;
+      const b = cards[best].getBoundingClientRect();
+      target.current = b.top - parent.getBoundingClientRect().top - 34;
 
-      if (best !== index) {
-        setIndex(best);
-        landed.current = false;
+      if (best !== idx.current) {
+        idx.current = best;
+        settled.current = false;
+        const it = itemsRef.current[best];
+        if (it) {
+          const line2 = reviewLine({ index: best, ...it });
+          setSay({ mood: line2.mood, text: line2.text });
+        }
       }
     };
 
     const step = () => {
-      // critically-ish damped spring — quick, with just enough overshoot to
-      // read as a landing rather than a slide
-      const k = 0.14;
-      const damp = 0.76;
-      v.current = (v.current + (target.current - y.current) * k) * damp;
-      y.current += v.current;
+      // spring: stiff enough to keep up with a flick, loose enough to overshoot
+      vel.current = (vel.current + (target.current - y.current) * 0.13) * 0.78;
+      y.current += vel.current;
       host.style.transform = `translate3d(0, ${y.current.toFixed(2)}px, 0)`;
 
-      // squash on impact, once per landing
-      if (!landed.current && Math.abs(v.current) < 0.35 && Math.abs(target.current - y.current) < 1.5) {
-        landed.current = true;
+      if (!settled.current && Math.abs(vel.current) < 0.3 && Math.abs(target.current - y.current) < 1.2) {
+        settled.current = true;
         host.animate(
           [
-            { transform: `translate3d(0, ${y.current}px, 0) scale(1.14, 0.86)` },
-            { transform: `translate3d(0, ${y.current}px, 0) scale(0.96, 1.05)` },
-            { transform: `translate3d(0, ${y.current}px, 0) scale(1, 1)` },
+            { transform: `translate3d(0,${y.current}px,0) scale(1.16,0.84)` },
+            { transform: `translate3d(0,${y.current}px,0) scale(0.95,1.06)` },
+            { transform: `translate3d(0,${y.current}px,0) scale(1,1)` },
           ],
-          { duration: 380, easing: "cubic-bezier(.22,1,.36,1)" }
+          { duration: 400, easing: "cubic-bezier(.22,1,.36,1)" }
         );
       }
-      raf.current = requestAnimationFrame(step);
+      raf = requestAnimationFrame(step);
     };
 
     measure();
-    y.current = target.current;
-    step();
+    y.current = target.current; // seed once, on first mount only
+    raf = requestAnimationFrame(step);
 
     scroller.addEventListener("scroll", measure, { passive: true });
     const ro = new ResizeObserver(measure);
@@ -121,29 +126,23 @@ export default function PotterRider({
     return () => {
       scroller.removeEventListener("scroll", measure);
       ro.disconnect();
-      if (raf.current !== null) cancelAnimationFrame(raf.current);
+      cancelAnimationFrame(raf);
     };
-  }, [enabled, containerSelector, itemSelector, index]);
+    // Intentionally NOT depending on the current index — see the note above.
+  }, [containerSelector, itemSelector]);
 
-  useEffect(() => {
-    const it = items[index];
-    if (!it) return;
-    const line = reviewLine({ index, ...it });
-    setMood(line.mood);
-    setText(line.text);
-  }, [index, items]);
-
-  if (!enabled || items.length === 0) return null;
+  if (items.length === 0) return null;
 
   return (
-    <div ref={hostRef} className="potter-rider" aria-hidden="true">
+    <div
+      ref={hostRef}
+      className="potter-rider"
+      style={{ visibility: visible ? "visible" : "hidden" }}
+      aria-hidden="true"
+    >
       <div className="relative">
-        <Potter mood={mood} look={-0.45} size={74} />
-        {text && (
-          <p className="potter-thought" style={{ bottom: "42%", maxWidth: 150 }}>
-            {text}
-          </p>
-        )}
+        <Potter mood={say.mood} look={-0.5} lookY={-0.4} size={80} />
+        {say.text && <p className="potter-thought">{say.text}</p>}
       </div>
     </div>
   );

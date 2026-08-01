@@ -66,12 +66,17 @@ export default function PotterCoach({
   if (!enabled) return null;
 
   return (
-    <div className="potter-perch" style={{ right: 14 }}>
+    <div className="potter-perch potter-perch--centre">
       <div className="relative">
-        <Potter mood={line?.mood ?? "peek"} look={-0.25} lookY={-0.7} size={92} />
-        {line && !leaving && <p className="potter-thought">{line.text}</p>}
+        <Potter mood={line?.mood ?? "peek"} look={0} lookY={-0.7} size={96} />
+        {line && !leaving && (
+          <p className="potter-thought potter-thought--left">{line.text}</p>
+        )}
         {line && leaving && (
-          <p className="potter-thought" data-leaving="true">
+          <p
+            className="potter-thought potter-thought--left"
+            data-leaving="true"
+          >
             {line.text}
           </p>
         )}

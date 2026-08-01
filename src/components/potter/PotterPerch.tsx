@@ -60,7 +60,7 @@ export default function PotterPerch() {
   if (!ready) return null;
 
   return (
-    <div ref={hostRef} className="potter-perch">
+    <div ref={hostRef} className="potter-perch potter-perch--right">
       <div className="relative">
         {/* lookY is negative: he is leaning over a ledge, so he is looking DOWN
             into the card, not out at the reader. */}

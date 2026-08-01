@@ -586,6 +586,19 @@ export default function TestClient({
         </p>
       )}
 
+      {/* Potter perches on the timer card, centred at the top of the run.
+          He is a preceding sibling and the card is z-40, so the card genuinely
+          covers his lower half — a child can never be occluded by its parent. */}
+      <div className="relative">
+        <PotterCoach
+          index={idx}
+          total={quiz.length}
+          answered={quiz.length - blanks.length}
+          secondsLeft={seconds}
+          justAnswered={answers[idx] !== null}
+        />
+      </div>
+
       {/* Ring, dots and the progress line ride together at the top of the run.
           `top-0` is correct rather than lucky: the scroll container is the
           panel's <main>, and the navbar sits outside it. */}
@@ -633,15 +646,8 @@ export default function TestClient({
             Potter is a preceding SIBLING of the question, and the question is
             lifted to z-10 — a child can never be occluded by its own parent,
             because the parent's background paints beneath its children. */}
-        <div key={idx} className={`relative q-in${dir < 0 ? " back" : ""}`}>
-          <PotterCoach
-            index={idx}
-            total={quiz.length}
-            answered={quiz.length - blanks.length}
-            secondsLeft={seconds}
-            justAnswered={answers[idx] !== null}
-          />
-          <div className="relative z-10">
+        <div key={idx} className={`q-in${dir < 0 ? " back" : ""}`}>
+          <div>
             <QuestionCard
               question={q}
               index={idx}
