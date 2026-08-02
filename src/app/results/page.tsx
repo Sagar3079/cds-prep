@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
+import RandomTestUpsell from "@/components/RandomTestUpsell";
 import AnswerExplanation from "@/components/AnswerExplanation";
 import PotterRider from "@/components/potter/PotterRider";
 import QuestionCard from "@/components/QuestionCard";
@@ -560,6 +561,8 @@ export default function ResultsPage() {
           ))}
         </ol>
       </div>
+
+      <RandomTestUpsell />
 
       <div className="flex justify-center pt-1">
         <Link href="/" className="btn-ghost">

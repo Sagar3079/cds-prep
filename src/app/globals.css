@@ -207,6 +207,10 @@ body {
     var(--surface);
 }
 .app-panel {
+  /* Positioned so `.upsell-scrim`'s `inset: 0` resolves against the DEVICE.
+     Static, it resolved against the scrolled `main` instead and the sheet
+     landed part-way down the review instead of over the panel. */
+  position: relative;
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 2rem;
@@ -1009,4 +1013,42 @@ mark.target-word {
 .explain__body--muted {
   color: var(--muted);
   font-style: italic;
+}
+
+/* ---- the plan sheet ----
+   Anchored to the device panel, not the window: on desktop the app is a phone
+   inside a page, and a viewport-centred dialog would float off the "device" it
+   belongs to. `position: fixed` would do exactly that, so this is absolute
+   against `.app-panel`, which is the only box that is the app. */
+.upsell-scrim {
+  /* `fixed`, not `absolute`. Absolute resolves against the nearest positioned
+     ancestor, and inside the review that is neither the panel nor the scroller
+     — measured, the scrim came out 510px tall starting 40px down, so the sheet
+     floated in the middle of the questions instead of sitting on the device.
+     Fixed is the one anchor that cannot be got wrong. The cost is that on a
+     desktop it dims the page around the phone frame rather than just the frame;
+     on a phone, where the panel IS the viewport, they are the same thing. */
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: color-mix(in srgb, var(--ink) 42%, transparent);
+  animation: upsellFade 0.2s var(--ease) both;
+}
+.upsell-sheet {
+  width: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 1.25rem 1.125rem calc(1.125rem + env(safe-area-inset-bottom));
+  border-radius: 1.5rem 1.5rem 0 0;
+  background: var(--paper);
+  box-shadow: 0 -10px 40px rgba(16, 20, 45, 0.24);
+  animation: upsellUp 0.28s var(--ease) both;
+}
+@keyframes upsellFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes upsellUp {
+  from { transform: translateY(14px); opacity: 0; }
+  to   { transform: none; opacity: 1; }
 }
