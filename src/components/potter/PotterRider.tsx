@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import Potter, { RIDE_LEDGE_RATIO, type Mood } from "./Potter";
+import type { Mood } from "./Potter";
+import { useCharacter, useCharacterSwitch } from "./characters";
 import { reviewLine } from "@/lib/potter";
 import { usePotterDrag } from "@/lib/usePotterDrag";
 import {
@@ -34,15 +35,24 @@ const smoothstep = (n: number) => n * n * (3 - 2 * n);
 /** The reading line: how far down the panel the card you are looking at sits. */
 const FOCUS = 0.36;
 /** His rendered height. `--potter-band` in globals.css — the gap opened between
-    review cards — must stay at or above the `PERCH` derived from it. */
+    review cards — must stay at or above the `perch` derived from it. */
 const SIZE = 66;
 /**
  * How much of him stands ABOVE the card's top edge once he has settled on it —
- * the remaining `SIZE - PERCH` is behind the card. Derived from the art's own
- * ride line rather than guessed, so resizing him cannot silently sink his head
- * behind the card or lift his broom off it.
+ * the remaining `SIZE - perch` is behind the card. Derived from the CHOSEN
+ * character's own ride line rather than guessed or borrowed, so neither
+ * resizing him nor swapping the art can silently sink his head behind the card
+ * or lift his broom off it. Every character's ride line is different; that is
+ * the whole reason it comes from the registry.
  */
-const PERCH = Math.round(SIZE * RIDE_LEDGE_RATIO);
+const perchOf = (rideLedgeRatio: number) => Math.round(SIZE * rideLedgeRatio);
+/**
+ * Slack, in px, added over the perch when the band has to be rebuilt for a
+ * character the stylesheet's 52px cannot hold — room for the flight bob and the
+ * roll, which both reach a couple of px above his own box. Taken from the CSS
+ * itself: 52 − Potter's 46px perch is exactly this.
+ */
+const BAND_SLACK = 6;
 /**
  * The dead band BEFORE the handover point, as a fraction of the gap to the next
  * card — hysteresis, not a ramp. See the handover note below.
@@ -102,16 +112,17 @@ const GAZE_SWING = 0.35;
    cards but nothing can delay the departure past the point he starts sinking.
 
    Being invisible for the length of the fall is then dealt with by z-order
-   rather than by shortening the fall — see `SHOW` and `LAND`. */
+   rather than by shortening the fall — see `SHOW_TOL` and `LAND`. */
 
 /**
  * Visible px above the card below which staying behind it swallows him. Settled
- * he shows exactly `PERCH`; anything less means he has left the edge.
+ * he shows exactly `perch`; anything less — hence the 4px of tolerance below —
+ * means he has left the edge.
  */
-const SHOW = PERCH - 4;
+const SHOW_TOL = 4;
 /**
  * How close to his perch counts as arrived, in px. Must clear the band's
- * overhang (`--potter-band` − `PERCH`, the few px his head is behind the card
+ * overhang (`--potter-band` − `perch`, the few px his head is behind the card
  * ABOVE at the moment it lets go of him) so the landing is allowed to happen,
  * and stay far under a gap so a real handover always reads as a departure.
  */
@@ -148,9 +159,10 @@ const DIVE_SPEED = 600;
 const CLEAR = 3;
 
 /**
- * Potter riding the review list — he flies down the answers on a broom and
- * settles on the top edge of whichever card you are reading, legs and broom
- * behind it, head and torso in the gap above it.
+ * The companion riding the review list — he flies down the answers on a broom
+ * and settles on the top edge of whichever card you are reading, legs and broom
+ * behind it, head and torso in the gap above it. WHERE that edge cuts him is
+ * `perch`, taken from the chosen character's own ride line via the registry.
  *
  * The occlusion is CSS, and it has two states. SETTLED on a card he is behind
  * it — `.review-list > li` is positioned with a z-index and `.potter-rider` is
@@ -163,7 +175,7 @@ const CLEAR = 3;
  * cards, and the switch is taken from the geometry it already has rather than
  * from a timer — he goes in front the moment his target stops being the edge he
  * is standing on, and comes back down the moment being behind would still show
- * `SHOW` px of him. Landing, that moment is when his head clears the bottom
+ * `perch` px of him. Landing, that moment is when his head clears the bottom
  * edge of the card ABOVE, where the difference between the two layers is the
  * few px of broom the band does not cover, so the flip is nearly invisible and
  * he is moving through it either way.
@@ -215,6 +227,17 @@ export default function PotterRider({
   const hostRef = useRef<HTMLDivElement | null>(null);
   const tiltRef = useRef<HTMLDivElement | null>(null);
   const sayRef = useRef<HTMLDivElement | null>(null);
+
+  const { art, ready: artReady } = useCharacter();
+  /**
+   * Where THIS character's card edge falls. A plain number derived from the
+   * registry, so it is stable between renders and safe as an effect dependency
+   * — which it has to be, because the flight loop measures every card anchor
+   * against it.
+   */
+  const perch = perchOf(art.rideLedgeRatio);
+  // A drag offset measured against one silhouette means nothing for another.
+  useCharacterSwitch(art.id, artReady, drag.reset);
 
   const [visible, setVisible] = useState(false);
   const [talk, setTalk] = useState(true);
@@ -282,8 +305,12 @@ export default function PotterRider({
    * has to rebuild it: hiding him in Settings and turning him back on used to
    * leave the loop writing transforms to the detached old node while the new
    * one sat unanimated at the top of the list.
+   *
+   * `artReady` joins it for the same reason: until the stored character has
+   * settled there is no figure to measure, and the perch line the loop works
+   * in would be the wrong one.
    */
-  const mounted = shown && items.length > 0;
+  const mounted = shown && artReady && items.length > 0;
 
   useEffect(() => {
     setTalk(thoughtsOn());
@@ -297,6 +324,28 @@ export default function PotterRider({
     if (!host || !scroller || !parent) return;
     /** The wall the crossing lean is measured against. */
     const panel = host.closest<HTMLElement>(".app-panel");
+
+    // The band between cards is sized in CSS (52px, against Potter's 46px
+    // perch and Kuromi's 47px). A character who sat higher on the edge than the
+    // stylesheet allows for would have their head clipped by the card ABOVE, so
+    // the authored value is read once and only overridden when it genuinely
+    // cannot hold the perch — every character that fits leaves the list exactly
+    // as designed rather than reflowing it by a pixel on every switch.
+    //
+    // It goes on the element that OWNS the variable (the list, reached through
+    // a card rather than by a second selector) because `.review-list` declares
+    // it on itself, so a value set on an ancestor would be overridden rather
+    // than inherited. Set once here, never per frame: it reflows every card.
+    const list = scroller.querySelector<HTMLElement>(itemSelector)?.parentElement;
+    if (list) {
+      list.style.removeProperty("--potter-band");
+      const authored = parseFloat(
+        getComputedStyle(list).getPropertyValue("--potter-band"),
+      );
+      if (!Number.isFinite(authored) || authored < perch) {
+        list.style.setProperty("--potter-band", `${perch + BAND_SLACK}px`);
+      }
+    }
 
     let raf = 0;
     let prev = performance.now();
@@ -317,12 +366,12 @@ export default function PotterRider({
       // 14px translate for half a second. Measuring during it perched him 14px
       // low on every card, and nothing re-measured afterwards because a
       // transform changes no layout box for the ResizeObserver to notice.
-      const anchors = cards.map((c) => c.offsetTop - PERCH);
+      const anchors = cards.map((c) => c.offsetTop - perch);
       const last = anchors.length - 1;
       const pitch =
         last > 0
           ? (anchors[last] - anchors[0]) / last
-          : cards[0].offsetHeight + PERCH;
+          : cards[0].offsetHeight + perch;
 
       // Both edges of every card, in the same list coordinates as `y`, so the
       // loop can tell whether a card is covering him — the signal the z-order
@@ -518,7 +567,7 @@ export default function PotterRider({
       // ── which layer he is on ────────────────────────────────────────────
       // Leaving is by TARGET, not by pixels: the frame his target stops being
       // the edge under him is the frame he lifts off, so the flip lands while
-      // he is still standing on the card with only the `SIZE - PERCH` px of
+      // he is still standing on the card with only the `SIZE - perch` px of
       // broom the card was hiding to reveal — never while he is stationary,
       // and never once he is already buried.
       //
@@ -534,7 +583,9 @@ export default function PotterRider({
       // back in front, so he cannot flicker.
       const home = Math.abs(target.current - y.current);
       if (front.current) {
-        if (home < LAND && seen(y.current - CLEAR) >= SHOW) front.current = false;
+        if (home < LAND && seen(y.current - CLEAR) >= perch - SHOW_TOL) {
+          front.current = false;
+        }
       } else if (home > LAND) {
         front.current = true;
       }
@@ -582,6 +633,9 @@ export default function PotterRider({
       ro.disconnect();
       cancelAnimationFrame(raf);
       measureRef.current = null;
+      // Back to the stylesheet's band, so the next character sizes it from the
+      // authored value rather than from the last one's.
+      list?.style.removeProperty("--potter-band");
       // He is hidden again until the rebuilt loop has placed him, so a re-mount
       // cannot flash him at the CSS default position for a frame.
       setVisible(false);
@@ -589,8 +643,12 @@ export default function PotterRider({
     // Intentionally NOT depending on the current index — see the note above.
     // `mounted` IS a legitimate dependency: it changes only when the host node
     // itself comes or goes (a Settings toggle, or the list emptying), and the
-    // loop closes over that node.
-  }, [containerSelector, itemSelector, roomToFly, mounted]);
+    // loop closes over that node. `perch` is the same kind of dependency: it is
+    // the line every card anchor is measured from, it changes only when the
+    // character does, and a rebuild is exactly what that needs — the loop
+    // re-seeds `y` from the new anchors instead of springing him from one
+    // character's edge to another's.
+  }, [containerSelector, itemSelector, roomToFly, mounted, perch]);
 
   /**
    * The review filter swaps which question sits at each index without changing
@@ -613,6 +671,8 @@ export default function PotterRider({
 
   if (!mounted) return null;
 
+  const Figure = art.Figure;
+
   return (
     <div
       ref={hostRef}
@@ -623,7 +683,7 @@ export default function PotterRider({
       style={
         {
           visibility: visible ? "visible" : "hidden",
-          "--potter-sink": `${SIZE - PERCH}px`,
+          "--potter-sink": `${SIZE - perch}px`,
         } as CSSProperties
       }
     >
@@ -639,7 +699,7 @@ export default function PotterRider({
       >
         <div className="relative">
           <div ref={tiltRef} className="potter-rider__tilt">
-            <Potter
+            <Figure
               riding
               mood={say.mood}
               look={face}

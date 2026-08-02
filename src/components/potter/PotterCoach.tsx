@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import Potter, { LEDGE_RATIO } from "./Potter";
+import { useCharacter, useCharacterSwitch } from "./characters";
 import { usePotterDrag } from "@/lib/usePotterDrag";
 import { testLine, type Line } from "@/lib/potter";
 import {
@@ -17,10 +17,13 @@ const SIZE = 112;
 const SHOW_MS = 4200;
 
 /**
- * Potter during a run: perched on the timer card, reacting to how it is going.
- * He comments on *pace and situation only* — never on whether an answer looks
- * right, because nothing is marked until submit and a hint would corrupt the
- * score.
+ * The companion during a run: perched on the timer card, reacting to how it is
+ * going. He comments on *pace and situation only* — never on whether an answer
+ * looks right, because nothing is marked until submit and a hint would corrupt
+ * the score.
+ *
+ * `--potter-below` comes from the chosen character's own ledge ratio, so the
+ * card cuts each figure on the line its art was drawn for.
  */
 export default function PotterCoach({
   index,
@@ -41,6 +44,11 @@ export default function PotterCoach({
   const drag = usePotterDrag("test");
   const [talk, setTalk] = useState(true);
   const [shown, setShown] = useState(true);
+  const { art, ready: artReady } = useCharacter();
+  // A drag offset belongs to the figure it was measured against, so a switch
+  // puts this placement back on its ledge rather than inheriting a position
+  // that meant something for a different silhouette.
+  useCharacterSwitch(art.id, artReady, drag.reset);
   // Deliberately impure: only the value from the very first render is ever
   // used (useRef's initial-value argument is discarded on every render after
   // mount), so this reads the real mount time exactly once.
@@ -116,7 +124,9 @@ export default function PotterCoach({
     };
   }, [motionOk, index, total, justAnswered]);
 
-  if (!shown) return null;
+  if (!shown || !artReady) return null;
+
+  const Figure = art.Figure;
 
   return (
     <div
@@ -126,7 +136,7 @@ export default function PotterCoach({
       style={
         {
           "--potter-h": `${SIZE}px`,
-          "--potter-below": 1 - LEDGE_RATIO,
+          "--potter-below": 1 - art.ledgeRatio,
         } as CSSProperties
       }
     >
@@ -139,7 +149,7 @@ export default function PotterCoach({
         {...drag.handlers}
       >
         <div className="relative">
-          <Potter
+          <Figure
             // Reduced motion should quieten him, not delete him.
             mood={motionOk ? (line?.mood ?? "peek") : "peek"}
             look={0}
