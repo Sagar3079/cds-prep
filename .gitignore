@@ -32,6 +32,8 @@ answer_keys/*.pdf
 # Not redistributed, for the same reason the PDFs are not. Regenerate locally
 # with scripts/ocr_and_parse.py.
 scripts/ocr_text/
+# Same again for the General Knowledge papers. Regenerate with scripts/gk_ocr.py.
+scripts/ocr_gk_text/
 
 # logs & local artifacts
 scripts/ocr_log.txt

@@ -1,0 +1,1712 @@
+[
+  {
+    "paper": "CDS1-2018-GK",
+    "session": 1,
+    "year": 2018,
+    "series": "A",
+    "found": 119,
+    "kept": 102,
+    "dropped": {
+      "code-grid (no resolvable list)": 1,
+      "duplicate-options": 1,
+      "options-not-abcd": 14,
+      "empty-option": 1
+    },
+    "suspect": [
+      {
+        "id": "cds1-2018-gk-007",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "Which one of the following is the correct relation between the Kelvin temperature (T) and "
+      },
+      {
+        "id": "cds1-2018-gk-008",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Sound waves cannot travel through a"
+      },
+      {
+        "id": "cds1-2018-gk-023",
+        "flags": [
+          "tiny-option"
+        ],
+        "question": "A protein is synthesized in the endoplasmic reticulum bound ribosomes and it targets to th"
+      },
+      {
+        "id": "cds1-2018-gk-039",
+        "flags": [
+          "tiny-option",
+          "orphan-token"
+        ],
+        "question": "A wire of copper having length I and area of cross-section A is taken and a current / is f"
+      },
+      {
+        "id": "cds1-2018-gk-040",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "The pressure of a fluid varies with depth h as P = PQ+pgh, where p is the fluid density. T"
+      },
+      {
+        "id": "cds1-2018-gk-104",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "In the context of elections in India, which one of the following is the correct full form "
+      },
+      {
+        "id": "cds1-2018-gk-108",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Where is Hambantota Port located?"
+      },
+      {
+        "id": "cds1-2018-gk-115",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "Which of the following is/are the feature(s) of the Brahmadeya Grants during c 600-1200 AD"
+      },
+      {
+        "id": "cds1-2018-gk-116",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Who is the author of Manimekalai?"
+      }
+    ],
+    "key": "cds1-2018-gk",
+    "key_note": null,
+    "answered": 102,
+    "pages": 21,
+    "quality": {
+      "glued_rate": 0.0005,
+      "camel_rate": 0.001,
+      "mean_word_len": 5.03,
+      "words": 4063,
+      "mean_conf": 1.0
+    }
+  },
+  {
+    "paper": "CDS1-2019-GK",
+    "session": 1,
+    "year": 2019,
+    "series": "A",
+    "found": 116,
+    "kept": 72,
+    "dropped": {
+      "options-not-abcd": 44
+    },
+    "suspect": [
+      {
+        "id": "cds1-2019-gk-004",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "The Limltation Law,which was passed by the British in.1859.addressedwhich one ofthe follow"
+      },
+      {
+        "id": "cds1-2019-gk-021",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Which one of the following is not an assuimption in the law of demand?"
+      },
+      {
+        "id": "cds1-2019-gk-054",
+        "flags": [
+          "long-option"
+        ],
+        "question": "In which of the following,functional group isomerism is notpossible?"
+      },
+      {
+        "id": "cds1-2019-gk-060",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Ifthe wavelengths corresponding to ultraviolet, visible and infrared radiations are given "
+      },
+      {
+        "id": "cds1-2019-gk-081",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "The PC15 molecule has trigonal bipyramidal structure.Therefore,the hybridization of p orbi"
+      },
+      {
+        "id": "cds1-2019-gk-084",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "What is a constellation?"
+      },
+      {
+        "id": "cds1-2019-gk-085",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "The Hooke'slaw is valid for"
+      },
+      {
+        "id": "cds1-2019-gk-116",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Which one of thefollowingpairsof military training institute of India and location is not "
+      }
+    ],
+    "key": "cds1-2019-gk",
+    "key_note": null,
+    "answered": 72,
+    "pages": 21,
+    "quality": {
+      "glued_rate": 0.012,
+      "camel_rate": 0.0112,
+      "mean_word_len": 5.59,
+      "words": 2409,
+      "mean_conf": 0.852
+    }
+  },
+  {
+    "paper": "CDS1-2020-GK",
+    "session": 1,
+    "year": 2020,
+    "series": "A",
+    "found": 120,
+    "kept": 103,
+    "dropped": {
+      "options-not-abcd": 14,
+      "empty-option": 2,
+      "figure-or-map": 1
+    },
+    "suspect": [
+      {
+        "id": "cds1-2020-gk-002",
+        "flags": [
+          "low-ocr-confidence",
+          "orphan-token"
+        ],
+        "question": "The elements of which of the following pairs are isobars?"
+      },
+      {
+        "id": "cds1-2020-gk-003",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Which one of the following chemical reactions is not feasible?"
+      },
+      {
+        "id": "cds1-2020-gk-022",
+        "flags": [
+          "tiny-option"
+        ],
+        "question": "The numberof water molecules associated with copper sulphate molecule to form crystals is"
+      },
+      {
+        "id": "cds1-2020-gk-024",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "If x is the temperature of a system in Kelvin and y is the temperature of the system in C,"
+      },
+      {
+        "id": "cds1-2020-gk-025",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "The resistivity p of a material may be expressed in units of"
+      },
+      {
+        "id": "cds1-2020-gk-038",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Nyishi tribe is found mainly in"
+      },
+      {
+        "id": "cds1-2020-gk-040",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "The number of people per unit area of arable land is termed as"
+      },
+      {
+        "id": "cds1-2020-gk-047",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Which of the following statements is not correctregarding the Membersof Parliament Local A"
+      },
+      {
+        "id": "cds1-2020-gk-052",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "The Cash Reserve Ratio refers to"
+      },
+      {
+        "id": "cds1-2020-gk-057",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Recently the Reserve Bank of India has imposed limitations,initially for a period of six m"
+      },
+      {
+        "id": "cds1-2020-gk-081",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Naropa'is an annual festival of"
+      },
+      {
+        "id": "cds1-2020-gk-083",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "The Global Goalkeeper Award is given by"
+      },
+      {
+        "id": "cds1-2020-gk-084",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "‘Gandhi Solar Park'is located at"
+      },
+      {
+        "id": "cds1-2020-gk-093",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "The Ministry of Heavy Industries and Public Enterprises consists of"
+      },
+      {
+        "id": "cds1-2020-gk-098",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Hilsa is the national fish of"
+      },
+      {
+        "id": "cds1-2020-gk-119",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "BRICS Summit, 2020 will be hosted by"
+      }
+    ],
+    "key": "cds1-2020-gk",
+    "key_note": null,
+    "answered": 103,
+    "pages": 17,
+    "quality": {
+      "glued_rate": 0.0007,
+      "camel_rate": 0.0063,
+      "mean_word_len": 5.26,
+      "words": 3001,
+      "mean_conf": 0.869
+    }
+  },
+  {
+    "paper": "CDS1-2021-GK",
+    "session": 1,
+    "year": 2021,
+    "series": "A",
+    "found": 109,
+    "kept": 96,
+    "dropped": {
+      "options-not-abcd": 11,
+      "wide-block (table)": 2
+    },
+    "suspect": [
+      {
+        "id": "cds1-2021-gk-007",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "Which one of the following statements about the Gandhi-Irwin Pact of 1931 is correct?"
+      },
+      {
+        "id": "cds1-2021-gk-010",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "Which one of the following statements about | the Act V of 1843 relating to Slavery in Ind"
+      },
+      {
+        "id": "cds1-2021-gk-015",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "The Saubhagya Scheme aims at universal"
+      },
+      {
+        "id": "cds1-2021-gk-016",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Mission Indradhanush aims at"
+      },
+      {
+        "id": "cds1-2021-gk-023",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Aluminium is manufactured from"
+      },
+      {
+        "id": "cds1-2021-gk-029",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "1 Francois Bernier was physician to"
+      },
+      {
+        "id": "cds1-2021-gk-058",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "Who among the following g was popularly known as 'Lokahitwadi'?"
+      },
+      {
+        "id": "cds1-2021-gk-070",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "Which one of the following longitudes is the standard meridian of India?"
+      },
+      {
+        "id": "cds1-2021-gk-091",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Cell wall is not present in cells of"
+      },
+      {
+        "id": "cds1-2021-gk-119",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "The weight of an object is due to"
+      }
+    ],
+    "key": "cds1-2021-gk",
+    "key_note": null,
+    "answered": 95,
+    "pages": 17,
+    "quality": {
+      "glued_rate": 0.0003,
+      "camel_rate": 0.0012,
+      "mean_word_len": 5.11,
+      "words": 3221,
+      "mean_conf": 0.941
+    }
+  },
+  {
+    "paper": "CDS1-2022-GK",
+    "session": 1,
+    "year": 2022,
+    "series": "A",
+    "found": 98,
+    "kept": 75,
+    "dropped": {
+      "options-not-abcd": 20,
+      "empty-option": 1,
+      "stem-too-short": 1,
+      "swallowed-next-item": 1
+    },
+    "suspect": [
+      {
+        "id": "cds1-2022-gk-005",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "A boy completes one round of a circular track of diameter 200 m in 30 s. What will be the "
+      },
+      {
+        "id": "cds1-2022-gk-007",
+        "flags": [
+          "tiny-option"
+        ],
+        "question": "The number of moles of oxygen gas used in the complete combustion of 1 mole of glucose is:"
+      },
+      {
+        "id": "cds1-2022-gk-018",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "The disease rickets develops in children due to the deficiency of:"
+      },
+      {
+        "id": "cds1-2022-gk-021",
+        "flags": [
+          "low-ocr-confidence",
+          "orphan-token"
+        ],
+        "question": "An object weighs 9N on the surface of the Earth.What would be its weight,when measured on "
+      },
+      {
+        "id": "cds1-2022-gk-022",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "The twinkling of a star is due to:"
+      },
+      {
+        "id": "cds1-2022-gk-025",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "in human stomach?"
+      },
+      {
+        "id": "cds1-2022-gk-033",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Where are the Bermuda Islands located?"
+      },
+      {
+        "id": "cds1-2022-gk-058",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Isohalines are lines joining equal:"
+      },
+      {
+        "id": "cds1-2022-gk-072",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Ten Degree Channel is found between:"
+      },
+      {
+        "id": "cds1-2022-gk-076",
+        "flags": [
+          "long-option"
+        ],
+        "question": "Which one of the following Articles of the Constitution of India requires the Prime Minist"
+      }
+    ],
+    "key": "cds1-2022-gk",
+    "key_note": null,
+    "answered": 75,
+    "pages": 17,
+    "quality": {
+      "glued_rate": 0.0044,
+      "camel_rate": 0.008,
+      "mean_word_len": 5.17,
+      "words": 2751,
+      "mean_conf": 0.887
+    }
+  },
+  {
+    "paper": "CDS1-2023-GK",
+    "session": 1,
+    "year": 2023,
+    "series": "A",
+    "found": 116,
+    "kept": 98,
+    "dropped": {
+      "options-not-abcd": 17,
+      "duplicate-options": 1
+    },
+    "suspect": [
+      {
+        "id": "cds1-2023-gk-006",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "A person burned a firecracker in front of a cliff and heard its echo 5 s after it burst.Th"
+      },
+      {
+        "id": "cds1-2023-gk-031",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Consider the following statements: After forming the Indian National Army, Subhas Chandra "
+      },
+      {
+        "id": "cds1-2023-gk-048",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "A car moving with a speed of 12 m/s is subjected to brakes which produces a deceleration o"
+      },
+      {
+        "id": "cds1-2023-gk-049",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "What is the chemical composition of a soda-acid type fire extinguisher?"
+      },
+      {
+        "id": "cds1-2023-gk-069",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Which of the following is/are the objective/objectives ofthePradhan MantriSwasthya Suraksh"
+      },
+      {
+        "id": "cds1-2023-gk-070",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Who among the following political leaders suggested the dissolution of the Indian National"
+      },
+      {
+        "id": "cds1-2023-gk-084",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Who among the following is honoured with the UN Environment Programme's 2022 Champions of "
+      },
+      {
+        "id": "cds1-2023-gk-091",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Indus river basin is extended up to"
+      },
+      {
+        "id": "cds1-2023-gk-107",
+        "flags": [
+          "long-option",
+          "low-ocr-confidence",
+          "orphan-token"
+        ],
+        "question": "There is an increase in forest cover area ofIndiabetween2011and 2 However, there is a decr"
+      }
+    ],
+    "key": "cds1-2023-gk",
+    "key_note": null,
+    "answered": 96,
+    "pages": 21,
+    "quality": {
+      "glued_rate": 0.0035,
+      "camel_rate": 0.0061,
+      "mean_word_len": 5.22,
+      "words": 3749,
+      "mean_conf": 0.865
+    }
+  },
+  {
+    "paper": "CDS1-2024-GK",
+    "session": 1,
+    "year": 2024,
+    "series": "A",
+    "found": 117,
+    "kept": 109,
+    "dropped": {
+      "empty-option": 2,
+      "options-not-abcd": 5,
+      "match-the-following": 1
+    },
+    "suspect": [
+      {
+        "id": "cds1-2024-gk-008",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "At which of the following places was diamond mining carried out during the Delhi Sultanate"
+      },
+      {
+        "id": "cds1-2024-gk-012",
+        "flags": [
+          "short-stem",
+          "low-ocr-confidence"
+        ],
+        "question": "Photo 51 refers to an image of"
+      },
+      {
+        "id": "cds1-2024-gk-036",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Methanol is toxic because"
+      },
+      {
+        "id": "cds1-2024-gk-037",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Vinegar is"
+      },
+      {
+        "id": "cds1-2024-gk-050",
+        "flags": [
+          "tiny-option"
+        ],
+        "question": "Consider the following statements about the initial development of railways in India by th"
+      },
+      {
+        "id": "cds1-2024-gk-077",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "The correct order of atomic radius of Li,Na,Be and O is"
+      },
+      {
+        "id": "cds1-2024-gk-089",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "What is culturable wasteland?"
+      },
+      {
+        "id": "cds1-2024-gk-095",
+        "flags": [
+          "tiny-option"
+        ],
+        "question": "How many of the following statements about Bhakti poet Namdev is/are correct? 1. He seems "
+      },
+      {
+        "id": "cds1-2024-gk-098",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Who propounded Kashmir Shaivism?"
+      },
+      {
+        "id": "cds1-2024-gk-102",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Through the Forty Second Amendment to the Constitution of India,which of the following was"
+      },
+      {
+        "id": "cds1-2024-gk-109",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Which one ofthe following gis an indigenous assault rifle developed by DRDO? 3 2 4 1 (a) H"
+      }
+    ],
+    "key": "cds1-2024-gk",
+    "key_note": null,
+    "answered": 108,
+    "pages": 22,
+    "quality": {
+      "glued_rate": 0.0017,
+      "camel_rate": 0.0032,
+      "mean_word_len": 5.11,
+      "words": 4720,
+      "mean_conf": 0.876
+    }
+  },
+  {
+    "paper": "CDS1-2025-GK",
+    "session": 1,
+    "year": 2025,
+    "series": "A",
+    "found": 103,
+    "kept": 87,
+    "dropped": {
+      "options-not-abcd": 10,
+      "swallowed-next-item": 1,
+      "empty-option": 3,
+      "code-grid (no resolvable list)": 1,
+      "wide-block (table)": 1
+    },
+    "suspect": [
+      {
+        "id": "cds1-2025-gk-027",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "A metallic sphere of mass 1 kg and volume 2 x 104 m? is completely immersed in water. The "
+      },
+      {
+        "id": "cds1-2025-gk-028",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "A light bulb rated as 60 W at 220 V has a potential difference of 110 V across its ends. T"
+      },
+      {
+        "id": "cds1-2025-gk-030",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "T The force with which the Earth attracts an object is called:"
+      },
+      {
+        "id": "cds1-2025-gk-067",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Core inflation is:"
+      },
+      {
+        "id": "cds1-2025-gk-072",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Myopia is also known as:"
+      },
+      {
+        "id": "cds1-2025-gk-114",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "Who among the following were awarded the Major Dhyan Chand Khel Ratna Award 2024? 1. Shri "
+      }
+    ],
+    "key": "cds1-2025-gk",
+    "key_note": null,
+    "answered": 87,
+    "pages": 17,
+    "quality": {
+      "glued_rate": 0.0013,
+      "camel_rate": 0.0036,
+      "mean_word_len": 5.17,
+      "words": 3017,
+      "mean_conf": 0.899
+    }
+  },
+  {
+    "paper": "CDS2-2016-GK",
+    "session": 2,
+    "year": 2016,
+    "series": "A",
+    "found": 119,
+    "kept": 97,
+    "dropped": {
+      "options-not-abcd": 22
+    },
+    "suspect": [
+      {
+        "id": "cds2-2016-gk-017",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "In the gamma decay of a nucleus"
+      },
+      {
+        "id": "cds2-2016-gk-018",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "In a bipolar junction transistor"
+      },
+      {
+        "id": "cds2-2016-gk-019",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "The pressure exerted by a 760 mm column of mercury at O °C is known as"
+      },
+      {
+        "id": "cds2-2016-gk-039",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Liquids and gases never show"
+      },
+      {
+        "id": "cds2-2016-gk-048",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Which one of the following is correct?"
+      },
+      {
+        "id": "cds2-2016-gk-082",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "The epic, Silappadikaram refers to the"
+      },
+      {
+        "id": "cds2-2016-gk-083",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Rakshasa type of marriage is"
+      },
+      {
+        "id": "cds2-2016-gk-086",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Which one of the following statements about the Missile Technology Control Regime is not c"
+      },
+      {
+        "id": "cds2-2016-gk-101",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Jammu and Kashmir Rifles is"
+      },
+      {
+        "id": "cds2-2016-gk-102",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Which one of the following is correct?"
+      },
+      {
+        "id": "cds2-2016-gk-110",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "The members of NAFTA are"
+      },
+      {
+        "id": "cds2-2016-gk-118",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Which one of the following statements with regard to the National Commission for Scheduled"
+      }
+    ],
+    "key": null,
+    "key_note": "no key entry",
+    "answered": 0,
+    "pages": 22,
+    "quality": {
+      "glued_rate": 0.0045,
+      "camel_rate": 0.0063,
+      "mean_word_len": 5.2,
+      "words": 3984,
+      "mean_conf": 0.881
+    }
+  },
+  {
+    "paper": "CDS2-2017-GK",
+    "session": 2,
+    "year": 2017,
+    "series": "A",
+    "found": 112,
+    "kept": 95,
+    "dropped": {
+      "options-not-abcd": 13,
+      "match-the-following": 4
+    },
+    "suspect": [
+      {
+        "id": "cds2-2017-gk-012",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "Two wires are made having same length l and area of cross-section A. Wire 1 is made of cop"
+      },
+      {
+        "id": "cds2-2017-gk-031",
+        "flags": [
+          "long-option"
+        ],
+        "question": "Devaluation of currency will be more beneficial if prices of"
+      },
+      {
+        "id": "cds2-2017-gk-054",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "An emulsion consists of"
+      },
+      {
+        "id": "cds2-2017-gk-055",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Which ofthefollowing radioactive substances enters/enter the human body through poog chain"
+      },
+      {
+        "id": "cds2-2017-gk-056",
+        "flags": [
+          "short-stem",
+          "low-ocr-confidence"
+        ],
+        "question": "Xeriscaping'is a concept related to"
+      },
+      {
+        "id": "cds2-2017-gk-115",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Which one of the following statements about the Global Environment Facility Grant Agreemen"
+      }
+    ],
+    "key": null,
+    "key_note": "no key entry",
+    "answered": 0,
+    "pages": 22,
+    "quality": {
+      "glued_rate": 0.0026,
+      "camel_rate": 0.0034,
+      "mean_word_len": 5.18,
+      "words": 3775,
+      "mean_conf": 0.882
+    }
+  },
+  {
+    "paper": "CDS2-2018-GK",
+    "session": 2,
+    "year": 2018,
+    "series": "A",
+    "found": 120,
+    "kept": 104,
+    "dropped": {
+      "options-not-abcd": 15,
+      "code-grid (no resolvable list)": 1
+    },
+    "suspect": [
+      {
+        "id": "cds2-2018-gk-005",
+        "flags": [
+          "short-stem",
+          "orphan-token"
+        ],
+        "question": "The compound C7H7NO2 has"
+      },
+      {
+        "id": "cds2-2018-gk-008",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "If two miscible liquids of same volume but different densities P and P2 are mixed, then th"
+      },
+      {
+        "id": "cds2-2018-gk-009",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "The position vector of a particle is =2t²x+3ty+42 Then the instantaneous velocity D and ac"
+      },
+      {
+        "id": "cds2-2018-gk-010",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "Two persons are holdingaropeof negligible mass horizontally. A 20 kg mass is attached to t"
+      },
+      {
+        "id": "cds2-2018-gk-027",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "In which one of the following reactions, the maximum quantity of H2 gas is produced by the"
+      },
+      {
+        "id": "cds2-2018-gk-045",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Khasi language is included in"
+      },
+      {
+        "id": "cds2-2018-gk-071",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "With regard to the cabinet decision in July 2018,the percentage increase in Minimum Suppor"
+      },
+      {
+        "id": "cds2-2018-gk-080",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Who was the first Nawab Wazir of Awadh in the 18th century?"
+      },
+      {
+        "id": "cds2-2018-gk-081",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "According theFrench traveller Tavernier, the majority of houses in Varanasi during the 17t"
+      },
+      {
+        "id": "cds2-2018-gk-082",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Which ofthe following statements relating to the duties of the Governor is/are correct? 1."
+      },
+      {
+        "id": "cds2-2018-gk-098",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "Which one of the following regarding the tenureof theelected membersof the Autonomous Dist"
+      },
+      {
+        "id": "cds2-2018-gk-105",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Which one of the following criteria is not required to be qualified for appointment as Jud"
+      },
+      {
+        "id": "cds2-2018-gk-108",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Which one of the following regarding the ordinance-making power of the Governor is not cor"
+      },
+      {
+        "id": "cds2-2018-gk-114",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "SWAYAM is"
+      },
+      {
+        "id": "cds2-2018-gk-119",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Who took over the Eka Movement' started by the Congress in Awadh during 1921-1922?"
+      }
+    ],
+    "key": null,
+    "key_note": "no key entry",
+    "answered": 0,
+    "pages": 21,
+    "quality": {
+      "glued_rate": 0.0034,
+      "camel_rate": 0.0066,
+      "mean_word_len": 5.17,
+      "words": 3770,
+      "mean_conf": 0.886
+    }
+  },
+  {
+    "paper": "CDS2-2019-GK",
+    "session": 2,
+    "year": 2019,
+    "series": "B",
+    "refused": "Test Booklet Series B — keys are Series A",
+    "found": 0,
+    "kept": 0,
+    "dropped": {},
+    "suspect": [],
+    "key": null
+  },
+  {
+    "paper": "CDS2-2020-GK",
+    "session": 2,
+    "year": 2020,
+    "series": "A",
+    "found": 120,
+    "kept": 118,
+    "dropped": {
+      "options-not-abcd": 2
+    },
+    "suspect": [
+      {
+        "id": "cds2-2020-gk-011",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "The largest geographical area of India is covered by which one of the following types of s"
+      },
+      {
+        "id": "cds2-2020-gk-025",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "August 12 is celebrated as"
+      },
+      {
+        "id": "cds2-2020-gk-037",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Sea of Azov is connected to"
+      },
+      {
+        "id": "cds2-2020-gk-055",
+        "flags": [
+          "short-stem",
+          "low-ocr-confidence"
+        ],
+        "question": "What is ‘Little Boy'?"
+      },
+      {
+        "id": "cds2-2020-gk-075",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "Which one of the following statements with regard to the appointment of the Members of the"
+      },
+      {
+        "id": "cds2-2020-gk-080",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "The Citizenship (Amendment) Act falls under which one of the following Parts of the Consti"
+      },
+      {
+        "id": "cds2-2020-gk-082",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "ASEEM is"
+      },
+      {
+        "id": "cds2-2020-gk-085",
+        "flags": [
+          "tiny-option"
+        ],
+        "question": "The Pragyan rover installed in Chandrayaan--2 mission had how many wheels?"
+      },
+      {
+        "id": "cds2-2020-gk-090",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "If the speed of light in air is represented by c and the speed in a medium is v, then the "
+      },
+      {
+        "id": "cds2-2020-gk-092",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "All the individuals s of a particular organism, such as rose plants, belong to a taxonomic"
+      },
+      {
+        "id": "cds2-2020-gk-093",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Pearls are harvested from"
+      },
+      {
+        "id": "cds2-2020-gk-097",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Symbol of element was introduced by"
+      },
+      {
+        "id": "cds2-2020-gk-101",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "Which of the following lenses will bend the light rays through largest angle?"
+      },
+      {
+        "id": "cds2-2020-gk-102",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "A luminous object is placed at a distance of 40 cm from a converging lens of focal length "
+      },
+      {
+        "id": "cds2-2020-gk-108",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Mature sclerenchyma cells have"
+      },
+      {
+        "id": "cds2-2020-gk-109",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "In human beings, the chromosomes that determine birth of a normal female child are"
+      },
+      {
+        "id": "cds2-2020-gk-110",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Antibiotic such as penicillin blocks"
+      },
+      {
+        "id": "cds2-2020-gk-111",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "The radioactive isotope of hydrogen is"
+      },
+      {
+        "id": "cds2-2020-gk-114",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "The valency of phosphorus is"
+      },
+      {
+        "id": "cds2-2020-gk-115",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Lead nitrate on heating gives"
+      }
+    ],
+    "key": "cds2-2020-gk",
+    "key_note": null,
+    "answered": 118,
+    "pages": 17,
+    "quality": {
+      "glued_rate": 0.0,
+      "camel_rate": 0.0022,
+      "mean_word_len": 5.04,
+      "words": 3586,
+      "mean_conf": 0.916
+    }
+  },
+  {
+    "paper": "CDS2-2021-GK",
+    "session": 2,
+    "year": 2021,
+    "series": "A",
+    "found": 109,
+    "kept": 100,
+    "dropped": {
+      "options-not-abcd": 8,
+      "match-the-following": 1
+    },
+    "suspect": [
+      {
+        "id": "cds2-2021-gk-006",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "An athlete completes one round of a circular track of diameter 100 m in 20 s.Whatwill be t"
+      },
+      {
+        "id": "cds2-2021-gk-019",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "A sound wave has a frequency of 4 kHz and wavelength 30 cm. How long will it take to trave"
+      },
+      {
+        "id": "cds2-2021-gk-020",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "An electric bulb is connected to a 110 V generator. The current is 0.2 A. What is the powe"
+      },
+      {
+        "id": "cds2-2021-gk-036",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "D performs her train journey by the shortest route from Bengaluru to New Delhi. Which one "
+      },
+      {
+        "id": "cds2-2021-gk-038",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "M wants to visit a place in a Union Territory, which is located at 34°N and 77° E.Which on"
+      },
+      {
+        "id": "cds2-2021-gk-040",
+        "flags": [
+          "tiny-option",
+          "orphan-token"
+        ],
+        "question": "In a discussion, M from Arunachal Pradesh, J from Assam, N from Meghalaya and S from Nagal"
+      },
+      {
+        "id": "cds2-2021-gk-045",
+        "flags": [
+          "long-option"
+        ],
+        "question": "In India, the first major public appearance of Mahatma Gandhiwas in"
+      },
+      {
+        "id": "cds2-2021-gk-051",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "Which one of the following is true of a pure voluntary exchange between two parties A and "
+      },
+      {
+        "id": "cds2-2021-gk-064",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "D had recently visited Khardung La, Nubra Valley Iand several Buddhist monasteries. Which "
+      },
+      {
+        "id": "cds2-2021-gk-067",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "S had witnessed contour bunding and contour ploughing while visiting one of the States in "
+      },
+      {
+        "id": "cds2-2021-gk-103",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Bagram Air Base is located in"
+      },
+      {
+        "id": "cds2-2021-gk-104",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "The Panchmuli Lake is situated near"
+      }
+    ],
+    "key": "cds2-2021-gk",
+    "key_note": null,
+    "answered": 99,
+    "pages": 17,
+    "quality": {
+      "glued_rate": 0.0026,
+      "camel_rate": 0.0049,
+      "mean_word_len": 5.11,
+      "words": 3458,
+      "mean_conf": 0.896
+    }
+  },
+  {
+    "paper": "CDS2-2022-GK",
+    "session": 2,
+    "year": 2022,
+    "series": "A",
+    "found": 104,
+    "kept": 86,
+    "dropped": {
+      "options-not-abcd": 16,
+      "wide-block (table)": 1,
+      "empty-option": 1
+    },
+    "suspect": [
+      {
+        "id": "cds2-2022-gk-016",
+        "flags": [
+          "short-stem",
+          "low-ocr-confidence"
+        ],
+        "question": "Cl is not isoelectronic with"
+      },
+      {
+        "id": "cds2-2022-gk-017",
+        "flags": [
+          "short-stem",
+          "long-option"
+        ],
+        "question": "In plant cells"
+      },
+      {
+        "id": "cds2-2022-gk-021",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "not work at acidic pH?"
+      },
+      {
+        "id": "cds2-2022-gk-022",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Urea is produced by metabolism of"
+      },
+      {
+        "id": "cds2-2022-gk-023",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Deficiency of iron causes"
+      },
+      {
+        "id": "cds2-2022-gk-038",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "The Tolkappiyam is"
+      },
+      {
+        "id": "cds2-2022-gk-041",
+        "flags": [
+          "tiny-option"
+        ],
+        "question": "Consider the following: 1. M.A.Ayyangar 2. G.S.Dhillon 3. Balram Jakhar 4. P.A.Sangma How "
+      },
+      {
+        "id": "cds2-2022-gk-042",
+        "flags": [
+          "tiny-option"
+        ],
+        "question": "Consider the following pairs of Schedule and Content of the Constitution of India: 1. Firs"
+      },
+      {
+        "id": "cds2-2022-gk-056",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Recently launchedJan Samarth'portal"
+      },
+      {
+        "id": "cds2-2022-gk-064",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "What was a munjaniq in medieval period?"
+      },
+      {
+        "id": "cds2-2022-gk-069",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Fat in human body is stored in"
+      },
+      {
+        "id": "cds2-2022-gk-105",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Blue Helmets are"
+      }
+    ],
+    "key": "cds2-2022-gk",
+    "key_note": null,
+    "answered": 86,
+    "pages": 17,
+    "quality": {
+      "glued_rate": 0.0025,
+      "camel_rate": 0.0044,
+      "mean_word_len": 5.34,
+      "words": 2751,
+      "mean_conf": 0.847
+    }
+  },
+  {
+    "paper": "CDS2-2023-GK",
+    "session": 2,
+    "year": 2023,
+    "series": "A",
+    "found": 106,
+    "kept": 84,
+    "dropped": {
+      "figure-or-map": 3,
+      "options-not-abcd": 15,
+      "empty-option": 2,
+      "wide-block (table)": 1,
+      "match-the-following": 1
+    },
+    "suspect": [
+      {
+        "id": "cds2-2023-gk-012",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Chromosomes are composed of DNA and:"
+      },
+      {
+        "id": "cds2-2023-gk-017",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Where is the Vikramkhol Cave located?"
+      },
+      {
+        "id": "cds2-2023-gk-036",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "A charged particle moves through a magnetic field B with a velocity v. Which one of the fo"
+      },
+      {
+        "id": "cds2-2023-gk-045",
+        "flags": [
+          "long-option"
+        ],
+        "question": "Cell wall is absent in which one of the following organisms?"
+      },
+      {
+        "id": "cds2-2023-gk-076",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "What does India's“Blue growth”refer to?"
+      }
+    ],
+    "key": "cds2-2023-gk",
+    "key_note": null,
+    "answered": 84,
+    "pages": 19,
+    "quality": {
+      "glued_rate": 0.0021,
+      "camel_rate": 0.0062,
+      "mean_word_len": 5.16,
+      "words": 3363,
+      "mean_conf": 0.861
+    }
+  },
+  {
+    "paper": "CDS2-2024-GK",
+    "session": 2,
+    "year": 2024,
+    "series": "A",
+    "found": 105,
+    "kept": 85,
+    "dropped": {
+      "options-not-abcd": 18,
+      "wide-block (table)": 2
+    },
+    "suspect": [
+      {
+        "id": "cds2-2024-gk-012",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "The two isotopes of elemental chlorine are: 35 36"
+      },
+      {
+        "id": "cds2-2024-gk-014",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Potassium nitrate is not used:"
+      },
+      {
+        "id": "cds2-2024-gk-020",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "bleaching of paper?"
+      },
+      {
+        "id": "cds2-2024-gk-078",
+        "flags": [
+          "low-ocr-confidence"
+        ],
+        "question": "Consider the following statements: 1. Hadley cells are key to understanding the wind patte"
+      },
+      {
+        "id": "cds2-2024-gk-092",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "Consider the following statements: 1. An additional spending by the Government of # X is l"
+      },
+      {
+        "id": "cds2-2024-gk-100",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "Suppose there are only two normal goods in the economy, X and Y. If price of good X increa"
+      }
+    ],
+    "key": "cds2-2024-gk",
+    "key_note": null,
+    "answered": 85,
+    "pages": 19,
+    "quality": {
+      "glued_rate": 0.0009,
+      "camel_rate": 0.0034,
+      "mean_word_len": 5.11,
+      "words": 3519,
+      "mean_conf": 0.888
+    }
+  },
+  {
+    "paper": "CDS2-2025-GK",
+    "session": 2,
+    "year": 2025,
+    "series": "A",
+    "found": 109,
+    "kept": 89,
+    "dropped": {
+      "options-not-abcd": 13,
+      "empty-option": 1,
+      "figure-or-map": 1,
+      "match-the-following": 1,
+      "wide-block (table)": 4
+    },
+    "suspect": [
+      {
+        "id": "cds2-2025-gk-022",
+        "flags": [
+          "tiny-option",
+          "orphan-token"
+        ],
+        "question": "A car travels a total distance L.It travelshalf the distance with speed v and the other ha"
+      },
+      {
+        "id": "cds2-2025-gk-025",
+        "flags": [
+          "tiny-option",
+          "orphan-token"
+        ],
+        "question": "Assume‘A'does 500 Jofwork in‘x’minutes and‘B'does 1000 Jofworkin 20minutes.If the power de"
+      },
+      {
+        "id": "cds2-2025-gk-026",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "A sound wave travelling at a speed of 330 m/s produces 20 crests and 20 troughs in 0.1 sec"
+      },
+      {
+        "id": "cds2-2025-gk-027",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "An X-ray can be deflected:"
+      },
+      {
+        "id": "cds2-2025-gk-029",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Twinkling of a star is due to:"
+      },
+      {
+        "id": "cds2-2025-gk-030",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Van de Graaff generator generates:"
+      },
+      {
+        "id": "cds2-2025-gk-033",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Why do plastics not degrade easily?"
+      },
+      {
+        "id": "cds2-2025-gk-043",
+        "flags": [
+          "orphan-token"
+        ],
+        "question": "What are the four human blood types in ABO | blood group typing?"
+      },
+      {
+        "id": "cds2-2025-gk-046",
+        "flags": [
+          "short-stem"
+        ],
+        "question": "Tooth enamel of humans is made up of:"
+      },
+      {
+        "id": "cds2-2025-gk-066",
+        "flags": [
+          "tiny-option"
+        ],
+        "question": "With reference to the women achievers in modern India, consider the following statements: "
+      },
+      {
+        "id": "cds2-2025-gk-097",
+        "flags": [
+          "tiny-option"
+        ],
+        "question": "Consider the following pairs with reference to world climate types and their characteristi"
+      }
+    ],
+    "key": null,
+    "key_note": "no key entry",
+    "answered": 0,
+    "pages": 21,
+    "quality": {
+      "glued_rate": 0.0012,
+      "camel_rate": 0.0037,
+      "mean_word_len": 5.12,
+      "words": 3205,
+      "mean_conf": 0.906
+    }
+  }
+]
