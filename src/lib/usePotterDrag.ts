@@ -12,15 +12,18 @@ const ZERO: DragOffset = { x: 0, y: 0 };
 /** Below this, the gesture was a tap, not a drag. Fingers wobble. */
 const SLOP = 5;
 
+/** How much of him has to stay inside the panel, in px. */
+const KEEP_VISIBLE = 32;
+
 /**
  * Lets Potter be dragged out of the way and stay there.
  *
- * The offset is stored per placement (`home` / `test` / `review`) because the
+ * The offset is stored per placement (`home` / `test` / `review`), because a
  * position that works on one screen is meaningless on another, and it survives
  * reloads.
  *
- * Returns `moved`, which the tap handler must check: without it, every drag
- * would also fire the mute toggle on release.
+ * Returns `wasDragged`, which the tap handler must check: without it, every
+ * drag would also fire the mute toggle on release.
  */
 export function usePotterDrag(key: string) {
   const storageKey = `cds-potter-pos-${key}`;
@@ -30,77 +33,111 @@ export function usePotterDrag(key: string) {
   const [side, setSide] = useState<"left" | "right">("left");
   const hostRef = useRef<HTMLDivElement | null>(null);
 
-  const start = useRef<{
-    px: number;
-    py: number;
-    ox: number;
-    oy: number;
-  } | null>(null);
+  const start = useRef<{ px: number; py: number; ox: number; oy: number } | null>(
+    null,
+  );
   const moved = useRef(false);
+  /** The applied offset, readable synchronously from the pointer handlers. */
+  const applied = useRef<DragOffset>(ZERO);
+  applied.current = offset;
+
+  /**
+   * Clamp so he can never be pushed out of the panel.
+   *
+   * Without this one hard drag strands him permanently: the panel is
+   * `overflow: hidden`, so he is simply gone, and the offset persists across
+   * reloads — the only way back was a Settings button nobody would think to
+   * look for. Measured live rather than from stored numbers, because the panel
+   * and his own size both change with the viewport.
+   */
+  const clamp = useCallback((want: DragOffset): DragOffset => {
+    const host = hostRef.current;
+    const panel = host?.closest(".app-panel");
+    if (!host || !panel) return want;
+
+    const p = panel.getBoundingClientRect();
+    const h = host.getBoundingClientRect();
+    // Where he sits with NO offset — the rect already includes the current one.
+    const baseLeft = h.left - applied.current.x;
+    const baseTop = h.top - applied.current.y;
+
+    return {
+      x: Math.min(
+        Math.max(want.x, p.left + KEEP_VISIBLE - (baseLeft + h.width)),
+        p.right - KEEP_VISIBLE - baseLeft,
+      ),
+      y: Math.min(
+        Math.max(want.y, p.top + KEEP_VISIBLE - (baseTop + h.height)),
+        p.bottom - KEEP_VISIBLE - baseTop,
+      ),
+    };
+  }, []);
 
   // Read after mount only — the server cannot see localStorage.
   useEffect(() => {
+    let raw: string | null = null;
     try {
-      const raw = localStorage.getItem(storageKey);
-      if (!raw) return;
-      const p = JSON.parse(raw) as Partial<DragOffset>;
-      if (typeof p?.x === "number" && typeof p?.y === "number") {
-        setOffset({ x: p.x, y: p.y });
-      }
+      raw = localStorage.getItem(storageKey);
     } catch {
-      /* unreadable or malformed — he just starts where he was designed to */
+      return;
     }
-  }, [storageKey]);
-
-  const onPointerDown = useCallback(
-    (e: React.PointerEvent) => {
-      // Left button / touch / pen only.
-      if (e.button !== 0) return;
-      start.current = {
-        px: e.clientX,
-        py: e.clientY,
-        ox: offset.x,
-        oy: offset.y,
-      };
-      moved.current = false;
-      // Capture is deliberately NOT taken here. Capturing on pointerdown
-      // redirects every following pointer event to this wrapper, so the click
-      // never reaches the <button> inside it — which is why tapping him to mute
-      // stopped working. Capture is taken below, only once it is a real drag.
-    },
-    [offset.x, offset.y],
-  );
-
-  const onPointerMove = useCallback((e: React.PointerEvent) => {
-    const s = start.current;
-    if (!s) return;
-    const dx = e.clientX - s.px;
-    const dy = e.clientY - s.py;
-    if (!moved.current && Math.hypot(dx, dy) < SLOP) return;
-    if (!moved.current) {
-      moved.current = true;
-      setDragging(true);
-      // Now that it is a drag, capture so it survives the pointer leaving him.
-      try {
-        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-      } catch {
-        /* some pointer types refuse capture; the drag still works */
-      }
+    if (!raw) return;
+    try {
+      const p = JSON.parse(raw) as Partial<DragOffset>;
+      if (typeof p?.x !== "number" || typeof p?.y !== "number") return;
+      if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) return;
+      // Clamp on the way in as well: an offset stored before a resize, or from
+      // a wider window, can be off-screen here.
+      setOffset(clamp({ x: p.x, y: p.y }));
+    } catch {
+      /* unreadable — he just starts where he was designed to */
     }
-    setOffset({ x: s.ox + dx, y: s.oy + dy });
+  }, [storageKey, clamp]);
+
+  const onPointerDown = useCallback((e: React.PointerEvent) => {
+    if (e.button !== 0) return;
+    start.current = {
+      px: e.clientX,
+      py: e.clientY,
+      ox: applied.current.x,
+      oy: applied.current.y,
+    };
+    moved.current = false;
+    // Capture is deliberately NOT taken here. Capturing on pointerdown
+    // redirects every following pointer event to this wrapper, so the click
+    // never reaches the <button> inside it — which is why tapping him to mute
+    // stopped working. It is taken below, once it is a real drag.
   }, []);
+
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      const s = start.current;
+      if (!s) return;
+      const dx = e.clientX - s.px;
+      const dy = e.clientY - s.py;
+      if (!moved.current && Math.hypot(dx, dy) < SLOP) return;
+      if (!moved.current) {
+        moved.current = true;
+        setDragging(true);
+        try {
+          (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+        } catch {
+          /* some pointer types refuse capture; the drag still works */
+        }
+      }
+      setOffset(clamp({ x: s.ox + dx, y: s.oy + dy }));
+    },
+    [clamp],
+  );
 
   const finish = useCallback(
     (e: React.PointerEvent) => {
       if (!start.current) return;
       start.current = null;
-      if (!moved.current) {
-        setDragging(false);
-        return;
-      }
       setDragging(false);
+      if (!moved.current) return;
       try {
-        localStorage.setItem(storageKey, JSON.stringify(offset));
+        localStorage.setItem(storageKey, JSON.stringify(applied.current));
       } catch {
         /* private mode — the position just won't survive a reload */
       }
@@ -110,13 +147,12 @@ export function usePotterDrag(key: string) {
         /* capture already lost */
       }
     },
-    [offset, storageKey],
+    [storageKey],
   );
 
   /**
-   * Flip his speech to whichever side has room. Dragging him to the left edge
-   * would otherwise push the text off the panel, where `overflow: hidden`
-   * simply eats it.
+   * Flip his speech to whichever side has room. Dragged to the left edge, the
+   * text would otherwise run off the panel, where overflow: hidden eats it.
    */
   useEffect(() => {
     const host = hostRef.current;
@@ -142,7 +178,7 @@ export function usePotterDrag(key: string) {
   return {
     offset,
     dragging,
-    /** Attach to the draggable wrapper so the side can be measured. */
+    /** Attach to the draggable wrapper so position can be measured. */
     hostRef,
     side,
     /** True if the pointer travelled far enough that this was a drag, not a tap. */
