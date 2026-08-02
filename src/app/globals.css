@@ -670,13 +670,31 @@ mark.target-word {
    He crosses the column, so the wrapper takes no pointer events — otherwise a
    79px-wide mascot would sit over whatever is beneath him. `.potter--tappable`
    re-enables them on the figure itself, which must stay tappable to mute him. */
+/* Potter flies in a reserved lane down the right of the review list.
+   Inside a 460px panel there is no spare margin, so the lane is made rather
+   than found: `.review-list` narrows the cards by exactly --potter-lane and he
+   occupies what is left. Without it he sits on top of the question text, which
+   is the one thing a companion on a review screen must never do. */
 .potter-rider {
+  --potter-lane: 66px;
   position: absolute;
-  right: -10px;
+  right: 0;
   top: 0;
+  width: var(--potter-lane);
+  display: flex;
+  justify-content: center;
   z-index: 30;
   will-change: transform;
   pointer-events: none;
+}
+.review-list {
+  --potter-lane: 66px;
+  padding-right: var(--potter-lane);
+  transition: padding-right 0.3s var(--ease);
+}
+/* No lane when he is not flying — the cards get the full width back. */
+.review-list[data-rider="off"] {
+  padding-right: 0;
 }
 /* Rolled into the turn by the rAF loop. Separate from the wrapper so the bank
    composes with the translate instead of fighting it for the same property. */

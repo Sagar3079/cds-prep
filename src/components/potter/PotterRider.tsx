@@ -100,10 +100,13 @@ export default function PotterRider({
   containerSelector,
   itemSelector,
   items,
+  onActiveChange,
 }: {
   containerSelector: string;
   itemSelector: string;
   items: RiderItem[];
+  /** Told whether he is actually on screen, so the page can reserve his lane. */
+  onActiveChange?: (active: boolean) => void;
 }) {
   const drag = usePotterDrag("review");
   const hostRef = useRef<HTMLDivElement | null>(null);
@@ -321,6 +324,11 @@ export default function PotterRider({
   useEffect(() => onThoughtsChange(setTalk), []);
   useEffect(() => onPotterVisibleChange(setShown), []);
 
+  const active = shown && roomToFly && items.length > 0;
+  useEffect(() => {
+    onActiveChange?.(active);
+  }, [active, onActiveChange]);
+
   if (items.length === 0 || !shown) return null;
 
   return (
@@ -346,7 +354,7 @@ export default function PotterRider({
               mood={say.mood}
               look={face}
               lookY={-0.35}
-              size={92}
+              size={78}
               thoughtsOn={talk}
               // A drag must not also fire the mute toggle on release.
               onToggle={() => {

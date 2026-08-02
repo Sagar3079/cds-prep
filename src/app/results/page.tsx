@@ -279,6 +279,8 @@ export default function ResultsPage() {
   const [state, setState] = useState<ReadState>({ status: "loading" });
   const [reducedMotion, setReducedMotion] = useState(false);
   const [onlyMissed, setOnlyMissed] = useState(false);
+  /** Reserve the flight lane only while he is actually there. */
+  const [riderOn, setRiderOn] = useState(false);
 
   useEffect(() => {
     setReducedMotion(
@@ -521,9 +523,13 @@ export default function ResultsPage() {
             skipped: set.answers[i] === null,
             official: q.answerSource === OFFICIAL_KEY_SOURCE,
           }))}
+          onActiveChange={setRiderOn}
         />
 
-        <ol className="space-y-3.5">
+        <ol
+          className="review-list space-y-3.5"
+          data-rider={riderOn ? "on" : "off"}
+        >
           {visible.map(({ q, i }, position) => (
             <li
               key={`${onlyMissed ? "missed" : "all"}-${i}-${q.id}`}
