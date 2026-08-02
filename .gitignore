@@ -46,3 +46,6 @@ scripts/ocr_log.txt
 
 # typescript incremental build cache
 *.tsbuildinfo
+
+# playwright screenshots
+.visual/

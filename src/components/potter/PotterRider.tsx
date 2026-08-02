@@ -196,15 +196,24 @@ export default function PotterRider({
       // the lane was created to protect, and spent most of the cycle outside
       // the lane entirely. A drift the width of the lane reads as flight
       // without ever crossing a card.
-      amp.current = Math.max(14, host.offsetWidth * 0.3);
+      // Exactly the slack between the lane and the figure inside it, so the
+      // extremes touch the lane edges and never pass them.
+      const fig = host.firstElementChild as HTMLElement | null;
+      const figW = fig?.getBoundingClientRect().width ?? host.offsetWidth * 0.8;
+      amp.current = Math.max(8, host.offsetWidth - figW);
 
-      // The range of list positions that still has him inside the panel, so the
-      // loop can hold him there without doing any layout reads of its own.
+      // Where he is allowed to be, so the loop needs no layout reads of its own.
+      //
+      // Two constraints, and BOTH matter. The panel bound keeps him on screen.
+      // The list bound keeps him beside the answer cards — without it he rose
+      // above the first card and sat on the provenance note and the "Review"
+      // heading, which is content his lane was never carved out of.
       const top = originY - view.top; // list origin, relative to the panel top
-      lo.current = MARGIN - top;
+      const listSpan = Math.max(0, parent.clientHeight - host.offsetHeight);
+      lo.current = Math.max(MARGIN - top, 0);
       hi.current = Math.max(
         lo.current,
-        view.height - host.offsetHeight - MARGIN - top,
+        Math.min(view.height - host.offsetHeight - MARGIN - top, listSpan),
       );
 
       // The reading line, as a distance down the list. Continuous in scrollTop:
@@ -234,7 +243,10 @@ export default function PotterRider({
     /** Write the current state to the DOM. No layout reads live in here. */
     const paint = () => {
       const theta = ((y.current - base.current) / wave.current) * Math.PI * 2;
-      const x = -amp.current * 0.5 * (1 - Math.cos(theta));
+      // Centred on the lane: the old form was -A/2*(1-cos), which spans
+      // [-A, 0] — entirely to the left, so every pixel of amplitude went
+      // into the card. This spans [-A/2, +A/2] about the resting point.
+      const x = -amp.current * 0.5 * Math.cos(theta);
       const dir = -Math.sin(theta); // +1 travelling right, −1 travelling left
 
       host.style.transform = `translate3d(${x.toFixed(2)}px, ${y.current.toFixed(2)}px, 0)`;
