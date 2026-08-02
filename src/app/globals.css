@@ -801,3 +801,55 @@ mark.target-word {
   60%  { transform: scale(0.96, 1.05) translateY(-2px); }
   100% { transform: scale(1, 1); }
 }
+
+/* ============================================================
+   POTTER — EXPLANATIONS + DRAG
+   ============================================================ */
+
+/* On the review screen he explains the answer rather than reacting to it, and
+   an explanation is two or three sentences — the 158px thought bubble is far
+   too small for that, so this is a proper panel. */
+.potter-explain {
+  position: absolute;
+  right: calc(100% - 6px);
+  top: 6%;
+  width: max-content;
+  max-width: min(260px, 46vw);
+  padding: 11px 13px;
+  border-radius: 15px 15px 4px 15px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--ink);
+  text-wrap: pretty;
+  z-index: 3;
+  transform-origin: 100% 30%;
+  animation: thoughtIn 0.42s var(--spring) both;
+}
+.potter-explain__wait {
+  color: var(--muted);
+  font-weight: 600;
+  font-style: italic;
+}
+
+/* ---- drag ----
+   The whole point is that he stops covering the question, so he keeps pointer
+   events even where the rest of him would not. `touch-action: none` is what
+   stops a drag on a touchscreen scrolling the panel instead of moving him. */
+.potter-drag {
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+  transition: transform 0.32s var(--ease);
+}
+.potter-drag--active {
+  cursor: grabbing;
+  /* No transition while dragging — he must track the finger exactly, and a
+     0.32s ease turns a drag into a lag. */
+  transition: none;
+  filter: drop-shadow(0 14px 22px rgba(16, 20, 45, 0.3));
+}
+.potter-drag--active .potter__svg { animation-play-state: paused; }

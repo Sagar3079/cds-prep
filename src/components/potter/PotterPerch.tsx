@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import Potter, { LEDGE_RATIO } from "./Potter";
+import { usePotterDrag } from "@/lib/usePotterDrag";
 
 const SIZE = 118;
 import { homeLine } from "@/lib/potter";
@@ -31,6 +32,7 @@ export default function PotterPerch() {
     homeLine({ doneToday: false, streak: 0, accuracy: 0, tests: 0 }),
   );
   const [look, setLook] = useState(0);
+  const drag = usePotterDrag("home");
   const [talk, setTalk] = useState(true);
   const [shown, setShown] = useState(true);
   const hostRef = useRef<HTMLDivElement | null>(null);
@@ -93,22 +95,33 @@ export default function PotterPerch() {
         } as CSSProperties
       }
     >
-      <div className="relative">
-        {/* lookY is negative: he is leaning over a ledge, so he is looking DOWN
+      <div
+        className={`potter-drag ${drag.dragging ? "potter-drag--active" : ""}`}
+        style={{
+          transform: `translate3d(${drag.offset.x}px, ${drag.offset.y}px, 0)`,
+        }}
+        {...drag.handlers}
+      >
+        <div className="relative">
+          {/* lookY is negative: he is leaning over a ledge, so he is looking DOWN
             into the card, not out at the reader. */}
-        <Potter
-          mood={line.mood === "idle" ? "peek" : line.mood}
-          look={look}
-          lookY={-0.75}
-          size={SIZE}
-          thoughtsOn={talk}
-          onToggle={() => setTalk(toggleThoughts())}
-        />
-        {talk && (
-          <p className="potter-thought" aria-hidden="true">
-            {line.text}
-          </p>
-        )}
+          <Potter
+            mood={line.mood === "idle" ? "peek" : line.mood}
+            look={look}
+            lookY={-0.75}
+            size={SIZE}
+            thoughtsOn={talk}
+            onToggle={() => {
+              if (drag.wasDragged()) return;
+              setTalk(toggleThoughts());
+            }}
+          />
+          {talk && (
+            <p className="potter-thought" aria-hidden="true">
+              {line.text}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

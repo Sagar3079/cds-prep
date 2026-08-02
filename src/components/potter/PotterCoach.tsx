@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import Potter, { LEDGE_RATIO } from "./Potter";
+import { usePotterDrag } from "@/lib/usePotterDrag";
 import { testLine, type Line } from "@/lib/potter";
 import {
   onPotterVisibleChange,
@@ -37,6 +38,7 @@ export default function PotterCoach({
   const [line, setLine] = useState<Line | null>(null);
   const [leaving, setLeaving] = useState(false);
   const [motionOk, setMotionOk] = useState(true);
+  const drag = usePotterDrag("test");
   const [talk, setTalk] = useState(true);
   const [shown, setShown] = useState(true);
   const enteredAt = useRef(Date.now());
@@ -124,27 +126,38 @@ export default function PotterCoach({
         } as CSSProperties
       }
     >
-      <div className="relative">
-        <Potter
-          // Reduced motion should quieten him, not delete him.
-          mood={motionOk ? (line?.mood ?? "peek") : "peek"}
-          look={0}
-          lookY={-0.7}
-          size={SIZE}
-          thoughtsOn={talk}
-          onToggle={() => setTalk(toggleThoughts())}
-        />
-        {talk && motionOk && line && (
-          <p
-            className="potter-thought potter-thought--left"
-            // Decorative: the text mutates on its own and would otherwise be
-            // announced at random.
-            aria-hidden="true"
-            data-leaving={leaving ? "true" : undefined}
-          >
-            {line.text}
-          </p>
-        )}
+      <div
+        className={`potter-drag ${drag.dragging ? "potter-drag--active" : ""}`}
+        style={{
+          transform: `translate3d(${drag.offset.x}px, ${drag.offset.y}px, 0)`,
+        }}
+        {...drag.handlers}
+      >
+        <div className="relative">
+          <Potter
+            // Reduced motion should quieten him, not delete him.
+            mood={motionOk ? (line?.mood ?? "peek") : "peek"}
+            look={0}
+            lookY={-0.7}
+            size={SIZE}
+            thoughtsOn={talk}
+            onToggle={() => {
+              if (drag.wasDragged()) return;
+              setTalk(toggleThoughts());
+            }}
+          />
+          {talk && motionOk && line && (
+            <p
+              className="potter-thought potter-thought--left"
+              // Decorative: the text mutates on its own and would otherwise be
+              // announced at random.
+              aria-hidden="true"
+              data-leaving={leaving ? "true" : undefined}
+            >
+              {line.text}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

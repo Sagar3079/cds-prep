@@ -70,6 +70,7 @@ export default function SettingsPage() {
   const [talk, setTalk] = useState(true);
   const [topics, setTopics] = useState(0);
   const [cleared, setCleared] = useState(false);
+  const [moved, setMoved] = useState(false);
 
   useEffect(() => {
     setShowPotter(potterVisible());
@@ -118,7 +119,7 @@ export default function SettingsPage() {
             <Toggle
               id="potter-thoughts"
               label="Let him think out loud"
-              hint="His speech bubbles. You can also tap him anywhere to toggle this."
+              hint="His reactions during a test, and his explanation of each answer when you review. You can also tap him to toggle this."
               on={talk}
               disabled={!showPotter}
               onChange={(next) => {
@@ -126,6 +127,38 @@ export default function SettingsPage() {
                 setThoughts(next);
               }}
             />
+
+            <div className={showPotter ? "" : "opacity-55"}>
+              <p className="text-[0.8125rem] leading-relaxed text-muted">
+                Drag him anywhere and he stays put, per screen.
+              </p>
+              <button
+                type="button"
+                className="btn-ghost mt-2"
+                disabled={!showPotter}
+                onClick={() => {
+                  // A drag can strand him off-screen; this is the way back.
+                  for (const k of ["home", "test", "review"]) {
+                    try {
+                      localStorage.removeItem(`cds-potter-pos-${k}`);
+                    } catch {
+                      /* ignore */
+                    }
+                  }
+                  setMoved(true);
+                }}
+              >
+                Reset his position
+              </button>
+              {moved && (
+                <p
+                  role="status"
+                  className="mt-2 text-[0.8125rem] font-semibold text-ok-ink"
+                >
+                  Position reset. Reload to see him back in place.
+                </p>
+              )}
+            </div>
           </>
         )}
       </section>

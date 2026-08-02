@@ -514,6 +514,8 @@ export default function ResultsPage() {
           containerSelector=".panel-body > main"
           itemSelector="[data-review-card]"
           items={visible.map(({ q, i }) => ({
+            id: q.id,
+            chosen: set.answers[i],
             correct: set.answers[i] === q.answer,
             skipped: set.answers[i] === null,
             official: q.answerSource === OFFICIAL_KEY_SOURCE,
