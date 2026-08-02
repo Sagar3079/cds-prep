@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
+import AnswerExplanation from "@/components/AnswerExplanation";
 import PotterRider from "@/components/potter/PotterRider";
 import QuestionCard from "@/components/QuestionCard";
 import ScoreRing, { formatScore } from "@/components/ScoreRing";
@@ -544,6 +545,7 @@ export default function ResultsPage() {
                 onSelect={() => {}}
                 showResult
               />
+              <AnswerExplanation id={q.id} chosen={set.answers[i]} />
             </li>
           ))}
         </ol>

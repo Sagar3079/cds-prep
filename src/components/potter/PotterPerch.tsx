@@ -96,6 +96,7 @@ export default function PotterPerch() {
       }
     >
       <div
+        ref={drag.hostRef}
         className={`potter-drag ${drag.dragging ? "potter-drag--active" : ""}`}
         style={{
           transform: `translate3d(${drag.offset.x}px, ${drag.offset.y}px, 0)`,
@@ -117,7 +118,10 @@ export default function PotterPerch() {
             }}
           />
           {talk && (
-            <p className="potter-thought" aria-hidden="true">
+            <p
+              className={`potter-thought ${drag.side === "right" ? "potter-thought--left" : ""}`}
+              aria-hidden="true"
+            >
               {line.text}
             </p>
           )}

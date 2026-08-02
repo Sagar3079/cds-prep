@@ -127,6 +127,7 @@ export default function PotterCoach({
       }
     >
       <div
+        ref={drag.hostRef}
         className={`potter-drag ${drag.dragging ? "potter-drag--active" : ""}`}
         style={{
           transform: `translate3d(${drag.offset.x}px, ${drag.offset.y}px, 0)`,
@@ -148,7 +149,7 @@ export default function PotterCoach({
           />
           {talk && motionOk && line && (
             <p
-              className="potter-thought potter-thought--left"
+              className={`potter-thought ${drag.side === "right" ? "potter-thought--left" : ""}`}
               // Decorative: the text mutates on its own and would otherwise be
               // announced at random.
               aria-hidden="true"

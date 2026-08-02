@@ -806,35 +806,6 @@ mark.target-word {
    POTTER — EXPLANATIONS + DRAG
    ============================================================ */
 
-/* On the review screen he explains the answer rather than reacting to it, and
-   an explanation is two or three sentences — the 158px thought bubble is far
-   too small for that, so this is a proper panel. */
-.potter-explain {
-  position: absolute;
-  right: calc(100% - 6px);
-  top: 6%;
-  width: max-content;
-  max-width: min(260px, 46vw);
-  padding: 11px 13px;
-  border-radius: 15px 15px 4px 15px;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow-md);
-  font-size: 0.75rem;
-  font-weight: 500;
-  line-height: 1.5;
-  color: var(--ink);
-  text-wrap: pretty;
-  z-index: 3;
-  transform-origin: 100% 30%;
-  animation: thoughtIn 0.42s var(--spring) both;
-}
-.potter-explain__wait {
-  color: var(--muted);
-  font-weight: 600;
-  font-style: italic;
-}
-
 /* ---- drag ----
    The whole point is that he stops covering the question, so he keeps pointer
    events even where the rest of him would not. `touch-action: none` is what
@@ -853,3 +824,37 @@ mark.target-word {
   filter: drop-shadow(0 14px 22px rgba(16, 20, 45, 0.3));
 }
 .potter-drag--active .potter__svg { animation-play-state: paused; }
+
+
+/* ============================================================
+   ANSWER EXPLANATION
+   Under the question it belongs to, not in a floating panel: you read it while
+   comparing the options, and a panel that follows a character down the page
+   covers the very text it is explaining.
+   ============================================================ */
+.explain {
+  margin-top: 0.75rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: 0.875rem;
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.explain__label {
+  margin: 0 0 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+}
+.explain__body {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+.explain__body--muted {
+  color: var(--muted);
+  font-style: italic;
+}

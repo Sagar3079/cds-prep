@@ -26,6 +26,9 @@ export function usePotterDrag(key: string) {
   const storageKey = `cds-potter-pos-${key}`;
   const [offset, setOffset] = useState<DragOffset>(ZERO);
   const [dragging, setDragging] = useState(false);
+  /** Which way his speech should open so it stays inside the panel. */
+  const [side, setSide] = useState<"left" | "right">("left");
+  const hostRef = useRef<HTMLDivElement | null>(null);
 
   const start = useRef<{
     px: number;
@@ -60,7 +63,10 @@ export function usePotterDrag(key: string) {
         oy: offset.y,
       };
       moved.current = false;
-      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      // Capture is deliberately NOT taken here. Capturing on pointerdown
+      // redirects every following pointer event to this wrapper, so the click
+      // never reaches the <button> inside it — which is why tapping him to mute
+      // stopped working. Capture is taken below, only once it is a real drag.
     },
     [offset.x, offset.y],
   );
@@ -74,6 +80,12 @@ export function usePotterDrag(key: string) {
     if (!moved.current) {
       moved.current = true;
       setDragging(true);
+      // Now that it is a drag, capture so it survives the pointer leaving him.
+      try {
+        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      } catch {
+        /* some pointer types refuse capture; the drag still works */
+      }
     }
     setOffset({ x: s.ox + dx, y: s.oy + dy });
   }, []);
@@ -101,6 +113,23 @@ export function usePotterDrag(key: string) {
     [offset, storageKey],
   );
 
+  /**
+   * Flip his speech to whichever side has room. Dragging him to the left edge
+   * would otherwise push the text off the panel, where `overflow: hidden`
+   * simply eats it.
+   */
+  useEffect(() => {
+    const host = hostRef.current;
+    const panel = host?.closest(".app-panel");
+    if (!host || !panel) return;
+    const h = host.getBoundingClientRect();
+    const p = panel.getBoundingClientRect();
+    const NEEDED = 190; // widest bubble plus its gap
+    const roomLeft = h.left - p.left;
+    const roomRight = p.right - h.right;
+    setSide(roomLeft >= NEEDED || roomLeft >= roomRight ? "left" : "right");
+  }, [offset.x, offset.y]);
+
   const reset = useCallback(() => {
     setOffset(ZERO);
     try {
@@ -113,6 +142,9 @@ export function usePotterDrag(key: string) {
   return {
     offset,
     dragging,
+    /** Attach to the draggable wrapper so the side can be measured. */
+    hostRef,
+    side,
     /** True if the pointer travelled far enough that this was a drag, not a tap. */
     wasDragged: () => moved.current,
     reset,

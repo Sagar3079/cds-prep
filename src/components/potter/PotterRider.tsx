@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Potter, { type Mood } from "./Potter";
 import { reviewLine } from "@/lib/potter";
 import { usePotterDrag } from "@/lib/usePotterDrag";
@@ -20,11 +20,6 @@ export interface RiderItem {
   correct: boolean;
   skipped: boolean;
   official: boolean;
-}
-
-interface Explain {
-  state: "loading" | "ready" | "failed";
-  text: string;
 }
 
 const clamp01 = (n: number) => (n < 0 ? 0 : n > 1 ? 1 : n);
@@ -123,12 +118,6 @@ export default function PotterRider({
     mood: "peek",
     text: "",
   });
-  /** The explanation for the card he is currently beside. */
-  const [explain, setExplain] = useState<Explain | null>(null);
-  /** Keyed by question id, so scrolling back never refetches. */
-  const cache = useRef<Map<string, string>>(new Map());
-  /** Guards against a slow response for a card you have already scrolled past. */
-  const wantId = useRef<string | null>(null);
 
   // physics, geometry + index, deliberately outside React so the loop never
   // re-renders and never goes stale.
@@ -232,7 +221,6 @@ export default function PotterRider({
         if (it) {
           const line = reviewLine({ index: cur, ...it });
           setSay({ mood: line.mood, text: line.text });
-          void askAbout(it);
         }
       }
     };
@@ -330,42 +318,6 @@ export default function PotterRider({
     measureRef.current?.();
   }, [items]);
 
-  /**
-   * Ask the server why this answer is the answer.
-   *
-   * This is the whole point of him on the review screen — a canned reaction is
-   * decoration, an explanation is the feature. The endpoint works with no API
-   * key configured (it returns a written explanation built from the bank), so
-   * this path is never dead.
-   */
-  const askAbout = useCallback(async (item: RiderItem) => {
-    const hit = cache.current.get(item.id);
-    if (hit !== undefined) {
-      setExplain({ state: "ready", text: hit });
-      return;
-    }
-    wantId.current = item.id;
-    setExplain({ state: "loading", text: "" });
-    try {
-      const res = await fetch("/api/explain", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ id: item.id, chosen: item.chosen }),
-      });
-      const data = (await res.json()) as { text?: string };
-      // A card you have already scrolled past must not overwrite the current one.
-      if (wantId.current !== item.id) return;
-      if (!res.ok || typeof data.text !== "string" || !data.text.trim()) {
-        setExplain({ state: "failed", text: "" });
-        return;
-      }
-      cache.current.set(item.id, data.text.trim());
-      setExplain({ state: "ready", text: data.text.trim() });
-    } catch {
-      if (wantId.current === item.id) setExplain({ state: "failed", text: "" });
-    }
-  }, []);
-
   useEffect(() => onThoughtsChange(setTalk), []);
   useEffect(() => onPotterVisibleChange(setShown), []);
 
@@ -380,6 +332,7 @@ export default function PotterRider({
       {/* Drag offset lives on its own wrapper so it composes with the flight
           transform the rAF loop writes to `hostRef` instead of fighting it. */}
       <div
+        ref={drag.hostRef}
         className={`potter-drag ${drag.dragging ? "potter-drag--active" : ""}`}
         style={{
           transform: `translate3d(${drag.offset.x}px, ${drag.offset.y}px, 0)`,
@@ -406,14 +359,13 @@ export default function PotterRider({
           {/* A wrapper the loop can fade: `.potter-thought`'s own entry
               animation fills forwards, so its opacity cannot be driven here. */}
           <div ref={sayRef} className="potter-rider__say">
-            {talk && (
-              <div className="potter-explain" role="note">
-                {explain?.state === "loading" && (
-                  <span className="potter-explain__wait">working it out…</span>
-                )}
-                {explain?.state === "ready" && explain.text}
-                {(explain === null || explain.state === "failed") && say.text}
-              </div>
+            {talk && say.text && (
+              <p
+                className={`potter-thought ${drag.side === "right" ? "potter-thought--left" : ""}`}
+                aria-hidden="true"
+              >
+                {say.text}
+              </p>
             )}
           </div>
         </div>
