@@ -81,6 +81,17 @@ const WINDOWS = {
    * a sorted-set read.
    */
   leaderboard: { tokens: 120, window: "1 m" },
+
+  /**
+   * Client error reports. 10 per minute.
+   *
+   * Each error boundary fires this once per mount via a `useEffect`, so a
+   * real user trips it at most a handful of times a session — one broken
+   * screen, maybe a retry. Ten a minute leaves headroom for that while still
+   * capping what a direct POST to this public endpoint can write, since
+   * nothing else gates who may call it.
+   */
+  log: { tokens: 10, window: "1 m" },
 } as const satisfies Record<string, { tokens: number; window: `${number} ${"s" | "m" | "h"}` }>;
 
 export type LimitedRoute = keyof typeof WINDOWS;
@@ -94,6 +105,7 @@ const MESSAGES: Record<LimitedRoute, string> = {
     "You've sent a lot of results in a short time. Wait a little and try again.",
   explain: "Too many explanations at once. Give it a moment and they'll load.",
   leaderboard: "The board is being asked for too often. It'll be back shortly.",
+  log: "Too many error reports just now. Give it a moment.",
 };
 
 /**
