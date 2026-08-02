@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 import type { Question, Subject } from "@/types";
 import { clearRunStatus, reportRun } from "./LeaderboardNote";
 import PotterCoach from "./potter/PotterCoach";
-import { HEAD_ROOM } from "./potter/PotterPerch";
 import QuestionCard from "./QuestionCard";
 import Timer from "./Timer";
 import {
@@ -692,7 +691,14 @@ export default function TestClient({
           `sticky` replaces `relative` rather than joining it: both set
           `position`, and a sticky box is just as good a containing block for
           his absolute positioning. */}
-      <div className="sticky z-40" style={{ top: HEAD_ROOM }}>
+      {/* NOT sticky. It was, so the countdown stayed on screen — but the run
+          header is opaque and the question scrolls underneath it, so on any
+          question long enough to need scrolling (all of GK: "Consider the
+          following statements... 1... 2... 3...") the first line of the stem
+          slid under the card and simply vanished. A timer you can scroll back
+          to costs less than a question you cannot read. The English test fits
+          on one screen anyway, so the clock is visible for the whole run there. */}
+      <div className="relative z-40">
         <PotterCoach
           index={idx}
           total={quiz.length}
@@ -709,7 +715,11 @@ export default function TestClient({
             Stacked, the ring alone is 150px and the run header ate 235px of an
             844px phone, which pushed the options off the bottom and forced a
             scroll between reading the question and answering it. */}
-        <div className="card run-head flex flex-col items-center gap-3">
+        {/* `relative z-10` is what hides his lower half. `.potter-perch` sits at
+            z-index 0 as an earlier sibling, so the card must have its own
+            stacking context to paint over him — without it his legs cover the
+            progress dots, which are buttons you can press. */}
+        <div className="card run-head relative z-10 flex flex-col items-center gap-3">
           <Timer seconds={seconds} total={MARKING.durationSec} />
 
           <div className="run-head__meta flex flex-col items-center gap-3">
