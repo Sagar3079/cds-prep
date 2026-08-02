@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { kv, kvConfigured } from "@/lib/kv";
+import { rateLimit } from "@/lib/ratelimit";
 import { currentAccount } from "@/lib/account";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +27,10 @@ const TOP = 50;
  * yesterday cannot leak into the ranking and the store cannot grow without
  * bound.
  */
-export async function GET() {
+export async function GET(req: Request) {
+  const limited = await rateLimit(req, "leaderboard");
+  if (limited) return limited;
+
   if (!kvConfigured) {
     return NextResponse.json({ day: istDay(), rows: [], configured: false });
   }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import questions from "@/data/questions.json";
 import type { Question } from "@/types";
+import { rateLimit } from "@/lib/ratelimit";
 
 /**
  * Potter's explanation endpoint.
@@ -705,6 +706,10 @@ function offline(q: Question, chosen: number | null): string {
 }
 
 export async function POST(req: Request) {
+  // Ahead of the model call, which is the part that costs money.
+  const limited = await rateLimit(req, "explain");
+  if (limited) return limited;
+
   let body: Body;
   try {
     body = (await req.json()) as Body;

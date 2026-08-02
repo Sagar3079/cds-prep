@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { randomBytes } from "node:crypto";
 import { kv, kvConfigured } from "@/lib/kv";
+import { rateLimit } from "@/lib/ratelimit";
 import {
   SESSION_COOKIE,
   accountKey,
@@ -17,7 +18,10 @@ import {
 const SESSION_DAYS = 180;
 
 /** Who am I? Used by the leaderboard to highlight your own row. */
-export async function GET() {
+export async function GET(req: Request) {
+  const limited = await rateLimit(req, "account:read");
+  if (limited) return limited;
+
   const acct = await currentAccount();
   if (!acct) return NextResponse.json({ signedIn: false });
   return NextResponse.json({
@@ -41,6 +45,11 @@ export async function GET() {
  * once verification lands, this endpoint must require it.
  */
 export async function POST(req: Request) {
+  // Before parsing: a malformed body is as good a way to spam sign-ups as a
+  // valid one, so the throttle must not sit behind validation.
+  const limited = await rateLimit(req, "account:create");
+  if (limited) return limited;
+
   if (!kvConfigured) {
     return NextResponse.json(
       { error: "Accounts are not configured on this deployment." },

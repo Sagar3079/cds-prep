@@ -3,6 +3,7 @@ import questionsData from "@/data/questions.json";
 import type { Question } from "@/types";
 import { MARKING } from "@/lib/daily";
 import { kv, kvConfigured } from "@/lib/kv";
+import { rateLimit } from "@/lib/ratelimit";
 import { currentAccount, displayName } from "@/lib/account";
 import { boardKey, boardNameKey, istDay } from "../leaderboard/route";
 
@@ -39,6 +40,9 @@ interface Body {
  * someone grind the same ten questions upward.
  */
 export async function POST(req: Request) {
+  const limited = await rateLimit(req, "submit");
+  if (limited) return limited;
+
   if (!kvConfigured) {
     return NextResponse.json({ error: "Leaderboard is not configured." }, { status: 503 });
   }

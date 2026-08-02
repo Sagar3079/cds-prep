@@ -27,6 +27,8 @@
   "dependencies": {
     "@types/node": "^26.1.2",
     "@types/react": "^19.2.18",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.1",
     "autoprefixer": "^10.5.4",
     "next": "^16.2.12",
     "postcss": "^8.5.25",
