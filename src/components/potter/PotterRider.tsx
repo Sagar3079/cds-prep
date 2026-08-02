@@ -251,10 +251,20 @@ export default function PotterRider({
   /** Lets the filter-change effect re-run the measurement without re-subscribing. */
   const measureRef = useRef<(() => void) | null>(null);
 
-  /** Live gates. Evaluated once at mount, he never appeared on a widened window. */
+  /**
+   * Live gates. Evaluated once at mount, he never appeared on a widened window.
+   *
+   * The width gate used to be `620px`, which is wider than every phone — so on
+   * the device most people actually revise on, he was mounted but never made
+   * visible. It dated from the reserved 78px lane, which genuinely did not fit
+   * in a phone-width column. There is no lane any more: he perches on the top
+   * edge of a card, in the gap above it, and that gap is the same 52px whatever
+   * the screen is. `360px` only excludes the handful of viewports too narrow
+   * for the gap plus a readable bubble.
+   */
   const [roomToFly, setRoomToFly] = useState(false);
   useEffect(() => {
-    const wide = window.matchMedia("(min-width: 620px)");
+    const wide = window.matchMedia("(min-width: 360px)");
     const still = window.matchMedia("(prefers-reduced-motion: reduce)");
     const apply = () => setRoomToFly(wide.matches && !still.matches);
     apply();

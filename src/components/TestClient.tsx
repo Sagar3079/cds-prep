@@ -583,7 +583,19 @@ export default function TestClient({
 
   return (
     <div className="shell space-y-4">
-      <div className="flex items-baseline justify-between gap-3 flex-wrap">
+      {/* Potter perches on the timer card below and his bubble opens beside his
+          head, level with this row — measured, it sat straight on top of both
+          the title and the date, at every width. Reserving horizontal space
+          does not help here: the bubble opens LEFTWARD and reached x=8 on a
+          390px screen, i.e. across the whole row. He cannot be lifted over the
+          text either, because his drag wrapper carries a transform and traps
+          the bubble in its own stacking context. So the row claims a band of
+          its own and everything below it starts under the bubble.
+
+          `mb`, not `mt` on the block below: the shell uses `space-y-4`, which
+          sets margin-TOP on every later sibling, and two margin-top utilities
+          on one element is a specificity coin-toss. */}
+      <div className="mb-20 flex items-baseline justify-between gap-3 flex-wrap">
         <h1 className="text-lg font-extrabold tracking-tight text-ink">
           {isRandom ? "Random Quiz" : "Today's Test"}
         </h1>
@@ -616,9 +628,14 @@ export default function TestClient({
         {/* Ring, dots and the progress line ride together at the top of the run.
             `top-0` is correct rather than lucky: the scroll container is the
             panel's <main>, and the navbar sits outside it. */}
-        <div className="card sticky top-0 z-40 flex flex-col items-center gap-3">
+        {/* `run-head` turns this stack on its side below 620px — see globals.css.
+            Stacked, the ring alone is 150px and the run header ate 235px of an
+            844px phone, which pushed the options off the bottom and forced a
+            scroll between reading the question and answering it. */}
+        <div className="card run-head sticky top-0 z-40 flex flex-col items-center gap-3">
           <Timer seconds={seconds} total={MARKING.durationSec} />
 
+          <div className="run-head__meta flex flex-col items-center gap-3">
           <div
             role="group"
             aria-label="Jump to question"
@@ -642,9 +659,10 @@ export default function TestClient({
             ))}
           </div>
 
-          <p className="text-sm text-muted text-center">
+          <p className="run-head__count text-sm text-muted text-center">
             Question {idx + 1} of {quiz.length} · {answered} answered
           </p>
+          </div>
         </div>
       </div>
 

@@ -20,84 +20,6 @@ function hasFixedOptions(q: Question): boolean {
   return (q as FixedOptionQuestion).fixedOptions === true;
 }
 
-/* ── answer provenance ─────────────────────────────────────────────────────── */
-
-type TrustTier = "keyed" | "transcribed" | "unverified";
-
-interface Trust {
-  tier: TrustTier;
-  label: string;
-  detail: string;
-}
-
-/**
- * `answerSource` is the only honest signal of how far an answer can be trusted.
- * The names are misleading — three of the four begin with "verified" but only
- * `verified-key` was ever checked against an external key, and the two "pattern"
- * tiers are fixed strings stamped on every hand-written item. Say so plainly:
- * a learner reviewing a wrong answer has to know whether the key is worth
- * arguing with.
- */
-const ANSWER_TRUST: Record<string, Trust> = {
-  "official-key": {
-    tier: "keyed",
-    label: "Official UPSC key",
-    detail:
-      "Read from the answer key UPSC published for this paper (Series A). This is the strongest provenance in the bank.",
-  },
-  "official-key-void": {
-    tier: "transcribed",
-    label: "No single answer",
-    detail:
-      "UPSC either dropped this question or accepted more than one option, so there is no single correct answer to mark against.",
-  },
-  // Legacy label. It was backed by a hand-typed transcription of the 2018 key
-  // that disagreed with the official key on 13 of its 63 entries, so anything
-  // still carrying it was never re-derived and is weaker than its name suggests.
-  "verified-key": {
-    tier: "transcribed",
-    label: "Hand-typed key",
-    detail:
-      "Taken from a hand-typed copy of an answer key that proved wrong on about a fifth of its entries. Treat it as likely, not settled.",
-  },
-  verified: {
-    tier: "transcribed",
-    label: "Transcribed by hand",
-    detail:
-      "Typed by hand from the paper, without an answer key. The transcriber recorded doubts about some of these, so treat the answer as likely rather than settled.",
-  },
-  "verified-pyq-pattern": {
-    tier: "unverified",
-    label: "Unverified practice item",
-    detail:
-      "Written by hand in the CDS pattern and never checked against any answer key. Despite its name, this label is stamped on every item in that set — it records nothing about verification.",
-  },
-  "predicted-cds-pattern": {
-    tier: "unverified",
-    label: "Unverified practice item",
-    detail:
-      "Written by hand in the CDS pattern and never checked against any answer key. Nothing about this answer has been confirmed against a source.",
-  },
-};
-
-const UNKNOWN_TRUST: Trust = {
-  tier: "unverified",
-  label: "Provenance unknown",
-  detail: "This item carries no recognised provenance label. Treat the answer as unverified.",
-};
-
-/**
- * Tier is carried by the wording first and by the border style second — solid
- * for the two tiers that trace back to a paper, dashed for the ones that record
- * nothing about verification. Colour only reinforces; it never carries the
- * distinction on its own.
- */
-const TRUST_STYLES: Record<TrustTier, string> = {
-  keyed: "chip-green border border-ok",
-  transcribed: "border border-streak-ink",
-  unverified: "chip-amber",
-};
-
 /* ── stem formatting ───────────────────────────────────────────────────────── */
 
 function formatBlanks(text: string, topic?: string): string {
@@ -379,7 +301,6 @@ export default function QuestionCard({
     ? (stemOptionLabels(question.question, question.options) ?? LETTER_LABELS)
     : LETTER_LABELS;
 
-  const trust = ANSWER_TRUST[question.answerSource] ?? UNKNOWN_TRUST;
   // Only `cds*` records come from a real paper; `year`/`session` on the
   // hand-written ones are placeholders, so no paper is claimed for them.
   const fromPaper = question.id.startsWith("cds");
@@ -453,7 +374,16 @@ export default function QuestionCard({
       {/* A plain div, not <header>: outside a sectioning ancestor a <header>
           becomes a banner landmark, and the results page stacks ten cards. */}
       <div className="space-y-2.5">
-        <p className="text-[0.6875rem] font-bold uppercase tracking-[0.08em] text-muted">
+        {/* Hidden on a phone DURING a test only: the timer row directly above
+            already reads "Question 1 of 10 · 0 answered", so this repeats it a
+            few pixels lower and costs a line the options need. On the review
+            screen there is no timer row, so it stays — that is the only place
+            the number is actually load-bearing. */}
+        <p
+          className={`text-[0.6875rem] font-bold uppercase tracking-[0.08em] text-muted ${
+            showResult ? "" : "q-index--during-test"
+          }`}
+        >
           Question {index + 1} of {total}
         </p>
         <div className="flex flex-wrap gap-1.5">
@@ -465,12 +395,13 @@ export default function QuestionCard({
               CDS-{question.session} {question.year}
             </span>
           )}
-          <span
-            className={`chip uppercase ${TRUST_STYLES[trust.tier]}`}
-            title={trust.detail}
-          >
-            {trust.label}
-          </span>
+          {/* The provenance chip ("Official UPSC key" / "Unverified practice
+              item") used to sit here and was removed on request: it took a
+              whole row on a phone and it is grading the bank, not the learner.
+              Provenance has NOT been dropped, only demoted — for anything that
+              is not an official key, the "Why this answer" panel still closes
+              with a clause saying so, which is where a learner is actually
+              weighing whether to trust the answer. */}
         </div>
       </div>
 
@@ -557,12 +488,11 @@ export default function QuestionCard({
         </div>
       )}
 
-      {showResult && (
-        <p className="text-xs leading-relaxed text-muted bg-surface border border-line rounded-xl px-3 py-2">
-          <strong className="font-semibold text-ink">{trust.label}.</strong>{" "}
-          {trust.detail}
-        </p>
-      )}
+      {/* The provenance box that stood here on the review screen is gone too.
+          It repeated for all ten questions and pushed the actual explanation
+          below the fold. What replaced it is one clause at the end of "Why this
+          answer", which only appears when the answer is NOT from an official
+          key — the case where a learner needs the warning. */}
     </div>
   );
 }

@@ -434,7 +434,42 @@ body {
    TIMER RING
    ============================================================ */
 .ring-wrap { position: relative; width: 150px; height: 150px; margin-inline: auto; }
-.ring-wrap svg { transform: rotate(-90deg); }
+
+/* ---- the run header, on a phone ----
+   Stacked, this is a 150px ring above a row of dots above a line of text: 235px
+   of an 844px screen, before the question card has started. Measured on a
+   390×844 viewport the question then began at y=516 and the last option landed
+   below the fold, so answering meant scrolling away from the question you were
+   answering — the one thing a timed test must not ask for.
+
+   Turned on its side the same three things cost 76px. Nothing is dropped: the
+   ring keeps its countdown and its colour states, the dots keep their 24px hit
+   areas, the count keeps its live region. Only the labels under the ring go,
+   and they were saying "REMAINING" beside a clock that is visibly counting
+   down. */
+@media (max-width: 620px) {
+  .run-head {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.75rem 0.9375rem;
+  }
+  .run-head .ring-wrap { width: 60px; height: 60px; margin-inline: 0; flex: none; }
+  .run-head .ring-time { font-size: 1rem; letter-spacing: -0.02em; }
+  .run-head .ring-lab { display: none; }
+  .run-head__meta { align-items: flex-start; gap: 0.5rem; min-width: 0; flex: 1; }
+  .run-head__meta > [role="group"] { justify-content: flex-start; gap: 11px; }
+  .run-head__count { font-size: 0.75rem; text-align: left; }
+  /* 62px per option × 4 is most of what is left. Trimming the vertical padding
+     buys the four of them 32px without touching the 44px minimum hit height. */
+  .option-btn { padding: 0.7rem 0.875rem; }
+  /* Duplicated by the run header a few pixels above it. Review keeps its copy. */
+  .q-index--during-test { display: none; }
+}
+/* Fill the wrapper rather than the 150px the markup asks for, so resizing
+   `.ring-wrap` actually resizes the ring. Without this the phone layout kept
+   drawing a 150px circle inside a 60px box and it spilled over the question. */
+.ring-wrap svg { transform: rotate(-90deg); width: 100%; height: 100%; display: block; }
 .ring-track { stroke: var(--surface-2); }
 .ring-prog { stroke: var(--accent); stroke-linecap: round; transition: stroke 0.5s var(--ease); }
 .ring-wrap.warn .ring-prog { stroke: var(--streak); }
@@ -545,6 +580,33 @@ mark.target-word {
   padding: 0;
   border: 0;
   background: none;
+  /* His own box is all that ever changes; nothing outside it depends on his
+     layout. Lets the compositor skip the rest of the page when he repaints. */
+  contain: layout paint;
+}
+
+/* ---- phones: the single biggest cost in this file ----
+   `filter: drop-shadow` re-renders its whole region on EVERY frame that any
+   descendant animates, and eight infinite animations run inside him. On a
+   desktop that is free; on a phone it is the difference between smooth and
+   visibly dropping frames, because the filter defeats compositing and forces a
+   main-thread repaint of the figure 60 times a second.
+
+   Below the tablet breakpoint the shadow is dropped and the ambient loops are
+   cut to the two that carry the "alive" read — the breath and the hair. His
+   flight, his bank and his dive are untouched: those are transforms on the
+   wrapper, they stay on the compositor, and they are the motion the screen is
+   actually about. Hover is irrelevant on a touch screen, so its filter
+   transition goes too. */
+@media (max-width: 620px) {
+  .potter { filter: none; }
+  .potter--tappable { transition: none; }
+  .potter__tail,
+  .potter__wand,
+  .potter__spark,
+  .potter__head-bob,
+  .potter--riding .potter__broom { animation: none; }
+  .potter-drag--active { filter: none; }
 }
 /* Tapping him mutes or unmutes his thoughts. Only the tappable variant takes
    pointer events — the decorative copies stay inert. */
@@ -751,8 +813,10 @@ mark.target-word {
   top: auto;
   bottom: var(--potter-sink, 20px);
   /* (0,2,0), so this also outranks `.potter-thought--left`'s narrower cap when
-     a drag flips the bubble to his other side. */
-  max-width: 200px;
+     a drag flips the bubble to his other side. A flat 200px is most of a phone
+     column, so it is capped against the viewport too — he sits at the right and
+     the bubble opens left, so it can only ever have the width left of him. */
+  max-width: min(200px, calc(100vw - 150px));
 }
 
 /* The review list itself. No lane: the cards get the full column width. */
