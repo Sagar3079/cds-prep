@@ -55,6 +55,11 @@ function answeredPool(all: Question[]): Question[] {
   );
 }
 
+/** How many of a bank's questions can actually be served and scored. */
+export function answerableCount(all: Question[]): number {
+  return answeredPool(all).length;
+}
+
 /** Fixed — the canonical order must depend on neither the user nor the date */
 const CANON_SEED = 0x5cd5c0de;
 const DAY_MS = 86400000;

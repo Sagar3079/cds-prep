@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import type { Question } from "@/types";
+import { SUBJECT_LABEL } from "@/lib/subject";
+import type { Question, Subject } from "@/types";
 
 /**
  * The leaderboard side of finishing a test.
@@ -50,9 +51,15 @@ export type SubmitOutcome =
   /** Network, timeout, or anything else that never reached an answer. */
   | { state: "unreachable" };
 
-function write(outcome: SubmitOutcome): void {
+/** The outcome plus the board it was about — there are two of them now. */
+interface Status {
+  outcome: SubmitOutcome;
+  subject: Subject;
+}
+
+function write(outcome: SubmitOutcome, subject: Subject): void {
   try {
-    sessionStorage.setItem(STATUS_KEY, JSON.stringify(outcome));
+    sessionStorage.setItem(STATUS_KEY, JSON.stringify({ ...outcome, subject }));
   } catch {
     /* private mode or a full store — the note simply won't appear */
   }
@@ -63,7 +70,7 @@ function write(outcome: SubmitOutcome): void {
   }
 }
 
-function read(): SubmitOutcome | null {
+function read(): Status | null {
   try {
     const raw = sessionStorage.getItem(STATUS_KEY);
     if (!raw) return null;
@@ -72,10 +79,14 @@ function read(): SubmitOutcome | null {
     const state = (parsed as { state?: unknown }).state;
     if (typeof state !== "string") return null;
     const reason = (parsed as { reason?: unknown }).reason;
+    const subject = (parsed as { subject?: unknown }).subject;
     return {
-      state,
-      reason: typeof reason === "string" ? reason : "",
-    } as SubmitOutcome;
+      outcome: {
+        state,
+        reason: typeof reason === "string" ? reason : "",
+      } as SubmitOutcome,
+      subject: subject === "gk" ? "gk" : "english",
+    };
   } catch {
     return null;
   }
@@ -94,15 +105,22 @@ interface SubmitReply {
  * The answers travel as the **text** of the option picked, not its index:
  * `shuffleQuestionOptions` reorders the options per run, so an index is
  * meaningless against the server's own copy of the key. A blank sends `null`.
+ *
+ * `subject` decides which board the run lands on and which key it is scored
+ * against, so it is sent explicitly rather than inferred from the ids — an
+ * unlabelled run would be scored as English and could put a GK score on the
+ * English board.
  */
 export function reportRun(
   quiz: Question[],
   answers: (number | null)[],
   seconds: number,
+  subject: Subject,
 ): void {
   if (typeof window === "undefined") return;
   try {
     const payload = {
+      subject,
       answers: quiz.map((q, i) => {
         const chosen = answers[i];
         return {
@@ -113,7 +131,7 @@ export function reportRun(
       seconds,
     };
 
-    write({ state: "pending" });
+    write({ state: "pending" }, subject);
 
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -128,9 +146,9 @@ export function reportRun(
       keepalive: true,
     })
       .then(async (res) => {
-        if (res.status === 401) return write({ state: "signed-out" });
-        if (res.status === 429) return write({ state: "throttled" });
-        if (res.status === 503) return write({ state: "off" });
+        if (res.status === 401) return write({ state: "signed-out" }, subject);
+        if (res.status === 429) return write({ state: "throttled" }, subject);
+        if (res.status === 503) return write({ state: "off" }, subject);
 
         let data: SubmitReply = {};
         try {
@@ -143,36 +161,51 @@ export function reportRun(
           const why = typeof data.error === "string" ? data.error.trim() : "";
           return write(
             why ? { state: "rejected", reason: why } : { state: "unreachable" },
+            subject,
           );
         }
-        if (data.onBoard === true) return write({ state: "posted" });
+        if (data.onBoard === true) return write({ state: "posted" }, subject);
 
         const why = typeof data.reason === "string" ? data.reason.trim() : "";
-        return write({
-          state: "not-counted",
-          reason: why || "This run isn’t on today’s board.",
-        });
+        return write(
+          {
+            state: "not-counted",
+            reason: why || "This run isn’t on today’s board.",
+          },
+          subject,
+        );
       })
-      .catch(() => write({ state: "unreachable" }))
+      .catch(() => write({ state: "unreachable" }, subject))
       .finally(() => window.clearTimeout(timer));
   } catch {
     // `fetch` missing, `AbortController` missing, JSON that won't stringify —
     // the run is already scored and saved, so this is the end of it.
     try {
-      write({ state: "unreachable" });
+      write({ state: "unreachable" }, subject);
     } catch {
       /* ignore */
     }
   }
 }
 
-/** Copy per outcome. `link` adds a quiet route to the Ranks tab. */
-function noteFor(outcome: SubmitOutcome): { text: string; link: boolean } | null {
+/**
+ * Copy per outcome. `link` adds a quiet route to the Ranks tab.
+ *
+ * The board is named wherever a run reached one: with a board per subject,
+ * "added to today's leaderboard" no longer says which.
+ */
+function noteFor(
+  outcome: SubmitOutcome,
+  subject: Subject,
+): { text: string; link: boolean } | null {
   switch (outcome.state) {
     case "pending":
       return null;
     case "posted":
-      return { text: "Added to today’s leaderboard.", link: true };
+      return {
+        text: `Added to today’s ${SUBJECT_LABEL[subject]} leaderboard.`,
+        link: true,
+      };
     case "not-counted":
       return { text: outcome.reason, link: true };
     case "signed-out":
@@ -207,17 +240,17 @@ function noteFor(outcome: SubmitOutcome): { text: string; link: boolean } | null
  * and nothing ever for a random set — only the daily test reports a run.
  */
 export default function LeaderboardNote() {
-  const [outcome, setOutcome] = useState<SubmitOutcome | null>(null);
+  const [status, setStatus] = useState<Status | null>(null);
 
   useEffect(() => {
-    const sync = () => setOutcome(read());
+    const sync = () => setStatus(read());
     sync();
     window.addEventListener(STATUS_EVENT, sync);
     return () => window.removeEventListener(STATUS_EVENT, sync);
   }, []);
 
-  const note = outcome ? noteFor(outcome) : null;
-  if (!note) return null;
+  const note = status ? noteFor(status.outcome, status.subject) : null;
+  if (!note || !status) return null;
 
   return (
     <p
@@ -228,8 +261,10 @@ export default function LeaderboardNote() {
       {note.link && (
         <>
           {" "}
+          {/* Straight to the board this run was about, not to whichever tab
+              the Ranks page happens to open on. */}
           <Link
-            href="/leaderboard"
+            href={`/leaderboard?subject=${status.subject}`}
             className="font-bold text-accent-ink underline underline-offset-2"
           >
             Ranks

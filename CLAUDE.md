@@ -5,9 +5,10 @@ Guidance for Claude Code working in this repo.
 ## What this is
 
 A Next.js 16 / React 19 / TypeScript / Tailwind v4 web app for daily CDS (Combined
-Defence Services) English practice. Questions are derived from UPSC previous-year
-papers via an OCR pipeline. All user state lives in browser `localStorage` — there is
-no backend, no database, no auth, no API keys.
+Defence Services) practice, in two subjects: English and General Knowledge.
+Questions are derived from UPSC previous-year papers via an OCR pipeline. All
+practice state lives in browser `localStorage`; only the optional leaderboard
+touches a server.
 
 **This is a frontend project.** Every task here is UI, UX, data-shaping, or the Python
 OCR pipeline.
@@ -27,8 +28,11 @@ src/
     daily.ts           seeded PRNG (mulberry32) → deterministic daily question set,
                        option shuffling with answer remap, MARKING, scoreAnswers
     storage.ts         localStorage read/write, streak + accuracy stats
-  data/questions.json  427 questions (the app's only data source)
-  types.ts             Question, QuestionPart, Results
+    subject.ts         Subject helpers — labels, mastery-key namespacing
+    bank.ts            one bank per subject, readiness gate, server-side key map
+  data/questions.json      English bank
+  data/questions-gk.json   General Knowledge bank — separate file, separate pool
+  types.ts             Question, QuestionPart, Subject, Results
 
 scripts/               Python OCR + parsing pipeline (ocr_and_parse.py,
                        seed_questions.py, expand_bank.py, merge_answered_ocr.py)
@@ -45,6 +49,26 @@ pdfs/                  gitignored — fetch locally, see README
   broke determinism before. Never introduce `Date.now()`, `Math.random()`, or any
   localStorage read into it. `pickRandomQuestions` is the separate non-deterministic
   entry point and is where per-user exclusion belongs.
+- **One bank per subject, in its own file, never merged.** English is
+  `questions.json`, General Knowledge is `questions-gk.json`, and each is passed
+  to the pickers on its own via `bankFor()`. Because the canonical order is one
+  shuffle of the *whole* pool, appending GK to the English array would reorder
+  that shuffle and silently move every existing user to a different daily set and
+  a different position in the cycle — with nothing failing to say so. Never
+  concatenate the banks, and never `.map()` `questions.json` into a new array on
+  the way to `pickDailyQuestions`. `node scripts/daily-snapshot.mjs --proof`
+  demonstrates both halves: separate banks change 0/30 dates, merging changes
+  30/30. Snapshot with `daily-snapshot.mjs before.json` / `--diff` around any
+  change that goes near this path.
+- **`questions-gk.json` may be absent, empty or short.** It comes from the OCR
+  pipeline and grows a paper at a time. `isSubjectReady()` gates the whole
+  subject on it: below one full set, GK is not offered on the home screen and
+  `/test?subject=gk` says so rather than rendering a three-question "test".
+- **Mastery keys are namespaced by subject.** All subjects share one
+  `cds-topic-mastery` record. English keeps its bare topic strings so records
+  already in people's browsers keep counting; GK is prefixed (`gk:polity`) via
+  `masteryKey()`. Much of the GK bank deliberately carries no topic at all —
+  weighting must keep tolerating that (it falls back to the baseline weight).
 - **Calendar days are local, never UTC.** Use `dateKey()` / `todayKey()` from
   `storage.ts`. `toISOString().slice(0,10)` is a bug here — users are in IST, so before
   05:30 it returns the previous day and attempts overwrite each other.
@@ -196,6 +220,10 @@ npm run build
 npm run typecheck  # tsc --noEmit
 npm run lint        # eslint . — flat config in eslint.config.mjs
 npm run visual      # scripts/visual-check.mjs against a running dev server
+
+node scripts/daily-snapshot.mjs before.json      # daily-set ids for 30 fixed dates
+node scripts/daily-snapshot.mjs --diff before.json after.json
+node scripts/daily-snapshot.mjs --proof          # separate banks vs one merged pool
 ```
 
 `next lint` was removed in Next 16; `eslint.config.mjs` (ESLint 9 flat config,
@@ -229,8 +257,11 @@ python scripts/seed_questions.py    # rebuild src/data/questions.json
    against a running `npm run dev`. It fails loudly, not silently, on horizontal scroll,
    `.panel-body > main` overflowing at phone width, and Potter losing his self-skip gate.
 5. Keyboard-only pass over any screen you touched; focus is visible throughout.
-6. If you touched `daily.ts`: the same date still yields the same set *regardless of
-   what is in localStorage*, and a shuffled option still scores correctly.
+6. If you touched `daily.ts`, either bank, or anything on the way into
+   `pickDailyQuestions`: the same date still yields the same set *regardless of
+   what is in localStorage*, a shuffled option still scores correctly, and
+   `node scripts/daily-snapshot.mjs --diff before.json after.json` reports zero
+   drift for English.
 7. If you touched `storage.ts`: a second attempt on the same day does not overwrite the
    first, and a date near midnight IST resolves to the local day.
 8. If you touched anything user-facing: run `/impeccable audit` on it.

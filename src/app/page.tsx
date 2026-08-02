@@ -2,22 +2,30 @@ import HomeStats, {
   HomeDate,
   HomeSetChip,
   HomeStartActions,
+  type CycleDays,
 } from "@/components/HomeStats";
 import PotterPerch from "@/components/potter/PotterPerch";
 import TopicInsight from "@/components/TopicInsight";
+import { bankFor, bankSize, isSubjectReady, readySubjects, PER_TEST } from "@/lib/bank";
 import { MARKING, dailyCycleDays } from "@/lib/daily";
-import questionsData from "@/data/questions.json";
-import type { Question } from "@/types";
-
-/** Matches the count TestClient asks pickDailyQuestions / pickRandomQuestions for. */
-const PER_TEST = 10;
 
 const mmss = (s: number) =>
   `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
 export default function Home() {
-  const questions = questionsData as Question[];
-  const cycleDays = dailyCycleDays(questions, PER_TEST);
+  const questions = bankFor("english");
+  // Every subject with a bank big enough to run a test. GK is simply absent
+  // from the home screen until its bank arrives — see `isSubjectReady`.
+  const available = readySubjects();
+  const cycleDays: CycleDays = {
+    english: dailyCycleDays(bankFor("english"), PER_TEST),
+    gk: dailyCycleDays(bankFor("gk"), PER_TEST),
+  };
+  const gkReady = isSubjectReady("gk");
+  const gkTotal = bankSize("gk");
+  const gkOfficial = bankFor("gk").filter(
+    (q) => q.answerSource === "official-key",
+  ).length;
   const minutes = Math.round(MARKING.durationSec / 60);
 
   return (
@@ -49,7 +57,7 @@ export default function Home() {
             aria-labelledby="today-heading"
             className="card relative z-10 flex flex-col items-center gap-4 text-center"
           >
-            <HomeSetChip cycleDays={cycleDays} />
+            <HomeSetChip available={available} cycleDays={cycleDays} />
 
             {/* decorative preview of the test clock — the live one lives on /test */}
             <div className="ring-wrap" aria-hidden="true">
@@ -79,26 +87,39 @@ export default function Home() {
               </p>
             </div>
 
-            <HomeStartActions />
+            <HomeStartActions available={available} />
           </section>
         </div>
 
         <HomeStats />
 
-        <TopicInsight />
+        <TopicInsight available={available} />
 
         <section className="card" aria-labelledby="bank-heading">
           <h2 id="bank-heading" className="text-[0.9375rem] font-bold text-ink">
             About the question bank
           </h2>
           <p className="mt-1.5 text-sm leading-relaxed text-muted">
-            {questions.length} questions — mostly Synonyms, Antonyms,
+            English: {questions.length} questions — mostly Synonyms, Antonyms,
             Comprehension, Idioms and Phrases and Spotting Errors. Only 110 are
             transcribed from real CDS-1 papers (2015–2018); the rest are
             hand-written practice items whose year and session labels are
             placeholders, so treat any single answer as practice rather than an
             official key.
           </p>
+          {gkReady && (
+            // Stated separately because the provenance is genuinely different,
+            // and flattening the two into one number would borrow the GK bank's
+            // authority for the hand-written English items. Counted rather than
+            // claimed: `answerSource` is the only honest signal, so the sentence
+            // is built from it instead of from what the bank is supposed to be.
+            <p className="mt-2 text-sm leading-relaxed text-muted">
+              General Knowledge: {gkTotal} questions
+              {gkOfficial === gkTotal
+                ? ", every one answered from the key UPSC published for that paper."
+                : `, ${gkOfficial} of them answered from an official UPSC key and the rest not.`}
+            </p>
+          )}
         </section>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { questionMasteryKey } from "@/lib/subject";
 import type { Question } from "@/types";
 
 /**
@@ -9,6 +10,12 @@ import type { Question } from "@/types";
  * comparable — and per-user state entering that path is the exact bug that was
  * fixed once already. Adaptation belongs to practice, which is per-user by
  * design. See `pickAdaptiveQuestions` in daily.ts.
+ *
+ * All subjects share this one record, so the keys are namespaced by subject
+ * (`masteryKey` in subject.ts). English keeps its bare topic strings — records
+ * already in people's browsers keep counting — and GK topics are prefixed, so a
+ * weak "Polity" can never drag the weighting of an English topic around, and a
+ * label that happens to exist in both banks cannot merge two unrelated scores.
  */
 
 const KEY = "cds-topic-mastery";
@@ -77,7 +84,10 @@ export function recordAttempt(
   const mastery = getMastery();
 
   questions.forEach((q, i) => {
-    const topic = q.topic?.trim();
+    // "" for a question with no topic — much of the GK bank deliberately has
+    // none, and an untracked question is drawn at the baseline weight rather
+    // than being excluded from practice.
+    const topic = questionMasteryKey(q);
     if (!topic) return;
     const stat = mastery[topic] ?? { ...EMPTY };
     const a = answers[i];

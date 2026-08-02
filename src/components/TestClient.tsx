@@ -8,7 +8,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import { useRouter } from "next/navigation";
-import type { Question } from "@/types";
+import type { Question, Subject } from "@/types";
 import { reportRun } from "./LeaderboardNote";
 import PotterCoach from "./potter/PotterCoach";
 import { HEAD_ROOM } from "./potter/PotterPerch";
@@ -33,6 +33,7 @@ import {
   type Attempt,
   type AttemptMode,
 } from "@/lib/storage";
+import { masteryKey, SUBJECT_LABEL } from "@/lib/subject";
 import Link from "next/link";
 
 const PROGRESS_VERSION = 1;
@@ -41,6 +42,7 @@ const PROGRESS_VERSION = 1;
 interface Progress {
   v: number;
   mode: AttemptMode;
+  subject: Subject;
   date: string;
   /**
    * Full question objects, not just ids: options are shuffled per run (and
@@ -55,16 +57,29 @@ interface Progress {
   startedAt: number;
 }
 
-/** Daily and random runs persist separately so one cannot clobber the other. */
-const progressKey = (mode: AttemptMode) => `cds-test-progress-${mode}`;
+/**
+ * Daily and random runs persist separately so one cannot clobber the other, and
+ * so do the subjects: a half-finished English daily and a half-finished GK daily
+ * are two different runs on the same date, and one key for both would restore
+ * the wrong ten questions into the wrong test.
+ *
+ * English keeps its original key so a run already in progress survives this
+ * change rather than being thrown away mid-clock.
+ */
+const progressKey = (mode: AttemptMode, subject: Subject) =>
+  subject === "english"
+    ? `cds-test-progress-${mode}`
+    : `cds-test-progress-${mode}-${subject}`;
 
-function loadProgress(mode: AttemptMode): Progress | null {
+function loadProgress(mode: AttemptMode, subject: Subject): Progress | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = localStorage.getItem(progressKey(mode));
+    const raw = localStorage.getItem(progressKey(mode, subject));
     if (!raw) return null;
     const p = JSON.parse(raw) as Partial<Progress> | null;
     if (!p || p.v !== PROGRESS_VERSION || p.mode !== mode) return null;
+    // Absent on a run started before GK existed, and those are all english.
+    if ((p.subject ?? "english") !== subject) return null;
     if (!Array.isArray(p.quiz) || p.quiz.length === 0) return null;
     if (!Array.isArray(p.answers) || p.answers.length !== p.quiz.length) {
       return null;
@@ -80,6 +95,7 @@ function loadProgress(mode: AttemptMode): Progress | null {
     return {
       v: p.v,
       mode,
+      subject,
       date: p.date,
       quiz: p.quiz,
       answers: p.answers,
@@ -96,16 +112,16 @@ function loadProgress(mode: AttemptMode): Progress | null {
 function saveProgress(p: Progress): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(progressKey(p.mode), JSON.stringify(p));
+    localStorage.setItem(progressKey(p.mode, p.subject), JSON.stringify(p));
   } catch {
     /* quota or private mode — the run continues from memory */
   }
 }
 
-function clearProgress(mode: AttemptMode): void {
+function clearProgress(mode: AttemptMode, subject: Subject): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.removeItem(progressKey(mode));
+    localStorage.removeItem(progressKey(mode, subject));
   } catch {
     /* ignore */
   }
@@ -155,9 +171,12 @@ interface FinalScore {
 export default function TestClient({
   questions,
   mode = "daily",
+  subject = "english",
 }: {
+  /** One subject's bank, never a mix — see the note at the top of `bank.ts`. */
   questions: Question[];
   mode?: AttemptMode;
+  subject?: Subject;
 }) {
   const router = useRouter();
   // Resolved once per mount. Rendered only after `ready`, so a server/client
@@ -205,27 +224,36 @@ export default function TestClient({
       if (Object.keys(mastery).length === 0) {
         return pickRandomQuestions(questions, 10, undefined, getAskedIds());
       }
+      // `availableTopics` reads THIS subject's bank, and the weights are looked
+      // up under this subject's namespace in the shared mastery record — so a
+      // weak "Polity" cannot pull an English set around, and vice versa. The
+      // map is keyed by the plain topic because `pickAdaptiveQuestions` sees
+      // one subject's pool at a time and reads `q.topic` directly. Questions
+      // with no topic (much of the GK bank, deliberately) simply miss the map
+      // and are drawn at the baseline weight.
+      const topics = availableTopics(questions);
+      const weighted = topicWeights(
+        topics.map((t) => masteryKey(subject, t)),
+        mastery,
+      );
       const weights = Object.fromEntries(
-        topicWeights(availableTopics(questions), mastery).map((t) => [
-          t.topic,
-          t.weight,
-        ]),
+        topics.map((t, i) => [t, weighted[i].weight]),
       );
       return pickAdaptiveQuestions(questions, 10, weights, getAskedIds());
     }
     return pickDailyQuestions(questions, date, 10, getAskedIds());
-  }, [questions, date, isRandom]);
+  }, [questions, date, isRandom, subject]);
 
   /* ---------------------------------------------------------------- restore */
 
   useEffect(() => {
     // "Shuffle again" is an explicit request for a new run — never restore into it.
-    const saved = runId === 0 ? loadProgress(mode) : null;
+    const saved = runId === 0 ? loadProgress(mode, subject) : null;
     const stale =
       saved !== null &&
       (saved.date !== date ||
         // already submitted: an attempt for this run was written after it began
-        getAttemptsForDate(date, mode).some(
+        getAttemptsForDate(date, mode, subject).some(
           (a) =>
             (a.savedAt ?? 0) >= saved.startedAt &&
             sameIds(
@@ -249,7 +277,7 @@ export default function TestClient({
       return;
     }
 
-    clearProgress(mode);
+    clearProgress(mode, subject);
     const q = buildQuiz();
     setQuiz(q);
     setAnswers(Array.from({ length: q.length }, () => null));
@@ -262,12 +290,12 @@ export default function TestClient({
     setSubmitted(false);
     setFinalScore(null);
     setReady(true);
-  }, [buildQuiz, runId, mode, date]);
+  }, [buildQuiz, runId, mode, date, subject]);
 
   useEffect(() => {
     if (isRandom) return;
-    setAlreadyDone(getLatestAttempt(date, "daily"));
-  }, [date, isRandom]);
+    setAlreadyDone(getLatestAttempt(date, "daily", subject));
+  }, [date, isRandom, subject]);
 
   /* ------------------------------------------------------------ persistence */
 
@@ -277,6 +305,7 @@ export default function TestClient({
     saveProgress({
       v: PROGRESS_VERSION,
       mode,
+      subject,
       date,
       quiz,
       answers,
@@ -284,7 +313,18 @@ export default function TestClient({
       deadline,
       startedAt,
     });
-  }, [started, submitted, quiz, answers, idx, deadline, startedAt, mode, date]);
+  }, [
+    started,
+    submitted,
+    quiz,
+    answers,
+    idx,
+    deadline,
+    startedAt,
+    mode,
+    subject,
+    date,
+  ]);
 
   /* ----------------------------------------------------------------- submit */
 
@@ -299,6 +339,7 @@ export default function TestClient({
     const attempt: Attempt = {
       date,
       mode,
+      subject,
       ...result,
       timeTaken,
       questionIds: quiz.map((q) => q.id),
@@ -317,7 +358,7 @@ export default function TestClient({
     try {
       sessionStorage.setItem(
         "cds-last-result",
-        JSON.stringify({ ...attempt, questions: quiz, mode }),
+        JSON.stringify({ ...attempt, questions: quiz, mode, subject }),
       );
       handedOff = true;
     } catch {
@@ -328,10 +369,11 @@ export default function TestClient({
     // off. The leaderboard comes after it and only after it, does not block the
     // redirect, and cannot reject — see `reportRun`. Daily only: the board is
     // "today's daily test, first attempt", so a random set would both
-    // misrepresent it and spend the account's one entry for the day.
-    if (!isRandom) reportRun(quiz, answers, timeTaken);
+    // misrepresent it and spend the account's one entry for the day. The
+    // subject decides which of the two boards it lands on.
+    if (!isRandom) reportRun(quiz, answers, timeTaken, subject);
 
-    clearProgress(mode);
+    clearProgress(mode, subject);
     setSubmitted(true);
     if (handedOff && persisted) {
       // replace, not push: a submitted test must not sit one Back press away.
@@ -340,7 +382,7 @@ export default function TestClient({
       // A write failed — deliver the score here instead of losing it silently.
       setFinalScore({ ...result, timeTaken, persisted, handedOff });
     }
-  }, [submitted, quiz, answers, startedAt, date, mode, isRandom, router]);
+  }, [submitted, quiz, answers, startedAt, date, mode, subject, isRandom, router]);
 
   // Latest-value ref: the countdown reads the current submit without listing it
   // as a dependency, so selecting an answer no longer restarts the clock.
@@ -557,8 +599,15 @@ export default function TestClient({
           <h1 className="text-2xl font-extrabold tracking-tight text-ink mb-2">
             {isRandom ? "Random Quiz" : "Today's Test"}
           </h1>
+          {/* The subject is named here rather than in the run header: the
+              header row is measured by scripts/visual-check.mjs at 360px and
+              already sits close to wrapping, and a wrapped header is what
+              pushed an option below the fold last time. */}
           <p className="text-muted mb-3">
-            {isRandom ? "New questions & shuffled options every time" : date}
+            {SUBJECT_LABEL[subject]}
+            {isRandom
+              ? " · new questions & shuffled options every time"
+              : ` · ${date}`}
           </p>
           <div className="flex flex-wrap gap-2 justify-center mb-6">
             <span className="chip chip-blue">{quiz.length} QUESTIONS</span>

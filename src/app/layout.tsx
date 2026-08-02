@@ -9,9 +9,11 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
-  title: "CDS English Prep",
+  // "CDS Prep" — the repo's own name — rather than "CDS English Prep", which
+  // stopped being true when General Knowledge became a second subject.
+  title: "CDS Prep",
   description:
-    "Daily CDS English practice — 10 questions, 10 minutes, marked like the real paper.",
+    "Daily CDS practice in English and General Knowledge — 10 questions, 10 minutes, marked like the real paper.",
 };
 
 export const viewport: Viewport = {

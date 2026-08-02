@@ -45,7 +45,7 @@ export default function GlobalError({
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>CDS English Prep</title>
+        <title>CDS Prep</title>
       </head>
       <body className="antialiased">
         <div className="grid min-h-dvh place-items-center bg-surface px-4 py-10">

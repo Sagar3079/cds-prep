@@ -422,7 +422,9 @@ const FIT_PROBE = () => {
  * else to go.
  */
 const LEADERBOARD_PROBE = () => {
-  const card = document.querySelector('section[aria-label="Rankings"]');
+  // `data-rankings`, not the accessible name: the board is per subject now, so
+  // the aria-label names which one and is no longer a stable selector.
+  const card = document.querySelector("section[data-rankings]");
   if (!card) return null;
   const cardBox = card.getBoundingClientRect();
   const rows = [...card.querySelectorAll(":scope > div")];
@@ -529,7 +531,7 @@ for (const vp of VIEWPORTS) {
           `${lb.spilling}/${lb.count} rows past the card's right edge`,
         );
       } else {
-        check(`${vp.name} leaderboard: rankings section rendered`, false, "section[aria-label=\"Rankings\"] not found");
+        check(`${vp.name} leaderboard: rankings section rendered`, false, "section[data-rankings] not found");
       }
     }
   }

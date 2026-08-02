@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
-import questionsData from "@/data/questions.json";
-import type { Question } from "@/types";
+import { bankById } from "@/lib/bank";
 import { MARKING } from "@/lib/daily";
 import { kv, kvConfigured } from "@/lib/kv";
 import { rateLimit } from "@/lib/ratelimit";
 import { currentAccount, displayName } from "@/lib/account";
+import { toSubject } from "@/lib/subject";
 import { boardKey, boardNameKey, istDay } from "../leaderboard/route";
-
-const BY_ID = new Map((questionsData as Question[]).map((q) => [q.id, q]));
 
 /** Two days, so a board outlives the IST day it belongs to and then goes. */
 const BOARD_TTL = 2 * 86400;
@@ -18,6 +16,8 @@ interface Body {
   /** Question id and the TEXT of the option chosen — see below. */
   answers?: { id?: unknown; chose?: unknown }[];
   seconds?: unknown;
+  /** Which board this run belongs to. Unrecognised or absent means english. */
+  subject?: unknown;
 }
 
 /**
@@ -36,8 +36,11 @@ interface Body {
  * after submission; until that lands, this board is honest about scores but not
  * proof against a cheat.
  *
- * One entry per account per day, first attempt only — a retake must not let
- * someone grind the same ten questions upward.
+ * One entry per account per day PER SUBJECT, first attempt only — a retake must
+ * not let someone grind the same ten questions upward. The subject is part of
+ * both the board key and the first-attempt claim, so an English run and a GK run
+ * on the same day are two separate entries on two separate boards and neither
+ * spends the other's claim.
  */
 export async function POST(req: Request) {
   const limited = await rateLimit(req, "submit");
@@ -71,6 +74,12 @@ export async function POST(req: Request) {
     );
   }
 
+  const subject = toSubject(body.subject);
+  // Per-subject key, not a merged one: an English question id submitted against
+  // the GK board resolves to nothing and is dropped, exactly like any other
+  // unknown id.
+  const byId = bankById(subject);
+
   let correct = 0;
   let wrong = 0;
   let blank = 0;
@@ -78,7 +87,7 @@ export async function POST(req: Request) {
 
   for (const a of submitted) {
     if (typeof a?.id !== "string") continue;
-    const q = BY_ID.get(a.id);
+    const q = byId.get(a.id);
     // Unknown ids and repeats are dropped rather than scored — a caller must
     // not be able to pad a run with the same easy question ten times.
     if (!q || seen.has(q.id) || typeof q.answer !== "number") continue;
@@ -96,23 +105,30 @@ export async function POST(req: Request) {
   const score = correct * MARKING.correct + wrong * MARKING.wrong;
   const day = istDay();
 
-  // First attempt of the day only. NX makes that a property of the store rather
-  // than of the order requests happen to arrive in.
-  const claimed = await kv.setIfAbsent(`done:${day}:${acct.id}`, "1", BOARD_TTL);
+  // First attempt of the day only, per subject. NX makes that a property of the
+  // store rather than of the order requests happen to arrive in.
+  const claimed = await kv.setIfAbsent(
+    `done:${day}:${subject}:${acct.id}`,
+    "1",
+    BOARD_TTL,
+  );
   if (!claimed) {
     return NextResponse.json({
+      subject,
       scored: { score, correct, wrong, blank },
       onBoard: false,
       reason: "Only your first attempt each day counts on the leaderboard.",
     });
   }
 
-  await kv.set(`${boardNameKey(day)}:${acct.id}`, displayName(acct));
-  await kv.expire(`${boardNameKey(day)}:${acct.id}`, BOARD_TTL);
-  await kv.zadd(boardKey(day), Math.round(score * 100), acct.id);
-  await kv.expire(boardKey(day), BOARD_TTL);
+  const nameKey = `${boardNameKey(day, subject)}:${acct.id}`;
+  await kv.set(nameKey, displayName(acct));
+  await kv.expire(nameKey, BOARD_TTL);
+  await kv.zadd(boardKey(day, subject), Math.round(score * 100), acct.id);
+  await kv.expire(boardKey(day, subject), BOARD_TTL);
 
   return NextResponse.json({
+    subject,
     scored: { score, correct, wrong, blank },
     onBoard: true,
   });

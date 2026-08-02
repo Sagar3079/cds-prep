@@ -10,6 +10,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import SubjectSwitch, { useSubject } from "@/components/SubjectSwitch";
 import type { Attempt } from "@/lib/storage";
 import {
   dateKey,
@@ -18,8 +19,13 @@ import {
   hasAttemptOn,
   todayKey,
 } from "@/lib/storage";
+import { SUBJECT_SHORT } from "@/lib/subject";
+import type { Subject } from "@/types";
 
 const DAY_MS = 86400000;
+
+/** Days in each subject's daily cycle, computed on the server from its own bank. */
+export type CycleDays = Record<Subject, number>;
 
 /* ── greeting ─────────────────────────────────────────────── */
 
@@ -59,29 +65,61 @@ function setNumber(key: string, cycleDays: number): number {
   return (((idx % cycleDays) + cycleDays) % cycleDays) + 1;
 }
 
-export function HomeSetChip({ cycleDays }: { cycleDays: number }) {
+export function HomeSetChip({
+  available,
+  cycleDays,
+}: {
+  available: Subject[];
+  cycleDays: CycleDays;
+}) {
+  const { subject } = useSubject(available);
   const [n, setN] = useState<number | null>(null);
+  const days = cycleDays[subject];
 
   useEffect(() => {
-    setN(setNumber(todayKey(), cycleDays));
-  }, [cycleDays]);
+    setN(setNumber(todayKey(), days));
+  }, [days]);
 
-  return <span className="chip chip-blue">SET {n ?? "—"}</span>;
+  return (
+    <span className="chip chip-blue">
+      {available.length > 1 ? `${SUBJECT_SHORT[subject].toUpperCase()} · ` : ""}
+      SET {n ?? "—"}
+    </span>
+  );
 }
 
 /* ── start / retake ───────────────────────────────────────── */
 
-export function HomeStartActions() {
-  const [doneToday, setDoneToday] = useState(false);
+/** `?subject=english` is the default and stays out of the URL. */
+const testHref = (subject: Subject, random = false) => {
+  const params = [
+    random ? "mode=random" : "",
+    subject === "english" ? "" : `subject=${subject}`,
+  ].filter(Boolean);
+  return params.length ? `/test?${params.join("&")}` : "/test";
+};
 
+export function HomeStartActions({ available }: { available: Subject[] }) {
+  const { subject, choose } = useSubject(available);
+  const [doneToday, setDoneToday] = useState(false);
+  const multi = available.length > 1;
+
+  // Per subject: finishing today's English test must not report today's GK
+  // test as already done.
   useEffect(() => {
-    setDoneToday(hasAttemptOn(todayKey(), "daily"));
-  }, []);
+    setDoneToday(hasAttemptOn(todayKey(), "daily", subject));
+  }, [subject]);
 
   return (
     <div className="flex w-full flex-col gap-2.5">
-      <Link href="/test" className="btn-primary w-full">
-        {doneToday ? "Retake today's test" : "Start today's test"}
+      {/* Sits directly above the button it changes — the choice and the action
+          read as one control rather than as a setting somewhere else on a
+          screen that is already carrying a lot. */}
+      <SubjectSwitch available={available} subject={subject} onChoose={choose} />
+
+      <Link href={testHref(subject)} className="btn-primary w-full">
+        {doneToday ? "Retake today's" : "Start today's"}{" "}
+        {multi ? `${SUBJECT_SHORT[subject]} test` : "test"}
         <svg
           width="17"
           height="17"
@@ -97,14 +135,15 @@ export function HomeStartActions() {
         </svg>
       </Link>
 
-      <Link href="/test?mode=random" className="btn-ghost w-full">
+      <Link href={testHref(subject, true)} className="btn-ghost w-full">
         Random set
       </Link>
 
       {doneToday && (
         <p className="text-xs leading-relaxed text-muted">
-          Today&apos;s set is done. A retake is saved as a new attempt, so your
-          first score stays in your history.
+          Today&apos;s {multi ? `${SUBJECT_SHORT[subject]} ` : ""}set is done. A
+          retake is saved as a new attempt, so your first score stays in your
+          history.
         </p>
       )}
     </div>

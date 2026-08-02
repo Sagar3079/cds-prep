@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import questions from "@/data/questions.json";
-import type { Question } from "@/types";
+import { bankFor } from "@/lib/bank";
 import { rateLimit } from "@/lib/ratelimit";
+import { subjectOf } from "@/lib/subject";
+import type { Question } from "@/types";
 
 /**
  * Potter's explanation endpoint.
@@ -16,8 +17,13 @@ import { rateLimit } from "@/lib/ratelimit";
  * to turn the model on.
  */
 
-const BANK = questions as Question[];
-const BY_ID = new Map(BANK.map((q) => [q.id, q]));
+// Both banks, because /results reviews whichever subject was just taken and an
+// unresolvable id renders as "couldn't load an explanation". Ids are unique
+// across the two (`cds1-2018-001` vs `cds1-2018-gk-001`), and `subjectOf` on the
+// record — not the lookup — is what decides how it gets explained.
+const BY_ID = new Map(
+  [...bankFor("english"), ...bankFor("gk")].map((q) => [q.id, q]),
+);
 
 const ENDPOINT =
   process.env.SCALEMAX_BASE_URL ?? "https://api.scalemax.pro/token";
@@ -640,7 +646,24 @@ function fallbackGeneric(stem: string, options: string[], right: string): string
   return `"${right}" is correct. This one doesn't match a pattern this offline check knows how to explain — compare it directly against the sentence's content and the other three options, and treat it as worth looking up rather than taking on faith.`;
 }
 
+/**
+ * General Knowledge, which none of the rules above are about.
+ *
+ * Every detector below this file's fold reasons about English grammar, and
+ * running them over a Polity question would at best land in `fallbackGeneric`
+ * and at worst assert a preposition rule about a date. There is no rule to
+ * recover here — a GK answer is a fact — so this says the true thing and stops,
+ * rather than dressing a restatement up as analysis.
+ */
+function explainGeneralKnowledge(q: Question, right: string): string {
+  const topic = q.topic?.trim();
+  const where = topic ? ` It sits under ${topic}.` : "";
+  return `The answer is "${right}".${where} General Knowledge is recall rather than reasoning — there is no rule this can be derived from, so the useful move is to fix the fact itself, and to look at the three near-misses beside it, since those are what the paper will offer you again.`;
+}
+
 function explainQuestion(q: Question, right: string): string {
+  if (subjectOf(q) === "gk") return explainGeneralKnowledge(q, right);
+
   const stem = q.question;
   const options = q.options;
   const topic = (q.topic ?? "").toLowerCase();
@@ -749,9 +772,11 @@ export async function POST(req: Request) {
       ? "This answer comes from the official UPSC key."
       : "This answer is NOT from an official key — say so.",
     "",
-    "Explain WHY, in at most three short sentences. Give the actual reason: the",
-    "meaning of the tested word, the grammar rule, or the idiom — not a",
-    "restatement of which option is correct, which they can already see.",
+    "Explain WHY, in at most three short sentences. Give the actual reason:",
+    subjectOf(q) === "gk"
+      ? "the fact behind the answer, and what makes the closest wrong option wrong"
+      : "the meaning of the tested word, the grammar rule, or the idiom",
+    "— not a restatement of which option is correct, which they can already see.",
     "If they chose wrong, name what made their option tempting.",
     "Speak plainly to an Indian defence-exam candidate. No preamble, no",
     "'the correct answer is'. Do not contradict the stated correct answer.",

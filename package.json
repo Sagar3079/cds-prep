@@ -1,7 +1,7 @@
 {
   "name": "cds-prep",
   "version": "1.0.0",
-  "description": "Daily CDS English practice from UPSC previous-year papers. Next.js. Attempts and streaks stay in the browser; joining the optional leaderboard stores an email, username and daily score on a server.",
+  "description": "Daily CDS practice from UPSC previous-year papers: English and General Knowledge. Next.js. Attempts and streaks stay in the browser; joining the optional leaderboard stores an email, username and daily score on a server.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -13,11 +13,13 @@
   },
   "keywords": [
     "cds",
-    "upsc",
-    "exam-prep",
     "english",
+    "exam-prep",
+    "general-knowledge",
+    "gk",
     "nextjs",
-    "quiz"
+    "quiz",
+    "upsc"
   ],
   "author": "Sagar3079",
   "license": "MIT",

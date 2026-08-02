@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useSubject } from "@/components/SubjectSwitch";
 import { CONFIDENCE_FLOOR, getMastery, weakestTopics, type TopicWeight } from "@/lib/mastery";
+import {
+  SUBJECT_SHORT,
+  subjectOfMasteryKey,
+  topicOfMasteryKey,
+} from "@/lib/subject";
+import type { Subject } from "@/types";
 
 const TONE: Record<TopicWeight["reason"], { bar: string; text: string; word: string }> = {
   weak: { bar: "bg-err", text: "text-err-ink", word: "needs work" },
@@ -11,8 +18,16 @@ const TONE: Record<TopicWeight["reason"], { bar: string; text: string; word: str
   new: { bar: "bg-accent", text: "text-accent-ink", word: "new" },
 };
 
-export default function TopicInsight() {
+export default function TopicInsight({
+  available,
+}: {
+  available: Subject[];
+}) {
   const [topics, setTopics] = useState<TopicWeight[] | null>(null);
+  // Shares the home screen's subject choice, so "Practice →" starts a set in
+  // whichever subject the switcher above it is showing rather than always
+  // English.
+  const { subject } = useSubject(available);
 
   useEffect(() => {
     setTopics(weakestTopics(getMastery(), 3));
@@ -43,7 +58,11 @@ export default function TopicInsight() {
           Where you&apos;re losing marks
         </h2>
         <Link
-          href="/test?mode=random"
+          href={
+            subject === "english"
+              ? "/test?mode=random"
+              : `/test?mode=random&subject=${subject}`
+          }
           className="text-[0.8125rem] font-bold text-accent-ink"
         >
           Practice →
@@ -54,10 +73,22 @@ export default function TopicInsight() {
         {topics.map((t) => {
           const pct = Math.round((t.accuracy ?? 0) * 100);
           const tone = TONE[t.reason];
+          // Mastery keys are namespaced by subject so the two banks cannot be
+          // weighted against each other; the reader sees the topic, plus which
+          // paper it came from when that is not obvious.
+          const label = topicOfMasteryKey(t.topic);
+          const from = subjectOfMasteryKey(t.topic);
           return (
             <li key={t.topic}>
               <div className="flex items-baseline justify-between gap-3 text-[0.8125rem]">
-                <span className="truncate font-semibold text-ink">{t.topic}</span>
+                <span className="min-w-0 truncate font-semibold capitalize text-ink">
+                  {label}
+                  {from !== "english" && (
+                    <span className="ml-1.5 text-[0.6875rem] font-bold uppercase tracking-[0.08em] text-muted">
+                      {SUBJECT_SHORT[from]}
+                    </span>
+                  )}
+                </span>
                 <span className={`shrink-0 font-bold tabular-nums ${tone.text}`}>
                   {pct}%
                   <span className="ml-1.5 font-medium text-muted">{tone.word}</span>
@@ -66,7 +97,7 @@ export default function TopicInsight() {
               <div
                 className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-2"
                 role="img"
-                aria-label={`${t.topic}: ${pct}% correct across ${t.seen} questions`}
+                aria-label={`${label}: ${pct}% correct across ${t.seen} questions`}
               >
                 <div
                   className={`h-full rounded-full transition-[width] duration-700 ease-[var(--ease)] ${tone.bar}`}

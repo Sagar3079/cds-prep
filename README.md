@@ -1,7 +1,8 @@
-# CDS English Prep
+# CDS Prep
 
-Daily CDS (Combined Defence Services) English practice, built from UPSC previous-year
-papers. A small Next.js app: one timed test a day, real UPSC marking, instant review,
+Daily CDS (Combined Defence Services) practice, built from UPSC previous-year
+papers: English, and General Knowledge from the papers whose official answer key
+UPSC published. A small Next.js app: one timed test a day per subject, real UPSC marking, instant review,
 and a streak history that lives entirely in your browser.
 
 Attempts, streaks and preferences stay in your browser. The one thing that leaves it is a

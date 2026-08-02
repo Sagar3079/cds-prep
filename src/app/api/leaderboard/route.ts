@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
+import { isSubjectReady } from "@/lib/bank";
 import { kv, kvConfigured } from "@/lib/kv";
 import { rateLimit } from "@/lib/ratelimit";
 import { currentAccount } from "@/lib/account";
+import { toSubject } from "@/lib/subject";
+import type { Subject } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -15,13 +18,23 @@ export function istDay(now = new Date()): string {
   }).format(now);
 }
 
-export const boardKey = (day: string) => `board:${day}`;
-export const boardNameKey = (day: string) => `boardnames:${day}`;
+/**
+ * One board per day per subject.
+ *
+ * The subject is in the key rather than in a field, so a GK score physically
+ * cannot land on the English board and one person can hold a place on both. The
+ * two-day TTL means there is nothing to migrate: keys written under the old
+ * `board:<day>` shape simply expire.
+ */
+export const boardKey = (day: string, subject: Subject) =>
+  `board:${day}:${subject}`;
+export const boardNameKey = (day: string, subject: Subject) =>
+  `boardnames:${day}:${subject}`;
 
 const TOP = 50;
 
 /**
- * Today's board, highest first.
+ * Today's board for one subject, highest first.
  *
  * Today only, by design and by key: the sorted set is per-day and expires, so
  * yesterday cannot leak into the ranking and the store cannot grow without
@@ -31,11 +44,24 @@ export async function GET(req: Request) {
   const limited = await rateLimit(req, "leaderboard");
   if (limited) return limited;
 
+  // Anything unrecognised is english, so a hand-typed query string gets a real
+  // board rather than a 400 or an empty one that looks like a bug.
+  const subject = toSubject(new URL(req.url).searchParams.get("subject"));
+  // The board exists whether or not the bank does; `ready` is what lets the page
+  // say "not built yet" instead of "nobody has taken it".
+  const ready = isSubjectReady(subject);
+
   if (!kvConfigured) {
-    return NextResponse.json({ day: istDay(), rows: [], configured: false });
+    return NextResponse.json({
+      day: istDay(),
+      subject,
+      ready,
+      rows: [],
+      configured: false,
+    });
   }
   const day = istDay();
-  const flat = (await kv.zrevrange(boardKey(day), 0, TOP - 1)) ?? [];
+  const flat = (await kv.zrevrange(boardKey(day, subject), 0, TOP - 1)) ?? [];
 
   // ZRANGE ... WITHSCORES returns [member, score, member, score, …].
   const entries: { id: string; score: number }[] = [];
@@ -44,7 +70,7 @@ export async function GET(req: Request) {
   }
 
   const names = await Promise.all(
-    entries.map((e) => kv.get(`${boardNameKey(day)}:${e.id}`)),
+    entries.map((e) => kv.get(`${boardNameKey(day, subject)}:${e.id}`)),
   );
 
   const me = await currentAccount();
@@ -59,15 +85,17 @@ export async function GET(req: Request) {
 
   let yourRank: number | null = null;
   if (me) {
-    const r = await kv.zrevrank(boardKey(day), me.id);
+    const r = await kv.zrevrank(boardKey(day, subject), me.id);
     if (typeof r === "number") yourRank = r + 1;
   }
 
   return NextResponse.json({
     day,
+    subject,
+    ready,
     rows,
     yourRank,
-    total: (await kv.zcard(boardKey(day))) ?? rows.length,
+    total: (await kv.zcard(boardKey(day, subject))) ?? rows.length,
     configured: true,
   });
 }

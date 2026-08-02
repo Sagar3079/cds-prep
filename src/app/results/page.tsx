@@ -10,7 +10,8 @@ import PotterRider from "@/components/potter/PotterRider";
 import QuestionCard from "@/components/QuestionCard";
 import ScoreRing, { formatScore } from "@/components/ScoreRing";
 import { MARKING, scoreAnswers } from "@/lib/daily";
-import type { Question, QuestionPart } from "@/types";
+import { SUBJECT_LABEL, toSubject } from "@/lib/subject";
+import type { Question, QuestionPart, Subject } from "@/types";
 
 const STORAGE_KEY = "cds-last-result";
 
@@ -26,6 +27,7 @@ const OFFICIAL_KEY_SOURCE = "official-key";
 interface ReviewSet {
   date: string;
   mode: "daily" | "random";
+  subject: Subject;
   timeTaken: number;
   questions: Question[];
   answers: (number | null)[];
@@ -71,6 +73,7 @@ function toQuestion(v: unknown): Question | null {
     question: v.question,
     parts: toParts(v.parts),
     target: typeof v.target === "string" ? v.target : undefined,
+    subject: v.subject === "gk" ? "gk" : undefined,
     fixedOptions: v.fixedOptions === true,
     options,
     // `answer` is legitimately nullable in the bank; don't coerce it to a number.
@@ -120,6 +123,7 @@ function parseReviewSet(raw: unknown): ReviewSet | null {
   return {
     date: typeof raw.date === "string" ? raw.date : "",
     mode: raw.mode === "random" ? "random" : "daily",
+    subject: toSubject(raw.subject),
     timeTaken: Math.max(
       0,
       Math.min(MARKING.durationSec, Math.round(finite(raw.timeTaken))),
@@ -381,7 +385,13 @@ export default function ResultsPage() {
     ? `Net score ${formatScore(set.score)} — the penalties outweighed the marks earned.`
     : `Scored ${formatScore(set.score)} out of ${set.total}.`;
 
+  // Where a "Retake" goes, and where the upsell's random set goes: back into the
+  // subject that was just reviewed, not silently into English.
+  const retakeHref =
+    set.subject === "english" ? "/test" : `/test?subject=${set.subject}`;
+
   const meta = [
+    SUBJECT_LABEL[set.subject],
     set.mode === "random" ? "Random set" : "Daily set",
     day,
     timedOut ? "Time expired" : "Submitted",
@@ -449,7 +459,7 @@ export default function ResultsPage() {
       </p>
 
       <div className="flex flex-wrap justify-center gap-3">
-        <Link href="/test" className="btn-ghost">
+        <Link href={retakeHref} className="btn-ghost">
           Retake
         </Link>
         <Link href="/" className="btn-primary">
