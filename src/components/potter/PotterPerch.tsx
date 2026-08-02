@@ -7,7 +7,13 @@ import Potter, { LEDGE_RATIO } from "./Potter";
 const SIZE = 118;
 import { homeLine } from "@/lib/potter";
 import { getStats, hasAttemptOn, todayKey } from "@/lib/storage";
-import { onThoughtsChange, thoughtsOn, toggleThoughts } from "@/lib/potterPrefs";
+import {
+  onPotterVisibleChange,
+  onThoughtsChange,
+  potterVisible,
+  thoughtsOn,
+  toggleThoughts,
+} from "@/lib/potterPrefs";
 
 /**
  * Potter perched on the daily card: hands on the top edge, lower half hidden
@@ -22,10 +28,11 @@ import { onThoughtsChange, thoughtsOn, toggleThoughts } from "@/lib/potterPrefs"
 export default function PotterPerch() {
   const [ready, setReady] = useState(false);
   const [line, setLine] = useState(() =>
-    homeLine({ doneToday: false, streak: 0, accuracy: 0, tests: 0 })
+    homeLine({ doneToday: false, streak: 0, accuracy: 0, tests: 0 }),
   );
   const [look, setLook] = useState(0);
   const [talk, setTalk] = useState(true);
+  const [shown, setShown] = useState(true);
   const hostRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -36,13 +43,15 @@ export default function PotterPerch() {
         streak: s.currentStreak > 0 ? s.currentStreak : s.bestStreak,
         accuracy: s.accuracy,
         tests: s.testsTaken,
-      })
+      }),
     );
     setTalk(thoughtsOn());
+    setShown(potterVisible());
     setReady(true);
   }, []);
 
   useEffect(() => onThoughtsChange(setTalk), []);
+  useEffect(() => onPotterVisibleChange(setShown), []);
 
   // His eyes follow the pointer, but only while it is over the panel — a
   // character tracking a cursor that is off in another window is unsettling.
@@ -56,7 +65,9 @@ export default function PotterPerch() {
       const cx = box.left + box.width / 2;
       // Quantised to 0.1: setLook on every pointermove re-rendered the whole
       // SVG at pointer rate for sub-pixel changes nobody can see.
-      const next = Math.round(Math.max(-1, Math.min(1, (ev.clientX - cx) / 190)) * 10) / 10;
+      const next =
+        Math.round(Math.max(-1, Math.min(1, (ev.clientX - cx) / 190)) * 10) /
+        10;
       setLook((cur) => (cur === next ? cur : next));
     };
     const onLeave = () => setLook(0);
@@ -68,7 +79,7 @@ export default function PotterPerch() {
     };
   }, [ready]);
 
-  if (!ready) return null;
+  if (!ready || !shown) return null;
 
   return (
     <div
@@ -93,9 +104,11 @@ export default function PotterPerch() {
           thoughtsOn={talk}
           onToggle={() => setTalk(toggleThoughts())}
         />
-        {talk && <p className="potter-thought" aria-hidden="true">
-          {line.text}
-        </p>}
+        {talk && (
+          <p className="potter-thought" aria-hidden="true">
+            {line.text}
+          </p>
+        )}
       </div>
     </div>
   );

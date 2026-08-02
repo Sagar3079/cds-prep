@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import Potter, { type Mood } from "./Potter";
 import { reviewLine } from "@/lib/potter";
 import {
+  onPotterVisibleChange,
   onThoughtsChange,
+  potterVisible,
   thoughtsOn,
   toggleThoughts,
 } from "@/lib/potterPrefs";
@@ -104,6 +106,7 @@ export default function PotterRider({
 
   const [visible, setVisible] = useState(false);
   const [talk, setTalk] = useState(true);
+  const [shown, setShown] = useState(true);
   const [face, setFace] = useState(0);
   const [say, setSay] = useState<{ mood: Mood; text: string }>({
     mood: "peek",
@@ -144,6 +147,7 @@ export default function PotterRider({
 
   useEffect(() => {
     setTalk(thoughtsOn());
+    setShown(potterVisible());
     if (typeof window === "undefined") return;
     if (!roomToFly) return;
 
@@ -309,8 +313,9 @@ export default function PotterRider({
   }, [items]);
 
   useEffect(() => onThoughtsChange(setTalk), []);
+  useEffect(() => onPotterVisibleChange(setShown), []);
 
-  if (items.length === 0) return null;
+  if (items.length === 0 || !shown) return null;
 
   return (
     <div

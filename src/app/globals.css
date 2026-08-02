@@ -598,7 +598,7 @@ mark.target-word {
 .potter__head, .potter__torso, .potter__hands, .potter__scarf {
   transition: transform 0.5s var(--ease);
 }
-.potter__cheeks { opacity: 0; transition: opacity 0.45s var(--ease); }
+.potter__cheeks { opacity: 0; transition: opacity 0.6s var(--ease); }
 .potter--excited .potter__cheeks,
 .potter--cheer .potter__cheeks,
 .potter--impressed .potter__cheeks { opacity: 1; }
@@ -704,7 +704,7 @@ mark.target-word {
 /* A mirrored figure should turn, not snap. The muted badge lives outside this
    group so it never reads reversed. */
 .potter__facing {
-  transition: transform 0.32s var(--ease);
+  transition: transform 0.46s var(--ease);
   transform-origin: 60px 70px;
 }
 /* Flying, not perching. The mood LEANS are dropped (they fight the rider's own
@@ -783,7 +783,12 @@ mark.target-word {
 }
 
 /* eyes move as a flick-and-hold, not a smooth glide — real saccades snap */
-.potter__eyes { transition: transform 0.14s cubic-bezier(0.2, 0.9, 0.3, 1); }
+/* Saccades snap and hold; everything else about him glides. */
+.potter__eyes { transition: transform 0.13s cubic-bezier(0.2, 0.9, 0.3, 1); }
+/* Mouth, brows and the scar ride the same curve as his posture, so a mood
+   change lands as one movement rather than several racing each other. */
+.potter__head path { transition: d 0.42s var(--ease); }
+.potter-thought { transition: opacity 0.3s var(--ease); }
 
 
 /* Tap feedback must outrank every mood and gesture rule that also targets

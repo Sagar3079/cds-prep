@@ -4,7 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import Potter, { LEDGE_RATIO } from "./Potter";
 import { testLine, type Line } from "@/lib/potter";
-import { onThoughtsChange, thoughtsOn, toggleThoughts } from "@/lib/potterPrefs";
+import {
+  onPotterVisibleChange,
+  onThoughtsChange,
+  potterVisible,
+  thoughtsOn,
+  toggleThoughts,
+} from "@/lib/potterPrefs";
 
 const SIZE = 112;
 const SHOW_MS = 4200;
@@ -32,6 +38,7 @@ export default function PotterCoach({
   const [leaving, setLeaving] = useState(false);
   const [motionOk, setMotionOk] = useState(true);
   const [talk, setTalk] = useState(true);
+  const [shown, setShown] = useState(true);
   const enteredAt = useRef(Date.now());
   const hideTimer = useRef<number | null>(null);
 
@@ -58,7 +65,13 @@ export default function PotterCoach({
 
   useEffect(() => {
     setTalk(thoughtsOn());
-    return onThoughtsChange(setTalk);
+    setShown(potterVisible());
+    const a = onThoughtsChange(setTalk);
+    const b = onPotterVisibleChange(setShown);
+    return () => {
+      a();
+      b();
+    };
   }, []);
 
   useEffect(() => {
@@ -96,6 +109,8 @@ export default function PotterCoach({
       if (hideTimer.current !== null) window.clearTimeout(hideTimer.current);
     };
   }, [motionOk, index, total, justAnswered]);
+
+  if (!shown) return null;
 
   return (
     <div
