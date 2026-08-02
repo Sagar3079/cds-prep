@@ -629,6 +629,11 @@ mark.target-word {
   bottom: calc(100% - var(--potter-h) * var(--potter-below, 0.47));
   z-index: 0;
 }
+/* Dragged, or parked somewhere after a drag: above the card instead of under
+   it. The ledge overlap only reads as depth while he is standing on the ledge —
+   anywhere else it just swallows him, and dragging him onto the card made him
+   vanish. Set by PotterPerch, which is the only thing that knows he has moved. */
+.potter-perch--front { z-index: 20; }
 .potter-perch--right  { right: 12px; }
 .potter-perch--centre { left: 50%; transform: translateX(-50%); }
 

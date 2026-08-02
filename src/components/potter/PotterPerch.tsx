@@ -83,10 +83,18 @@ export default function PotterPerch() {
 
   if (!ready || !shown) return null;
 
+  // Sitting behind the card is what makes him look perched ON it — but only
+  // while he is actually on the ledge. Once he is being dragged, or has been
+  // left somewhere else, the overlap stops reading as depth and just swallows
+  // him: drag him over the card and he disappears under it. The z-index has to
+  // live out here, on the element that shares a stacking context with the card;
+  // the inner drag wrapper is inside this one and cannot climb out of it.
+  const inFront = drag.dragging || drag.offset.x !== 0 || drag.offset.y !== 0;
+
   return (
     <div
       ref={hostRef}
-      className="potter-perch potter-perch--right"
+      className={`potter-perch potter-perch--right ${inFront ? "potter-perch--front" : ""}`}
       // Ties the perch offset to the rendered height so the two cannot drift.
       style={
         {
