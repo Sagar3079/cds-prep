@@ -920,7 +920,26 @@
   "session": 1,
   "qnum": 11,
   "passage": null,
-  "question": "the British manufacturers popularity of Indian textiles were jealous of the P Q R from the very beginning S",
+  "question": "The parts of this sentence have been jumbled. Choose the correct sequence.",
+  "parts": [
+   {
+    "label": "P",
+    "text": "the British manufacturers"
+   },
+   {
+    "label": "Q",
+    "text": "popularity of Indian textiles"
+   },
+   {
+    "label": "R",
+    "text": "were jealous of the"
+   },
+   {
+    "label": "S",
+    "text": "from the very beginning"
+   }
+  ],
+  "fixedOptions": true,
   "options": [
    "P Q R S",
    "S P Q R",
@@ -937,7 +956,26 @@
   "session": 1,
   "qnum": 12,
   "passage": null,
-  "question": "dress fashions changed and light cotton of the English textiles began to replace P Q R the coarse woollens S",
+  "question": "The parts of this sentence have been jumbled. Choose the correct sequence.",
+  "parts": [
+   {
+    "label": "P",
+    "text": "dress fashions changed and light cotton"
+   },
+   {
+    "label": "Q",
+    "text": "of the English"
+   },
+   {
+    "label": "R",
+    "text": "textiles began to replace"
+   },
+   {
+    "label": "S",
+    "text": "the coarse woollens"
+   }
+  ],
+  "fixedOptions": true,
   "options": [
    "P R S Q",
    "R S P Q",
@@ -954,7 +992,26 @@
   "session": 1,
   "qnum": 13,
   "passage": null,
-  "question": "put pressure on their government Indian goods in England the British manufacturers P Q R to restrict and prohibit S ^",
+  "question": "The parts of this sentence have been jumbled. Choose the correct sequence.",
+  "parts": [
+   {
+    "label": "P",
+    "text": "put pressure on their government"
+   },
+   {
+    "label": "Q",
+    "text": "Indian goods in England"
+   },
+   {
+    "label": "R",
+    "text": "the British manufacturers"
+   },
+   {
+    "label": "S",
+    "text": "to restrict and prohibit"
+   }
+  ],
+  "fixedOptions": true,
   "options": [
    "P Q R S",
    "S P R Q",
@@ -971,7 +1028,26 @@
   "session": 1,
   "qnum": 14,
   "passage": null,
-  "question": "however still held their own in foreign markets in spite of these laws P Q R Indian silk and cotton textiles S",
+  "question": "The parts of this sentence have been jumbled. Choose the correct sequence.",
+  "parts": [
+   {
+    "label": "P",
+    "text": "however"
+   },
+   {
+    "label": "Q",
+    "text": "still held their own in foreign markets"
+   },
+   {
+    "label": "R",
+    "text": "in spite of these laws"
+   },
+   {
+    "label": "S",
+    "text": "Indian silk and cotton textiles"
+   }
+  ],
+  "fixedOptions": true,
   "options": [
    "Q P R S",
    "S P R Q",
@@ -988,7 +1064,26 @@
   "session": 1,
   "qnum": 15,
   "passage": null,
-  "question": "and it led to rapid economic development the Industrial Revolution P Q transformed the British society in a fundamental manner R S",
+  "question": "The parts of this sentence have been jumbled. Choose the correct sequence.",
+  "parts": [
+   {
+    "label": "P",
+    "text": "and it led to rapid economic development"
+   },
+   {
+    "label": "Q",
+    "text": "the Industrial Revolution"
+   },
+   {
+    "label": "R",
+    "text": "transformed the British"
+   },
+   {
+    "label": "S",
+    "text": "society in a fundamental manner"
+   }
+  ],
+  "fixedOptions": true,
   "options": [
    "S P R Q",
    "Q P R S",
@@ -1005,7 +1100,26 @@
   "session": 1,
   "qnum": 16,
   "passage": null,
-  "question": "Muhammad Iqbal the philosophical and religious outlook of people through his poetry P Q ~ profoundly influenced one of the greatest poets of modem India R S",
+  "question": "The parts of this sentence have been jumbled. Choose the correct sequence.",
+  "parts": [
+   {
+    "label": "P",
+    "text": "Muhammad Iqbal"
+   },
+   {
+    "label": "Q",
+    "text": "the philosophical and religious outlook of people through his poetry"
+   },
+   {
+    "label": "R",
+    "text": "profoundly influenced"
+   },
+   {
+    "label": "S",
+    "text": "one of the greatest poets of modern India"
+   }
+  ],
+  "fixedOptions": true,
   "options": [
    "Q R S P",
    "S R Q P",
@@ -1022,7 +1136,26 @@
   "session": 1,
   "qnum": 17,
   "passage": null,
-  "question": "to accept any of the important disillusionment demands of the nationalists produced P Q R the failure of the British govemment S",
+  "question": "The parts of this sentence have been jumbled. Choose the correct sequence.",
+  "parts": [
+   {
+    "label": "P",
+    "text": "to accept any of the important"
+   },
+   {
+    "label": "Q",
+    "text": "disillusionment"
+   },
+   {
+    "label": "R",
+    "text": "demands of the nationalists produced"
+   },
+   {
+    "label": "S",
+    "text": "the failure of the British government"
+   }
+  ],
+  "fixedOptions": true,
   "options": [
    "S P R Q",
    "P Q R S",
@@ -1039,7 +1172,26 @@
   "session": 1,
   "qnum": 18,
   "passage": null,
-  "question": "showed that a backward the rise of modem Japan after 1868 P Q R Asian country could develop itself without Western control",
+  "question": "The parts of this sentence have been jumbled. Choose the correct sequence.",
+  "parts": [
+   {
+    "label": "P",
+    "text": "showed that a backward"
+   },
+   {
+    "label": "Q",
+    "text": "the rise of"
+   },
+   {
+    "label": "R",
+    "text": "modern Japan after 1868"
+   },
+   {
+    "label": "S",
+    "text": "Asian country could develop itself without Western control"
+   }
+  ],
+  "fixedOptions": true,
   "options": [
    "P Q R S",
    "S R Q P",
@@ -1056,7 +1208,26 @@
   "session": 1,
   "qnum": 19,
   "passage": null,
-  "question": "and the current Hindu emphasis and urged the people to imbibe the spirit of free-thinking P Q on rituals, ceremonies and superstitions Vivekananda condemned the caste system R S",
+  "question": "The parts of this sentence have been jumbled. Choose the correct sequence.",
+  "parts": [
+   {
+    "label": "P",
+    "text": "and the current Hindu emphasis"
+   },
+   {
+    "label": "Q",
+    "text": "and urged the people to imbibe the spirit of free-thinking"
+   },
+   {
+    "label": "R",
+    "text": "on rituals, ceremonies and superstitions"
+   },
+   {
+    "label": "S",
+    "text": "Vivekananda condemned the caste system"
+   }
+  ],
+  "fixedOptions": true,
   "options": [
    "P Q R S",
    "S P R Q",
@@ -1073,7 +1244,26 @@
   "session": 1,
   "qnum": 20,
   "passage": null,
-  "question": "Mr. John who was hardly six months old Charles as his son adopted P ~ Q R S",
+  "question": "The sentence begins with \"Mr. John\" and the parts below have been jumbled. Choose the correct sequence.",
+  "parts": [
+   {
+    "label": "P",
+    "text": "who was hardly six months old"
+   },
+   {
+    "label": "Q",
+    "text": "Charles"
+   },
+   {
+    "label": "R",
+    "text": "as his son"
+   },
+   {
+    "label": "S",
+    "text": "adopted"
+   }
+  ],
+  "fixedOptions": true,
   "options": [
    "S Q R P",
    "P S Q R",
@@ -1438,7 +1628,7 @@
   "session": 1,
   "qnum": 43,
   "passage": null,
-  "question": "SI : Tomorrow it will be a year since we lost our great leader. S6: Though he is no more with us, the qualities he possessed and the ideals he cherished remain with us. P ; To these he added a feminine sensi­ tiveness to atmosphere. Q : He was involved in the major events of his time. R : He participated in them all while maintaining the highest standards of public conduct. S : He was incomparably the greatest figure in our history - a man of dynamic force, intellectual power and profound vision.",
+  "question": "SI : Tomorrow it will be a year since we lost our great leader. S6: Though he is no more with us, the qualities he possessed and the ideals he cherished remain with us. P : To these he added a feminine sensi­ tiveness to atmosphere. Q : He was involved in the major events of his time. R : He participated in them all while maintaining the highest standards of public conduct. S : He was incomparably the greatest figure in our history - a man of dynamic force, intellectual power and profound vision.",
   "options": [
    "P S R Q",
    "R Q P S",
@@ -5234,6 +5424,7 @@
   "qnum": 62,
   "passage": null,
   "question": "It is encouraging to see India’s indigenous cinema is going places.",
+  "target": "indigenous",
   "options": [
    "homogenous",
    "classical",
@@ -5251,6 +5442,7 @@
   "qnum": 64,
   "passage": null,
   "question": "He tried to avoid saying something that would implicate him further.",
+  "target": "implicate",
   "options": [
    "reward",
    "incriminate",
@@ -5268,6 +5460,7 @@
   "qnum": 65,
   "passage": null,
   "question": "The statutory corporate tax which forms the major income of the government has not changed this year.",
+  "target": "statutory",
   "options": [
    "legislature",
    "unlawful",
@@ -5285,6 +5478,7 @@
   "qnum": 66,
   "passage": null,
   "question": "He has been part of the all dissident activities.",
+  "target": "dissident",
   "options": [
    "rebellious",
    "supportive",
@@ -5302,6 +5496,7 @@
   "qnum": 67,
   "passage": null,
   "question": "Advocacy is one major component of any new programme.",
+  "target": "Advocacy",
   "options": [
    "promotion",
    "opposition",
@@ -5319,6 +5514,7 @@
   "qnum": 69,
   "passage": null,
   "question": "There is a tendency to treat social changes as mere development in terms of accumulation of wealth.",
+  "target": "tendency",
   "options": [
    "position",
    "predisposition",
@@ -5336,6 +5532,7 @@
   "qnum": 70,
   "passage": null,
   "question": "During the ancient period poets were patronized through various institutions.",
+  "target": "patronized",
   "options": [
    "supported",
    "respected",
@@ -5353,6 +5550,7 @@
   "qnum": 72,
   "passage": null,
   "question": "Police had to resort to tear gas to diffuse tension among the crowd.",
+  "target": "diffuse",
   "options": [
    "concentrate",
    "scatter",
@@ -5370,6 +5568,7 @@
   "qnum": 73,
   "passage": null,
   "question": "Unrest in some pockets made the city dwellers confine themselves at home.",
+  "target": "Unrest",
   "options": [
    "Turbulence",
    "Unease",
@@ -5387,6 +5586,7 @@
   "qnum": 74,
   "passage": null,
   "question": "Peace and tranquility are instruments which would boost the development of society.",
+  "target": "tranquility",
   "options": [
    "uproar",
    "calm",
@@ -5404,6 +5604,7 @@
   "qnum": 75,
   "passage": null,
   "question": "Barring a decision of such disputes, other matters relating to the election of President or Vice-President may be regulated by law made by Parliament.",
+  "target": "Barring",
   "options": [
    "excepting",
    "without",
@@ -5421,6 +5622,7 @@
   "qnum": 78,
   "passage": null,
   "question": "All the allegations against the actor were expunged by the committee of inquiry.",
+  "target": "expunged",
   "options": [
    "got rid of",
    "part of",
@@ -5438,6 +5640,7 @@
   "qnum": 79,
   "passage": null,
   "question": "His relatives dissuaded him from giving up. the job.",
+  "target": "dissuaded",
   "options": [
    "persuaded",
    "discouraged",
@@ -5455,6 +5658,7 @@
   "qnum": 80,
   "passage": null,
   "question": "He is one of the confidants of the leader and can influence the decision of the government.",
+  "target": "confidants",
   "options": [
    "opponents",
    "intimate",
@@ -6400,7 +6604,7 @@
   "session": 2,
   "qnum": 54,
   "passage": null,
-  "question": "S1: Then what is necessary with regard to taming science and technology is S6: Then why do we not tame atomic energy to peaceful purposes P We must have the basic knowledge of the two. Q It is said, ‘Science is a useful servant but destructive master’. R By the misuse of science, mankind will meet its doom quite soon. S If we do not harness it for the welfare of mankind, I am afraid, a total annihilation is a must. The correct sequence should be",
+  "question": "S1: Then what is necessary with regard to taming science and technology is S6: Then why do we not tame atomic energy to peaceful purposes P : We must have the basic knowledge of the two. Q : It is said, ‘Science is a useful servant but destructive master’. R : By the misuse of science, mankind will meet its doom quite soon. S : If we do not harness it for the welfare of mankind, I am afraid, a total annihilation is a must. The correct sequence should be",
   "options": [
    "SRQP",
    "PQSR",
@@ -6417,7 +6621,7 @@
   "session": 2,
   "qnum": 59,
   "passage": null,
-  "question": "S1: Different people have different hobbies. S6: With hobbies, you spend time in a gainful way. P Thus, they say, as many people, so many hobbies. Q In due course, that becomes your hobby. R: Whatever leisure time you get, you use that in creative activity. S: Hobby is a leisure time activity. The correct sequence should be",
+  "question": "S1: Different people have different hobbies. S6: With hobbies, you spend time in a gainful way. P : Thus, they say, as many people, so many hobbies. Q : In due course, that becomes your hobby. R: Whatever leisure time you get, you use that in creative activity. S: Hobby is a leisure time activity. The correct sequence should be",
   "options": [
    "PQRS",
    "PQSR",
@@ -6435,6 +6639,7 @@
   "qnum": 71,
   "passage": null,
   "question": "He drowned in the flood water last year.",
+  "target": "drowned",
   "options": [
    "swarmed",
    "swam",
@@ -6452,6 +6657,7 @@
   "qnum": 72,
   "passage": null,
   "question": "Autumn is rather a dry season.",
+  "target": "dry",
   "options": [
    "arid",
    "humid",
@@ -6469,6 +6675,7 @@
   "qnum": 73,
   "passage": null,
   "question": "Our differences are growing day by day.",
+  "target": "differences",
   "options": [
    "confabulations",
    "interferences",
@@ -6486,6 +6693,7 @@
   "qnum": 74,
   "passage": null,
   "question": "The big tree hindered access of sunlight into the house.",
+  "target": "hindered",
   "options": [
    "impeded",
    "shaded",
@@ -6503,6 +6711,7 @@
   "qnum": 75,
   "passage": null,
   "question": "The complexity of the issue baffled everyone.",
+  "target": "complexity",
   "options": [
    "conclusion",
    "intricacy",
@@ -6520,6 +6729,7 @@
   "qnum": 76,
   "passage": null,
   "question": "He drank excessive amount of liquor.",
+  "target": "excessive",
   "options": [
    "inculpable",
    "inordinate",
@@ -6537,6 +6747,7 @@
   "qnum": 77,
   "passage": null,
   "question": "He initiated the dialogue.",
+  "target": "initiated",
   "options": [
    "ordered",
    "interfered",
@@ -6554,6 +6765,7 @@
   "qnum": 79,
   "passage": null,
   "question": "I overrule your proposal.",
+  "target": "overrule",
   "options": [
    "wan",
    "veto",
@@ -6571,6 +6783,7 @@
   "qnum": 80,
   "passage": null,
   "question": "His behaviour shocked me.",
+  "target": "shocked",
   "options": [
    "entreated",
    "pacified",
@@ -6588,6 +6801,7 @@
   "qnum": 82,
   "passage": null,
   "question": "He has become paunchy.",
+  "target": "paunchy",
   "options": [
    "stout",
    "slim",
@@ -6605,6 +6819,7 @@
   "qnum": 83,
   "passage": null,
   "question": "This river originates from the Ganges.",
+  "target": "originates",
   "options": [
    "inaugurates",
    "culminates",
@@ -6622,6 +6837,7 @@
   "qnum": 84,
   "passage": null,
   "question": "The film I saw was hilarious.",
+  "target": "hilarious",
   "options": [
    "tragic",
    "serious",
@@ -6639,6 +6855,7 @@
   "qnum": 85,
   "passage": null,
   "question": "On that day, pandemonium reigned in the hall.",
+  "target": "pandemonium",
   "options": [
    "hullaballoo",
    "uproar",
@@ -6656,6 +6873,7 @@
   "qnum": 86,
   "passage": null,
   "question": "The police detained me today amidst busy traffic.",
+  "target": "detained",
   "options": [
    "impeded",
    "released",
@@ -6673,6 +6891,7 @@
   "qnum": 87,
   "passage": null,
   "question": "In my state of despair, I confessed everything.",
+  "target": "despair",
   "options": [
    "despondency",
    "determination",
@@ -6690,6 +6909,7 @@
   "qnum": 89,
   "passage": null,
   "question": "There was much to boast about the quality of his work.",
+  "target": "boast",
   "options": [
    "bluster",
    "brag",
@@ -6707,6 +6927,7 @@
   "qnum": 90,
   "passage": null,
   "question": "He delivered an eccentric speech.",
+  "target": "an eccentric",
   "options": [
    "an odd",
    "a peculiar",
@@ -8726,6 +8947,7 @@
   "qnum": 51,
   "passage": null,
   "question": "His views on the matter are utopian.",
+  "target": "utopian",
   "options": [
    "realistic",
    "ideal",
@@ -8743,6 +8965,7 @@
   "qnum": 52,
   "passage": null,
   "question": "The shortage of funds will render nugatory the implementation of reform policies.",
+  "target": "nugatory",
   "options": [
    "explicit",
    "implicit",
@@ -8760,6 +8983,7 @@
   "qnum": 54,
   "passage": null,
   "question": "We must not become complacent about the progress of the technology.",
+  "target": "complacent",
   "options": [
    "discontented",
    "contented",
@@ -8777,6 +9001,7 @@
   "qnum": 55,
   "passage": null,
   "question": "The employees rejected the derisory pay offer.",
+  "target": "derisory",
   "options": [
    "partial",
    "full",
@@ -8794,6 +9019,7 @@
   "qnum": 57,
   "passage": null,
   "question": "The business floundered during the pandemic.",
+  "target": "floundered",
   "options": [
    "faced many problems",
    "glided through",
@@ -8811,6 +9037,7 @@
   "qnum": 58,
   "passage": null,
   "question": "His speeches were models of brevity.",
+  "target": "brevity",
   "options": [
    "lengthiness",
    "concision",
@@ -8828,6 +9055,7 @@
   "qnum": 60,
   "passage": null,
   "question": "No one knew what transpired during the meeting.",
+  "target": "transpired",
   "options": [
    "emerged",
    "exchanged",
@@ -8845,6 +9073,7 @@
   "qnum": 71,
   "passage": null,
   "question": "American Independence was a great blow to the invincible image of Great Britain.",
+  "target": "invincible",
   "options": [
    "vulnerable",
    "impregnable",
@@ -8862,6 +9091,7 @@
   "qnum": 72,
   "passage": null,
   "question": "The first step in precipitation is condensation.",
+  "target": "condensation",
   "options": [
    "constriction",
    "abridgement",
@@ -8879,6 +9109,7 @@
   "qnum": 73,
   "passage": null,
   "question": "This ushered in a large-scale social, economic, and political transformation.",
+  "target": "ushered in",
   "options": [
    "led",
    "conducted",
@@ -8896,6 +9127,7 @@
   "qnum": 74,
   "passage": null,
   "question": "The writer obfuscated the real issue with small details.",
+  "target": "obfuscated",
   "options": [
    "mystified",
    "obscured",
@@ -8913,6 +9145,7 @@
   "qnum": 75,
   "passage": null,
   "question": "The horror and abomination of the system of Sati in India was condemned thoroughly.",
+  "target": "abomination",
   "options": [
    "abhorrence",
    "termination",
@@ -8930,6 +9163,7 @@
   "qnum": 76,
   "passage": null,
   "question": "He was rebuked for his infraction of the discipline.",
+  "target": "infraction",
   "options": [
    "transgression",
    "observance",
@@ -8947,6 +9181,7 @@
   "qnum": 77,
   "passage": null,
   "question": "It is the general reaction of some people to denounce any new proposal by enthusiastic professionals.",
+  "target": "denounce",
   "options": [
    "criticise",
    "censure",
@@ -8964,6 +9199,7 @@
   "qnum": 78,
   "passage": null,
   "question": "The emperor as a centralised entity indisputably went beyond regional conflicts and fostered a certain mode of elite culture.",
+  "target": "fostered",
   "options": [
    "cultivated",
    "endorsed",
@@ -13203,6 +13439,7 @@
   "qnum": 1,
   "passage": null,
   "question": "The leader’s views were equivocal on contentious issue.",
+  "target": "equivocal",
   "options": [
    "obscure",
    "ambiguous",
@@ -13220,6 +13457,7 @@
   "qnum": 2,
   "passage": null,
   "question": "The authorities interacted with a group mutinous students.",
+  "target": "mutinous",
   "options": [
    "unruly",
    "contumacious",
@@ -13237,6 +13475,7 @@
   "qnum": 3,
   "passage": null,
   "question": "His behaviour was quite belligerent.",
+  "target": "belligerent",
   "options": [
    "bellicose",
    "antagonistic",
@@ -13254,6 +13493,7 @@
   "qnum": 4,
   "passage": null,
   "question": "He was effusive in his praise.",
+  "target": "effusive",
   "options": [
    "exuberant",
    "profuse",
@@ -13271,6 +13511,7 @@
   "qnum": 5,
   "passage": null,
   "question": "He is often accused of being iniquitous in conduct.",
+  "target": "iniquitous",
   "options": [
    "preposterous",
    "execrable",
@@ -13373,6 +13614,7 @@
   "qnum": 85,
   "passage": null,
   "question": "They were fed-up with his doltish behaviour.",
+  "target": "doltish",
   "options": [
    "wise",
    "imbecilic",
