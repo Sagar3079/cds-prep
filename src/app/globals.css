@@ -1049,3 +1049,13 @@ mark.target-word {
   from { transform: translateY(14px); opacity: 0; }
   to   { transform: none; opacity: 1; }
 }
+
+/* Plan rows in the upsell sheet. A pressed state, because they are a choice
+   rather than a label — the first version painted the recommended plan and gave
+   no way to pick the other one. */
+.plan-row {
+  transition: border-color 0.18s var(--ease), background 0.18s var(--ease),
+    transform 0.12s var(--ease);
+  cursor: pointer;
+}
+.plan-row:active { transform: scale(0.985); }
