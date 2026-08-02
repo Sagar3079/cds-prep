@@ -607,12 +607,12 @@ mark.target-word {
 @media (max-width: 620px) {
   .potter { filter: none; }
   .potter--tappable { transition: none; }
-  .potter__tail,
-  .potter__wand,
-  .potter__spark,
-  .potter__head-bob,
-  .potter--riding .potter__broom { animation: none; }
   .potter-drag--active { filter: none; }
+  /* The `animation: none` half of this reset used to live here and did nothing.
+     Every selector it named is re-declared further down at the SAME specificity,
+     so source order won and the loops kept running on phones — only the filter
+     rules above ever applied. Moved below those declarations; see the note
+     there. */
 }
 /* Tapping him mutes or unmutes his thoughts. Only the tappable variant takes
    pointer events — the decorative copies stay inert. */
@@ -897,6 +897,23 @@ mark.target-word {
 
 /* head rides a slower beat than the body, so the neck looks springy */
 .potter__head-bob { animation: potterHeadBob 6.1s ease-in-out infinite; }
+
+/* Phones: cut the ambient loops, AFTER the rules that declare them.
+   This block is separated from its `filter: none` sibling further up on
+   purpose. Placed there, it lost every one of these selectors to an identical
+   one declared later in the file, so the animations it claims to stop went on
+   running. Specificity ties are broken by source order, and a reset has to come
+   last. Kept: the breath and the hair, which carry the "alive" read. Untouched:
+   his flight, bank and dive, which are wrapper transforms on the compositor and
+   are the motion the screen is actually about. */
+@media (max-width: 620px) {
+  .potter__tail,
+  .potter__wand,
+  .potter__spark,
+  .potter__head-bob,
+  .potter--riding .potter__broom,
+  .potter--riding .potter__tail { animation: none; }
+}
 @keyframes potterHeadBob {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   40%      { transform: translateY(-1.1px) rotate(0.7deg); }
@@ -1064,3 +1081,117 @@ mark.target-word {
   cursor: pointer;
 }
 .plan-row:active { transform: scale(0.985); }
+
+/* ============================================================
+   KUROMI — the second mascot
+   BEGIN Kuromi block. Everything from here to END is new and belongs to
+   `Kuromi.tsx`; nothing above it was touched.
+
+   Kuromi renders as `.potter.kuromi`, so she inherits the whole POTTER
+   section above — the breath, the mood postures, the tap squash, the head
+   bob, the mirror, the perch, the thought bubble, the drag. That is the
+   point: the two characters are the same species of flat sticker and only
+   their anatomy differs, so posture is shared and only the parts that do
+   not exist on the other one are duplicated.
+
+   EVERY selector here is qualified with `.kuromi`. Potter never carries
+   that class, so nothing in this block can reach him — which matters more
+   than usual, because the settings screen shows both at once.
+   ============================================================ */
+
+/* The hood has weight and lags the head — her answer to `.potter__hair`,
+   and kept alive on phones for the same reason his hair is: with the head
+   bob switched off below 620px this is the only thing left that says the
+   head is attached to a body rather than pasted on.
+   Origin sits at the crown, so the sway pivots where the hood grips the
+   skull instead of swinging the whole headpiece sideways. */
+.kuromi .kuromi__hood {
+  transform-origin: 60px 30px;
+  animation: kuromiHood 4.7s ease-in-out infinite;
+}
+@keyframes kuromiHood {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  30%      { transform: rotate(-1.3deg) translateY(-0.7px); }
+  65%      { transform: rotate(0.9deg) translateY(0.5px); }
+}
+
+/* The two floppy points swing inside the hood's own sway, each on its own
+   period so they never wag in unison — two points moving as one read as a
+   single rigid shape, which is exactly what they are not.
+   Timings continue the non-harmonic ladder the POTTER — LIFE block sets up
+   (2.6 / 2.9 / 3.4 / 3.7 / 4.1 / 4.4 / 5 / 6.1): 3.1 / 3.9 / 4.3 / 4.7 share
+   no small common multiple with those or with each other. */
+.kuromi .kuromi__point--l {
+  transform-origin: 33px 14px;
+  animation: kuromiPointL 3.9s ease-in-out infinite;
+}
+.kuromi .kuromi__point--r {
+  transform-origin: 87px 14px;
+  animation: kuromiPointR 4.3s ease-in-out infinite;
+}
+@keyframes kuromiPointL {
+  0%, 100% { transform: rotate(0deg); }
+  35%      { transform: rotate(4.5deg); }
+  70%      { transform: rotate(-3deg); }
+}
+@keyframes kuromiPointR {
+  0%, 100% { transform: rotate(0deg); }
+  40%      { transform: rotate(-4.5deg); }
+  75%      { transform: rotate(3deg); }
+}
+
+/* The devil tail flicks from its root at her hip. Origin is the base of the
+   stroke, not the spade, so the tip travels and the join stays put. */
+.kuromi .kuromi__tail {
+  transform-origin: 76px 100px;
+  animation: kuromiTail 3.1s ease-in-out infinite;
+}
+@keyframes kuromiTail {
+  0%, 100% { transform: rotate(0deg); }
+  40%      { transform: rotate(-6deg); }
+  75%      { transform: rotate(4deg); }
+}
+/* streams harder in flight, the way his scarf does */
+.kuromi.potter--riding .kuromi__tail { animation-duration: 1.4s; }
+
+/* ---- idle beat: the smirk ----
+   Her replacement for his `nudge`, which pushes glasses she does not have.
+   Both points wag once and the brows twitch with them. `.kuromi__brows` is a
+   wrapper that carries NOTHING but this beat — the mood offset lives on a
+   second <g> inside it — because a CSS animation outranks the style attribute,
+   and sharing one element would have yanked a raised happy brow back to zero
+   for the whole 0.9s. Same split, same reason, as `.potter__head-bob`. */
+.kuromi.potter--smirk .kuromi__point--l,
+.kuromi.potter--smirk .kuromi__point--r {
+  animation: kuromiWag 0.9s var(--ease);
+}
+@keyframes kuromiWag {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(-9deg); }
+  60%      { transform: rotate(6deg); }
+}
+.kuromi.potter--smirk .kuromi__brows { animation: kuromiBrowTwitch 0.9s var(--ease); }
+@keyframes kuromiBrowTwitch {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  30%      { transform: translateY(-1.6px) rotate(-1.4deg); }
+  65%      { transform: translateY(0.6px); }
+}
+
+/* ---- phones ----
+   The same treatment the POTTER block gives his ambient loops at this
+   breakpoint, and for the same reason: `filter: drop-shadow` on `.potter`
+   repaints the whole figure on every frame any descendant animates, so each
+   loop that survives costs a main-thread repaint at 60fps.
+
+   Cut the two that are decoration — the points and the tail — and keep the
+   hood, which is the hair's counterpart and the only ambient motion left on
+   her head once `.potter__head-bob` is switched off above. The one-shot
+   gesture beats stay: they are not loops, and his are not cut either. */
+@media (max-width: 620px) {
+  .kuromi .kuromi__point--l,
+  .kuromi .kuromi__point--r,
+  .kuromi .kuromi__tail { animation: none; }
+}
+/* ============================================================
+   END Kuromi block
+   ============================================================ */
