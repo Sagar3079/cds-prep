@@ -32,21 +32,27 @@ export interface KuromiProps {
  * props, same exported geometry constants, same class hooks, so `PotterPerch`,
  * `PotterCoach` and `PotterRider` can render either one without knowing which.
  *
- * Chibi imp: enormous round white head under a dark jester hood, two long
- * floppy hood points ending in bobbles, a pink skull on the hood's front, big
- * black oval eyes under slanted brows, a tiny white body, and a devil tail with
- * a spade tip.
+ * The drawing is a flat vector likeness of the character: two long pointed
+ * hood horns with a small ball at each tip, a rounded black hood carrying the
+ * pink skull, a white face whose forehead point is the NEGATIVE SPACE between
+ * two humps of the face outline, a four-point jester ruff with pink bobbles, a
+ * small white body with feet, and a stubby devil tail at the right hip.
  *
- * STICKER RULES — the same ones Potter is drawn under, and for the same
- * reason: an earlier polished pass at that character was rejected as "too
- * polished", and an elaborate eye (iris, sclera, catchlight ring) was called
- * "ugly". So every form here is a solid fill inside a thick dark outline
- * (stroke 2.6–3.2 at this 120x140 viewBox) and the eyes are one solid oval plus
- * exactly one highlight. Shading is at most ONE flat secondary tone per form —
- * the darker bobbles on the hood points, the shaded far side of the hood, the
- * grey soles. No gradients, no rim lights, no soft cast shadows: they read as
- * "3D toy" rather than "sticker", and they would put her in a different visual
- * family from Potter, which is the one thing she must not do.
+ * STICKER RULES — the same ones Potter is drawn under. Every form is a solid
+ * fill inside one dark outline, and the outline is a UNIFORM 2.7 at this
+ * 120x140 viewBox: it is set once on the fit group below and inherited, so
+ * there is no per-shape stroke width to drift. Small details (skull sockets,
+ * eyes, lashes, nose, mouth) are fills with `stroke="none"`, never thin
+ * strokes. Five colours, no gradients, no rim lights, no soft shadows: those
+ * read as "3D toy" rather than "sticker" and would put her in a different
+ * visual family from Potter, which is the one thing she must not do.
+ *
+ * The forehead point deserves its own warning because it is the easiest thing
+ * here to break. `FACE` starts at (60,68) and rises to a hump on each side, so
+ * the dark hood BEHIND it shows through the dip. It is not a separate dark
+ * shape laid over the face and must never become one — the moment it is a
+ * shape, its outline doubles up against the face outline and she grows a
+ * pencilled-in triangle on her forehead.
  *
  * Consequently there are no <defs>, no gradients, no filters, no clipPaths and
  * therefore NO ids at all. That is load-bearing now that two characters exist:
@@ -54,45 +60,127 @@ export interface KuromiProps {
  * Potter's copies too the moment both mount on one page (settings previews both
  * of them side by side). If anything id-bearing is ever added, it MUST be
  * namespaced with a per-instance suffix from a `useRef`.
- *
- * The one tonal element that is not a fill is the flat contact shadow under her
- * paws. It is load-bearing — without it she floats — so it stays in the perched
- * pose and is dropped while `riding`, where floating is the point.
  */
 
-/**
- * LEDGE_Y = 76 of 140 is the line her paws grip; everything below it is meant
- * to sit behind whatever she is perched on. Exported so the CSS offsets her by
- * exactly the hidden portion instead of a guessed pixel value.
- *
- * Two px lower than Potter's 74, and the difference is the hood: her crown
- * reaches y=1 and her chin y=72, where his hair tops out at y=1 and his chin
- * ends at y=70, so the same "card edge just under the chin" reading lands two
- * px further down. It also has to clear the hood-point bobbles (they bottom out
- * at y=40) and leave the tail's spade tip (y=48–66) fully above the card —
- * cutting at 74 shaved the spade, which is the only place the tail is visible
- * at all in the perched pose.
- */
-export const LEDGE_RATIO = 76 / 140;
+/** Outline, hood/tail dark, body white, ruff bobble pink, skull/nose pink. */
+const OUTLINE = "#241A19";
+const HOOD = "#4B4947";
+const COAT = "#FFFFFF";
+const BOBBLE = "#F49FC3";
+const PINK = "#F4B4D1";
+/** Broom, in the same five-colour family: her hood tone and her bobble pink. */
+const BRISTLE = PINK;
+const BRISTLE_DARK = "#D6739F";
+
+/* ── the artwork, as flat path data ───────────────────────────────────────
+   Verbatim from the approved drawing, in ITS coordinate system; the whole
+   figure is then placed by `FIT` below, which carries the drawing's own
+   -1.6 vertical nudge. Ink bounds once `FIT_PERCHED` has nudged it, stroke
+   included: x 6.5–113.6, y 5.4–134.4. Every y quoted in this file is in that
+   placed frame, which is also the frame the two ledge ratios divide. */
+
+/** Hood horns. Tip up and out, base wide and low; the dome covers the base. */
+const HORN_L = "M11.8,13.6 L17.4,54.6 L32,52 L47.6,38.5 C47.2,32 46.3,30.4 43.2,29 Z";
+const HORN_R = "M108.2,13.6 L102.6,54.6 L88,52 L72.4,38.5 C72.8,32 73.7,30.4 76.8,29 Z";
+/** The devil tail, curling off the right hip just above the feet. */
+const TAIL =
+  "M80,123.5 C84,121.5 88.2,118 89.8,112.8 L100.2,109.8 C99.4,114.5 95,120.5 90,123 C87,124.6 83,125.2 80,124.8 Z";
+/** Body and both legs in one path — the notch at (60,119.5) is the crotch. */
+const BODY =
+  "M42,96 C40.5,104 40.5,113 42,120.5 C39.2,124.5 38.9,129.5 41.3,132.8 C44,135.4 50,135.4 53,133.2 C57.5,131.8 59,128 59.4,122 L60,119.5 L60.6,122 C61,128 62.5,131.8 67,133.2 C70,135.4 76,135.4 79,132.8 C81.1,129.5 80.8,124.5 78,120.5 C79.5,113 79.5,104 78,96 Z";
+const ARM_L =
+  "M37,95.5 C35.8,99 35.4,102.3 35.6,104.6 C34.6,105.6 34.6,107.7 35.8,108.6 C34.8,109.7 34.8,111.8 36,112.8 C36.4,115.2 38.6,117 40.8,116.8 C43,116.6 43.6,113.8 43.5,110.4 C43.3,105 43.4,98.5 43.1,95.5 Z";
+const ARM_R =
+  "M83,95.5 C84.2,99 84.6,102.3 84.4,104.6 C85.4,105.6 85.4,107.7 84.2,108.6 C85.2,109.7 85.2,111.8 84,112.8 C83.6,115.2 81.4,117 79.2,116.8 C77,116.6 76.4,113.8 76.5,110.4 C76.7,105 76.6,98.5 76.9,95.5 Z";
+/** Four-point jester ruff. The two inner points hang lowest, to y=107.5. */
+const COLLAR =
+  "M28.4,99.6 L36,92.2 Q60,89.8 84,92.2 L91.6,99.6 L74.5,100.2 L73.5,107.5 L60,99.6 L46.5,107.5 L45.5,100.2 Z";
+const DOME =
+  "M60,33.9 C52,33.9 47.5,35.5 43.6,37.9 C38,40.8 26.5,47.5 23.4,56.2 C22.8,60 22.8,66 23.6,71 C24.8,81 30,88.5 38.5,92 Q60,91 81.5,92 C90,88.5 95.2,81 96.4,71 C97.2,66 97.2,60 96.6,56.2 C93.5,47.5 82,40.8 76.4,37.9 C72.5,35.5 68,33.9 60,33.9 Z";
+/** Two humps with a dip at (60,68) — the dip IS the forehead point. */
+const FACE =
+  "M60,68 C55.5,65.5 51,63.7 47,63.5 C43.5,64.5 34.5,70 33.5,76.5 C32.6,84 38,92.5 47,94.4 C51,95.2 69,95.2 73,94.4 C82,92.5 87.4,84 86.5,76.5 C85.5,70 76.5,64.5 73,63.5 C69,63.7 64.5,65.5 60,68 Z";
 
 /**
- * The same line for the RIDING pose, where she straddles a broom instead of
- * gripping a ledge. y = 100 of 140 runs through the broom handle (97.5–104.5),
- * just under her paws: everything below it — the lower half of the handle, the
- * bristle head and both dangling legs — goes behind the card she is perched on,
- * while her torso, arms, tail and head stay above it. Cut any higher and the
- * broom floats free of the card; any lower and her legs dangle over the text.
+ * Where the drawing sits in the viewBox, per pose.
  *
- * Also bounded from above: `PotterRider` reserves `--potter-band: 52px` between
- * review cards and renders at SIZE 66, so this ratio must keep
- * `66 * RIDE_LEDGE_RATIO` at or under 52 or her head is clipped by the card
- * above. 100/140 gives 47.
+ * Perched is the drawing's own -1.6 nudge and nothing else, so every path
+ * above is used at its authored size and the outline stays exactly 2.7.
+ *
+ * Riding is that same drawing at 0.86, re-seated so its topmost ink lands at
+ * y≈2 — and the scale is forced, not stylistic. This character is
+ * head-dominant: hood plus face fill y 5.4–94.8 of a 140 box and the ruff runs
+ * on to y 111.3, while `RIDE_LEDGE_RATIO` may not put the broom lower than
+ * y≈98 without pushing her head out of the review band. At full size that
+ * handle would be driven straight through the ruff. Lifting her instead is not
+ * available: her horn balls already start at y 5.4, so there are five units of
+ * headroom in the whole box. 0.86 moves the bottom of the ruff from 111.3 up
+ * to 93.0, which is the ~18 units the broom needs, and costs an outline that
+ * renders at 2.32 in this pose — thinner than 2.7, but uniformly so, and only
+ * ever seen at the 66px rider.
  */
-export const RIDE_LEDGE_RATIO = 100 / 140;
+const FIT_PERCHED = "translate(0,-1.6)";
+const FIT_RIDING = "translate(8.4,-4.1) scale(0.86)";
+
+/**
+ * LEDGE_RATIO — the line a card's top edge crosses when she is perched.
+ *
+ * The line the ART wants is y ≈ 103. Read down the drawing: the chin ends at
+ * y=94.8, the jester ruff hangs under it from y=88.2, its two OUTER bobbles
+ * bottom out at y=102.4 and its two INNER ones run on to y=111.3, and the paws
+ * reach y=116.7. 103 is the one line in that stack that cuts nothing round in
+ * half: the outer bobbles clear it whole, the inner pair is cleanly out of
+ * sight, and the card takes the lower two thirds of the paws, which is what
+ * makes her read as leaning on the edge rather than hovering over it. The horn
+ * bobbles are at the far top (y 5.4–13.8) and are never in question.
+ *
+ * The CONSTANT is 96, not 103, and the seven units are not a fudge.
+ * `PotterPerch` offsets by `--potter-h × (1 − ratio)` against the perch BOX,
+ * and the figure inside it is an inline-block `<button>`, so that box is ~6px
+ * taller than the figure — a text descender the offset spends before it
+ * reaches any ink. The card therefore lands at `140 × ratio + ~7` in these
+ * coordinates, for Potter exactly as much as for her (his 74 lands at 81).
+ * Measured, not assumed: 96/140 puts it at 103.1 at the home perch's SIZE 118
+ * and 103.5 at the coach's 112.
+ *
+ * Bounded from above by the coach, which is the tightest placement either
+ * character has: at SIZE 112 the figure clears the run header's "Today's Test"
+ * by `188 − 112 × ratio`, and her thought bubble opens 4.7px under her own
+ * box. Past ratio ≈ 0.70 the bubble covers that heading and her right horn
+ * ball lands on the date line. 96/140 = 0.686 keeps both clear.
+ *
+ * Two honest consequences. Only 15% of her hides behind the card where 47% of
+ * Potter hides — that is the art, not a mistake, since 69% of her height is
+ * head, and cutting at his proportion would put the card edge across her eyes.
+ * And her tail cannot be seen while she is perched at all: this drawing wears
+ * it low at the hip (y 106.9–125.0), below every line the header above will
+ * allow. It is visible in Settings, where she is drawn whole, and its top
+ * clears the card in the riding pose.
+ */
+export const LEDGE_RATIO = 96 / 140;
+
+/**
+ * RIDE_LEDGE_RATIO — the same line for the RIDING pose, through the broom.
+ *
+ * y = 98 of 140 runs along the middle of the handle, which spans y 94.8–101.3
+ * once `FIT_RIDING` has placed it: the nose of the handle stays above the card
+ * and the bristle head, both legs and the lower half of the shaft go behind
+ * it. The ruff bottoms out at 93.0 and the nose-up tilt lifts the handle as it
+ * goes left, so the clearance between the two runs from 1.8 units at her
+ * centre down to about half a unit under the left bobble — tight by design,
+ * and the reason `FIT_RIDING` is 0.86 and not 0.9.
+ *
+ * Bounded from above, and this is the binding constraint on the whole riding
+ * pose: `PotterRider` renders at SIZE 66 into `--potter-band: 52px`, so
+ * `66 * ratio` must stay at or under 52. 98/140 gives 46 and leaves the same
+ * 6px of band slack Potter has — which is not spare, it is the room his
+ * flight bob and roll need above his own box.
+ */
+export const RIDE_LEDGE_RATIO = 98 / 140;
 
 /**
  * Idle beats. She plays one every 5–12s so she is never merely breathing.
- * `smirk` — a wag of both hood points with a brow twitch — is the most
+ * `smirk` — a wag of both hood horns with a lash twitch — is the most
  * characterful of the four, so it gets two entries and comes up twice as often.
  *
  * Deliberately NOT Potter's set: his `nudge` animates `.potter__specs`, and she
@@ -109,18 +197,6 @@ const GESTURE_MS: Record<Gesture, number> = {
   glance: 1400,
   shiver: 700,
 };
-
-const OUTLINE = "#1b1720";
-const HOOD = "#2b2833";
-const HOOD_DEEP = "#171420";
-const COAT = "#fbfaff";
-const COAT_SHADE = "#ddd9e6";
-const PINK = "#f6a5c8";
-const BLUSH = "#f5b8c9";
-const WOOD = "#3a3340";
-const WOOD_DARK = "#241f2b";
-const BRISTLE = "#f2a7c9";
-const BRISTLE_DARK = "#c87ba3";
 
 export default function Kuromi({
   mood = "idle",
@@ -272,532 +348,289 @@ export default function Kuromi({
         className="potter__facing"
         transform={facingRight ? "scale(-1,1)" : undefined}
       >
-        {/* ============== DEVIL TAIL ==============
-          Behind everything, curling up the right-hand side. Its whole reason for
-          taking that route is the ledge: a tail drawn hanging off her back would
-          live entirely below y=76 and would therefore never once be visible in
-          the app, since all three placements cut her at the ledge. Coming up
-          past her hip puts the spade tip at y=48–66, clear of the card and clear
-          of the right hood bobble above it (which bottoms out at y=40).
-          Drawn as a dark outline stroke with a narrower body-coloured stroke
-          over it — an outlined limb without a second path to keep in sync. */}
-        <g className="kuromi__tail">
-          <g fill="none" strokeLinecap="round">
-            <path
-              d="M76 100C98 106 113 88 104 62"
-              stroke={OUTLINE}
-              strokeWidth="9.6"
-            />
-            <path
-              d="M76 100C98 106 113 88 104 62"
-              stroke={HOOD}
-              strokeWidth="4.6"
-            />
-          </g>
-          {/* The spade. The notch in its base is the whole difference between a
-            devil tail and a traffic cone — the first pass had a convex base and
-            read as a cone at every size. Tilted out of the stalk's line so the
-            tip leads away from her rather than straight up. */}
+        {/* The pose fit, and the ONE place the outline is declared. Every shape
+          below inherits stroke 2.7 and only names its own fill; the face
+          details switch it off with stroke="none" and draw as pure fills. */}
+        <g
+          transform={riding ? FIT_RIDING : FIT_PERCHED}
+          fill="none"
+          stroke={OUTLINE}
+          strokeWidth="2.7"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        >
+          {/* ============== DEVIL TAIL ==============
+            First, so the body covers where it joins her hip. It sits low, by
+            her right foot, which is where this drawing wears it and why no
+            perched placement can show it — see LEDGE_RATIO. `transformOrigin`
+            is set here rather than left to globals.css because the pivot is a fact about
+            the art: (80,124) is the root of the stalk, so the tip travels and
+            the join stays welded to her hip. An inline style outranks the
+            stylesheet's own origin while leaving its keyframes untouched. */}
           <path
-            d="M104 45.5 115 63.5c-3.8-1.5-7.2-4.2-11-4.2s-7.2 2.7-11 4.2Z"
-            transform="rotate(10 104 62)"
+            className="kuromi__tail"
+            style={{ transformOrigin: "80px 124px" }}
+            d={TAIL}
             fill={HOOD}
-            stroke={OUTLINE}
-            strokeWidth="2.6"
-            strokeLinejoin="round"
           />
-        </g>
 
-        {/* ============== BODY ============== */}
-        <g className="potter__torso">
-          {riding ? (
-            <>
-              {/* legs hanging off the broom — drawn first so the coat hem cuts
-                across them and reads as cloth in front of the legs */}
-              <g stroke={OUTLINE} strokeWidth="2.6">
-                <rect x="44" y="102" width="12" height="19" rx="5" fill={COAT} />
-                <rect
-                  x="64"
-                  y="104"
-                  width="12"
-                  height="19"
-                  rx="5"
-                  fill={COAT_SHADE}
-                />
-                <rect
-                  x="39"
-                  y="117"
-                  width="18"
-                  height="9"
-                  rx="4.5"
-                  fill={COAT_SHADE}
-                />
-                <rect
-                  x="60"
-                  y="119"
-                  width="18"
-                  height="9"
-                  rx="4.5"
-                  fill={COAT_SHADE}
-                />
-              </g>
-
-              {/* seated body: shorter and wider than the standing one, hem
-                draping over the broom.
-                No flat secondary tone on it, unlike Potter's robe. His is a
-                large dark mass that needs one to stop reading as a silhouette;
-                hers is small and white, and every wedge tried on it read as a
-                stain rather than a shadow. "At most one secondary tone" is a
-                ceiling, not a quota — the outline carries the form here. */}
-              <path
-                d="M60 62c14 0 25 10 26 24l3 22H31l3-22c1-14 12-24 26-24Z"
-                fill={COAT}
-                stroke={OUTLINE}
-                strokeWidth="2.8"
-              />
-
-              {/* arms reaching down to the handle. Both outlines go down first
-                so the arms cannot cut into each other. */}
-              <g className="potter__arms" fill="none" strokeLinecap="round">
-                <path
-                  d="M36 74C26 82 28 93 41 99"
-                  stroke={OUTLINE}
-                  strokeWidth="14"
-                />
-                <path
-                  d="M84 74C94 82 92 95 79 101"
-                  stroke={OUTLINE}
-                  strokeWidth="14"
-                />
-                <path
-                  d="M36 74C26 82 28 93 41 99"
-                  stroke={COAT}
-                  strokeWidth="8.8"
-                />
-                <path
-                  d="M84 74C94 82 92 95 79 101"
-                  stroke={COAT}
-                  strokeWidth="8.8"
-                />
-              </g>
-            </>
-          ) : (
-            <>
-              {/* legs + feet, visible only when she is not perched */}
-              <g stroke={OUTLINE} strokeWidth="2.6">
-                <rect x="45" y="110" width="12" height="18" rx="5" fill={COAT} />
-                <rect
-                  x="63"
-                  y="110"
-                  width="12"
-                  height="18"
-                  rx="5"
-                  fill={COAT_SHADE}
-                />
-                <rect
-                  x="41"
-                  y="124"
-                  width="18"
-                  height="9"
-                  rx="4.5"
-                  fill={COAT_SHADE}
-                />
-                <rect
-                  x="61"
-                  y="124"
-                  width="18"
-                  height="9"
-                  rx="4.5"
-                  fill={COAT_SHADE}
-                />
-              </g>
-
-              {/* Body — a short flared smock, so the head reads as enormous.
-                The first pass was a straight-sided tube of the same width top
-                and bottom and read as a bottle next to Potter's flaring robe;
-                the flare is what puts the two silhouettes in the same family.
-                No flat secondary tone on it — see the seated body below. */}
-              <path
-                d="M60 62c16 0 27 12 27 28l2 14c0 8-13 12-29 12s-29-4-29-12l2-14c0-16 11-28 27-28Z"
-                fill={COAT}
-                stroke={OUTLINE}
-                strokeWidth="2.8"
-              />
-
-              {/* short arms up onto the ledge */}
-              <path
-                d="M41 70c-10 2-16 8-16 16l18 2Z"
-                fill={COAT}
-                stroke={OUTLINE}
-                strokeWidth="2.6"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M79 70c10 2 16 8 16 16l-18 2Z"
-                fill={COAT}
-                stroke={OUTLINE}
-                strokeWidth="2.6"
-                strokeLinejoin="round"
-              />
-            </>
-          )}
-        </g>
-
-        {/* ============== BROOM ==============
-          Behind her and in front of the body hem, so the handle passes across
-          her lap the way a stick you are sitting on does. Tilted nose-up.
-          Reuses `.potter__broom` on purpose: the bob keyframes in globals.css
-          are written around exactly this rotate(6 60 100), so sharing the class
-          shares the motion instead of duplicating it. */}
-        {riding && (
-          <g className="potter__broom" transform="rotate(6 60 100)">
-            <rect
-              x="2"
-              y="97.5"
-              width="88"
-              height="7"
-              rx="3.5"
-              fill={WOOD}
-              stroke={OUTLINE}
-              strokeWidth="2.8"
-            />
-            <path
-              d="M95 94.5C105 86 112 84.5 115 87.5c1.4 1.4 1.4 26.6 0 28-3 3-10 1.5-20-7Z"
-              fill={BRISTLE}
-              stroke={OUTLINE}
-              strokeWidth="2.8"
-              strokeLinejoin="round"
-            />
-            <g
-              stroke={BRISTLE_DARK}
-              strokeWidth="2"
-              strokeLinecap="round"
-              fill="none"
-            >
-              <path d="M99.5 98C105 95.5 110 94.7 112.5 94.9" />
-              <path d="M99.5 101.9C105 100.9 110 100.9 112.5 101.7" />
-              <path d="M99.5 105.7C105 107.1 110 108.3 112.5 108.9" />
-            </g>
-            {/* the binding where the straw meets the shaft */}
-            <rect
-              x="86"
-              y="92.5"
-              width="10"
-              height="18"
-              rx="4"
-              fill={WOOD_DARK}
-              stroke={OUTLINE}
-              strokeWidth="2.6"
-            />
+          {/* ============== BODY ==============
+            One path: torso, both legs and both feet, with the crotch notch at
+            (60,119.5). In the riding pose that notch is exactly where the broom
+            handle crosses, so the same body straddles the stick — no second
+            seated silhouette to keep in sync with this one. */}
+          <g className="potter__torso">
+            <path d={BODY} fill={COAT} />
           </g>
-        )}
 
-        {/* ============== HEAD ==============
-          Two nested groups on purpose. A CSS animation beats the style
-          attribute in the cascade, so an infinite idle bob on the SAME element
-          silently overrides the inline look transform — that is the bug that
-          left Potter's head unable to turn. The bob owns the outer group; the
-          turn owns the inner. */}
-        <g className="potter__head-bob">
-          <g
-            className="potter__head"
-            style={{
-              transform: `rotate(${lx * 4.5}deg) translateY(${ly * -1.6}px)`,
-              // Her neck is 10px lower than his: the head is the same height
-              // but sits under a hood, so the pivot follows the chin down.
-              transformOrigin: "60px 66px",
-            }}
-          >
-            {/* face — one solid fill, no modelling. Drawn before the hood so
-              the hood's hem cuts across the forehead. */}
-            <rect
-              x="28"
-              y="8"
-              width="64"
-              height="64"
-              rx="32"
-              fill={COAT}
-              stroke={OUTLINE}
-              strokeWidth="2.8"
-            />
-
-            {/* The hood, with the two points and the skull inside it, so the
-              whole headpiece sways as one lagging mass. */}
-            <g className="kuromi__hood">
-              {/* Hood points, drawn BEFORE the dome so the dome covers their
-                bases and they read as growing out of it. They sweep out and up
-                from the crown, tips flopping over into the bobbles. */}
-              <g className="kuromi__point kuromi__point--l">
-                <path
-                  d="M35 11C24-3 10 2 11 27c4-10 8-12 19-5Z"
-                  fill={HOOD}
-                  stroke={OUTLINE}
-                  strokeWidth="2.8"
-                  strokeLinejoin="round"
-                />
-                <circle
-                  cx="11"
-                  cy="33"
-                  r="5.8"
-                  fill={HOOD_DEEP}
-                  stroke={OUTLINE}
-                  strokeWidth="2.6"
-                />
-              </g>
-              <g className="kuromi__point kuromi__point--r">
-                <path
-                  d="M85 11c11-14 25-9 24 16-4-10-8-12-19-5Z"
-                  fill={HOOD}
-                  stroke={OUTLINE}
-                  strokeWidth="2.8"
-                  strokeLinejoin="round"
-                />
-                <circle
-                  cx="109"
-                  cy="33"
-                  r="5.8"
-                  fill={HOOD_DEEP}
-                  stroke={OUTLINE}
-                  strokeWidth="2.6"
-                />
-              </g>
-
-              {/* the dome. Wider than the head at the sides, hem straight across
-                the forehead — that flat hem is what makes it read as a hood
-                rather than a bonnet, and it is the shelf the skull stands on. */}
+          {/* ============== BROOM ==============
+            Over the body so the handle crosses her lap the way a stick you are
+            sitting on does, under the paws so they close on it. Reuses
+            `.potter__broom` on purpose: the bob keyframes in globals.css are
+            written around exactly this rotate(6 …), so sharing the class shares
+            the motion instead of duplicating it. Nose-up and travelling left. */}
+          {riding && (
+            <g className="potter__broom" transform="rotate(6 60 118.75)">
+              <rect x="2" y="115" width="90" height="7.5" rx="3.75" fill={HOOD} />
               <path
-                d="M18 50C16 13 36 1 60 1s44 12 42 49c-2-14-11-20-28-20H46C29 30 20 36 18 50Z"
-                fill={HOOD}
-                stroke={OUTLINE}
-                strokeWidth="2.9"
-                strokeLinejoin="round"
+                d="M95,111.5 C105,103 112,101.5 115,104.5 c1.4,1.4 1.4,26.6 0,28 -3,3 -10,1.5 -20,-7 Z"
+                fill={BRISTLE}
               />
-              {/* The head's single flat shadow tone. It hugs the hood's right
-                rim: the first pass put a free-floating wedge in the middle of
-                the dome and, on a near-black fill, it read as a smudge rather
-                than a shaded side. */}
-              <path d="M84 7c13 8 19 22 18 43l-6-.6c1-19-4-33-16-40Z" fill={HOOD_DEEP} />
-
-              {/* The pink skull on the hood's front — the badge that says
-                Kuromi at a glance, so it is drawn as big as the hem allows and
-                left as ONE flat pink. A shaded side was tried and, at 28px
-                across, read as a printing misregistration. */}
-              <g className="kuromi__skull">
-                <path
-                  d="M60 2c-8.8 0-16 6.6-16 14.8 0 4 1.8 7.6 4.8 10.2V29h22.4v-2c3-2.6 4.8-6.2 4.8-10.2C76 8.6 68.8 2 60 2Z"
-                  fill={PINK}
-                  stroke={OUTLINE}
-                  strokeWidth="2.4"
-                  strokeLinejoin="round"
-                />
-                <ellipse cx="53.8" cy="16" rx="3.8" ry="4.4" fill={OUTLINE} />
-                <ellipse cx="66.2" cy="16" rx="3.8" ry="4.4" fill={OUTLINE} />
-                <path d="M60 20.6 62.8 25h-5.6Z" fill={OUTLINE} />
-                {/* Two tooth notches, not four. Four came out as a barcode the
-                  moment she was rendered at the review screen's 66px. */}
-                <path
-                  d="M56.4 26V29M63.6 26V29"
-                  stroke={OUTLINE}
-                  strokeWidth="1.8"
-                  fill="none"
-                  strokeLinecap="round"
-                />
+              <g stroke={BRISTLE_DARK} strokeWidth="2">
+                <path d="M99.5,115 C105,112.5 110,111.7 112.5,111.9" />
+                <path d="M99.5,118.9 C105,117.9 110,117.9 112.5,118.7" />
+                <path d="M99.5,122.7 C105,124.1 110,125.3 112.5,125.9" />
               </g>
+              {/* the binding where the straw meets the shaft */}
+              <rect x="86" y="109.5" width="10" height="18" rx="4" fill={OUTLINE} />
             </g>
+          )}
 
-            {/* brows — short slanted strokes with the inner end LOWER, which is
-              the whole expression: it is what makes her read as mischievous
-              rather than merely cute. Every variant keeps the same `M x y c …`
-              shape so the `d` transition in globals.css can interpolate. */}
-            {/* Two nested groups, the same split the head uses and for the same
-              reason: the smirk beat animates `.kuromi__brows`, and a CSS
-              animation outranks the style attribute — put both on one element
-              and the twitch drags the brows back to translateY(0) for its whole
-              0.9s, dropping them out of a raised happy pose mid-beat. The beat
-              owns the outer group; the mood offset owns the inner. */}
-            <g className="kuromi__brows">
-              <g
-                style={{
-                  transform: `translateY(${happy ? -2.6 : mood === "wince" ? 2.2 : 0}px)`,
-                  transition: "transform .4s var(--ease)",
-                }}
-              >
-                <path
-                  d={
-                    mood === "thinking"
-                      ? "M38 37c4-2.4 8.4-3 12-2.4"
-                      : mood === "wince"
-                        ? "M38 32.6c4 2 8.4 4.4 12 6.6"
-                        : "M38 34.4c4 1.2 8.4 2.8 12 4.2"
-                  }
-                  stroke={OUTLINE}
-                  strokeWidth="3.2"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-                <path
-                  d={
-                    mood === "thinking"
-                      ? "M82 37c-4-2.4-8.4-3-12-2.4"
-                      : mood === "wince"
-                        ? "M82 32.6c-4 2-8.4 4.4-12 6.6"
-                        : "M82 34.4c-4 1.2-8.4 2.8-12 4.2"
-                  }
-                  stroke={OUTLINE}
-                  strokeWidth="3.2"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-              </g>
-            </g>
+          {/* ============== ARMS / PAWS ==============
+            Mitts at her sides. The perched ledge takes their lower two thirds,
+            which is what reads as leaning on the card rather than hovering over
+            it; riding, the broom handle passes just under them. */}
+          <g className="potter__hands">
+            <path d={ARM_L} fill={COAT} />
+            <path d={ARM_R} fill={COAT} />
+          </g>
 
-            {/* Eyes — one solid oval plus ONE highlight. Deliberately not a
-              layered iris: the elaborate version of Potter's was called ugly,
-              and a second character with more detailed eyes would break the
-              family read on the settings screen where both are shown together.
-              The transition is on the class, not inline: real saccades snap to a
-              target and hold. */}
+          {/* ============== JESTER RUFF ==============
+            After the paws, so its outer points hang over her upper arms, and
+            before the hood, so the hood's hem covers where it meets the neck.
+            The bobbles come last within the group so the ruff's own outline
+            cannot paint over them. */}
+          <g className="kuromi__collar">
+            <path d={COLLAR} fill={HOOD} />
+            <circle cx="28.4" cy="99.6" r="3" fill={BOBBLE} />
+            <circle cx="91.6" cy="99.6" r="3" fill={BOBBLE} />
+            <circle cx="46.5" cy="108.5" r="3" fill={BOBBLE} />
+            <circle cx="73.5" cy="108.5" r="3" fill={BOBBLE} />
+          </g>
+
+          {/* ============== HEAD ==============
+            Two nested groups on purpose. A CSS animation beats the style
+            attribute in the cascade, so an infinite idle bob on the SAME element
+            silently overrides the inline look transform — that is the bug that
+            left Potter's head unable to turn. The bob owns the outer group; the
+            turn owns the inner. */}
+          <g className="potter__head-bob">
             <g
-              className="potter__eyes"
+              className="potter__head"
               style={{
-                transform: `translate(${lx * 3.4}px, ${ly * -2.4}px)`,
+                transform: `rotate(${lx * 4.5}deg) translateY(${ly * -1.6}px)`,
+                // The pivot is her neck, where the hood meets the ruff — not
+                // the middle of the head. Turning about anything higher swings
+                // the chin out past the ruff instead of rotating over it.
+                transformOrigin: "60px 92px",
               }}
             >
-              {shut ? (
-                <>
-                  <path
-                    d="M40.5 49c3 4.6 9.5 4.6 12.5 0"
-                    stroke={OUTLINE}
-                    strokeWidth="3.2"
-                    fill="none"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M67 49c3 4.6 9.5 4.6 12.5 0"
-                    stroke={OUTLINE}
-                    strokeWidth="3.2"
-                    fill="none"
-                    strokeLinecap="round"
-                  />
-                </>
-              ) : (
-                <>
-                  <ellipse cx="47" cy="49" rx="6.6" ry="8.2" fill={OUTLINE} />
-                  <ellipse cx="73" cy="49" rx="6.6" ry="8.2" fill={OUTLINE} />
-                  <circle cx="49.4" cy="45.6" r="2.4" fill="#fff" />
-                  <circle cx="75.4" cy="45.6" r="2.4" fill="#fff" />
-                </>
-              )}
-            </g>
+              {/* Hood, horns and skull as one lagging mass. */}
+              <g className="kuromi__hood">
+                {/* Horns first: the dome is drawn after them and covers their
+                  wide bases, which is what makes them grow out of the hood
+                  instead of being pinned to it. Each pivots at its own base
+                  (see the tail above for why the origin lives here) — hinged
+                  anywhere else the tip stays put and the base swings, which
+                  is the wag backwards. */}
+                <path
+                  className="kuromi__point kuromi__point--l"
+                  style={{ transformOrigin: "40px 42px" }}
+                  d={HORN_L}
+                  fill={HOOD}
+                />
+                <path
+                  className="kuromi__point kuromi__point--r"
+                  style={{ transformOrigin: "80px 42px" }}
+                  d={HORN_R}
+                  fill={HOOD}
+                />
+                <circle cx="10.6" cy="11.2" r="2.8" fill={HOOD} />
+                <circle cx="109.4" cy="11.2" r="2.8" fill={HOOD} />
 
-            {/* nose + mouth */}
-            <ellipse
-              cx="60"
-              cy="57"
-              rx="4.2"
-              ry="3.2"
-              fill={PINK}
-              stroke={OUTLINE}
-              strokeWidth="1.8"
-            />
-            <path
-              d={
-                happy
-                  ? "M52.5 62c4 6.6 11 6.6 15 0"
-                  : mood === "wince"
-                    ? "M54 66.5c3-3.4 11-3.4 14 0"
-                    : mood === "thinking"
-                      ? "M55.5 63c1.6 0 7.4 0 9 0"
-                      : "M54 62.5c2 3.6 10 3.6 12 0"
-              }
-              stroke={OUTLINE}
-              strokeWidth="3"
-              fill="none"
-              strokeLinecap="round"
-            />
-            {happy && <path d="M54 63c3.5 4.4 10 4.4 13.5 0Z" fill="#b8465a" />}
+                <path d={DOME} fill={HOOD} />
 
-            <g className="potter__cheeks">
-              <ellipse cx="38" cy="57" rx="5.4" ry="3.1" fill={BLUSH} />
-              <ellipse cx="82" cy="57" rx="5.4" ry="3.1" fill={BLUSH} />
+                {/* The pink skull — the badge that says Kuromi at a glance, so
+                  it is left as ONE flat pink with dark cut-outs. Drawn inside
+                  the hood group so it sways with it; it clears the face's
+                  forehead point by three units, so its order against the face
+                  never matters. */}
+                <g className="kuromi__skull" stroke="none">
+                  <path d="M56.4,58 L63.6,58 L62.8,64.2 Q60,65.3 57.2,64.2 Z" fill={PINK} />
+                  <ellipse cx="60" cy="53.7" rx="9.5" ry="8" fill={PINK} />
+                  <ellipse
+                    cx="54"
+                    cy="57.2"
+                    rx="1.9"
+                    ry="2.9"
+                    fill={OUTLINE}
+                    transform="rotate(-8 54 57.2)"
+                  />
+                  <ellipse
+                    cx="66"
+                    cy="57.2"
+                    rx="1.9"
+                    ry="2.9"
+                    fill={OUTLINE}
+                    transform="rotate(8 66 57.2)"
+                  />
+                  <rect x="58.7" y="60.6" width="0.9" height="3.8" fill={OUTLINE} />
+                  <rect x="60.8" y="60.6" width="0.9" height="3.8" fill={OUTLINE} />
+                </g>
+              </g>
+
+              {/* The face. Its top edge is two humps with a dip at (60,68), and
+                the hood showing through that dip IS her forehead point. There
+                is deliberately no separate shape there — see the header. */}
+              <path d={FACE} fill={COAT} />
+
+              {/* Eyes. One solid oval each, no iris and no catchlight: the
+                elaborate version of Potter's eye was rejected as ugly, and a
+                second character with more detailed eyes would break the family
+                read on the settings screen where both are shown together.
+                The lashes live INSIDE this group so they travel with the eye
+                they belong to — parked outside it they detach the moment
+                `look` moves the eyes 3px. The transition is on the class, not
+                inline: real saccades snap to a target and hold. */}
+              <g
+                className="potter__eyes"
+                style={{ transform: `translate(${lx * 3.4}px, ${ly * -2.4}px)` }}
+              >
+                {shut ? (
+                  <>
+                    <path d="M39.6,76.5 Q43.4,81.5 47.2,76.5" />
+                    <path d="M72.8,76.5 Q76.6,81.5 80.4,76.5" />
+                  </>
+                ) : (
+                  <g stroke="none">
+                    <ellipse
+                      cx="43.4"
+                      cy="77.5"
+                      rx="3.8"
+                      ry="6.4"
+                      fill={OUTLINE}
+                      transform="rotate(-9 43.4 77.5)"
+                    />
+                    <ellipse
+                      cx="76.6"
+                      cy="77.5"
+                      rx="3.8"
+                      ry="6.4"
+                      fill={OUTLINE}
+                      transform="rotate(9 76.6 77.5)"
+                    />
+                  </g>
+                )}
+
+                {/* Lashes, and her brows in every sense that matters: they are
+                  the only thing above the eye that a mood can move.
+                  Two nested groups, the same split the head uses and for the
+                  same reason: the smirk beat animates `.kuromi__brows`, and a
+                  CSS animation outranks the style attribute — put both on one
+                  element and the twitch drags them back to translateY(0) for
+                  its whole 0.9s, dropping them out of a raised happy pose
+                  mid-beat. The beat owns the outer group; the mood owns the
+                  inner. The offset is small on purpose: these touch the eye,
+                  and anything past ~1px opens a visible gap. */}
+                <g className="kuromi__brows">
+                  <g
+                    stroke="none"
+                    fill={OUTLINE}
+                    style={{
+                      transform: `translateY(${happy ? -1.1 : mood === "wince" ? 0.9 : 0}px)`,
+                      transition: "transform .4s var(--ease)",
+                    }}
+                  >
+                    <path d="M43,71.2 L40.6,69 L41.6,72.3 Z" />
+                    <path d="M41.6,72.7 L39.4,71.3 L41,74 Z" />
+                    <path d="M77,71.2 L79.4,69 L78.4,72.3 Z" />
+                    <path d="M78.4,72.7 L80.6,71.3 L79,74 Z" />
+                  </g>
+                </g>
+              </g>
+
+              {/* Nose and mouth. Every mouth variant keeps the same
+                `M … Q … Q … Q … Z` shape so the `d` transition in globals.css
+                can interpolate between them instead of snapping. */}
+              <g stroke="none">
+                <ellipse cx="60" cy="83.6" rx="2.9" ry="2.6" fill={OUTLINE} />
+                <ellipse cx="60" cy="83.8" rx="1.9" ry="1.7" fill={PINK} />
+                <path
+                  d={
+                    happy
+                      ? "M53.6,85.4 Q60,89.2 66.4,85.4 Q66.1,93.4 60,93.8 Q53.9,93.4 53.6,85.4 Z"
+                      : mood === "wince"
+                        ? "M56.6,88.8 Q60,86.8 63.4,88.8 Q63.2,90.8 60,91 Q56.8,90.8 56.6,88.8 Z"
+                        : mood === "thinking"
+                          ? "M56.8,87.4 Q60,88.2 63.2,87.4 Q63.1,89.6 60,89.8 Q56.9,89.6 56.8,87.4 Z"
+                          : "M55.9,86.6 Q60,88.7 64.1,86.6 Q63.9,91.5 60,91.7 Q56.1,91.5 55.9,86.6 Z"
+                  }
+                  fill={OUTLINE}
+                />
+                {/* Only while the mouth is actually open — dropped into a
+                  pursed one it is a pink dot sitting on her chin. */}
+                {(happy || (mood !== "wince" && mood !== "thinking")) && (
+                  <ellipse
+                    cx="60.3"
+                    cy={happy ? 91.6 : 89.9}
+                    rx={happy ? 2.2 : 1.8}
+                    ry={happy ? 1.1 : 0.9}
+                    fill={PINK}
+                  />
+                )}
+                {/* Off by default — globals.css fades these in on the three
+                  happy moods and nowhere else, so the resting face keeps the
+                  drawing's own flat white cheeks. */}
+                <g className="potter__cheeks">
+                  <ellipse cx="42" cy="87" rx="5" ry="2.8" fill={BOBBLE} />
+                  <ellipse cx="78" cy="87" rx="5" ry="2.8" fill={BOBBLE} />
+                </g>
+              </g>
             </g>
           </g>
         </g>
-
-        {/* ============== PAWS ==============
-          On the broom handle when riding (same tilt as the broom), otherwise
-          gripping the ledge at y=76. Drawn last so they sit over the handle.
-          The pink bobble at each wrist is Kuromi's cuff accent; it is placed at
-          the INNER end of the paw, which is where the arm actually meets it,
-          and high enough on the paw to stay above the ledge line. */}
-        {riding ? (
-          <g
-            className="potter__hands"
-            transform="rotate(6 60 100)"
-            stroke={OUTLINE}
-            strokeWidth="2.6"
-          >
-            <rect x="32" y="93.5" width="18" height="14" rx="6.5" fill={COAT} />
-            <rect x="68" y="93.5" width="18" height="14" rx="6.5" fill={COAT} />
-            <circle cx="51" cy="97" r="4.4" fill={PINK} />
-            <circle cx="67" cy="97" r="4.4" fill={PINK} />
-            <g stroke={COAT_SHADE} strokeWidth="1.8" strokeLinecap="round">
-              <path d="M37 98v5M41.5 97v7M46 98v5" />
-              <path d="M73 98v5M77.5 97v7M82 98v5" />
-            </g>
-          </g>
-        ) : (
-          <g className="potter__hands" stroke={OUTLINE} strokeWidth="2.6">
-            <rect x="24" y="66" width="22" height="17" rx="8" fill={COAT} />
-            <rect x="74" y="66" width="22" height="17" rx="8" fill={COAT} />
-            {/* Straddling the paw's inner edge at its vertical middle. Sat at
-              y=71 in the first pass, level with the cheeks and the same pink,
-              which turned every mood with blush on into four pink dots and
-              read as a second set of cheeks rather than a cuff. */}
-            <circle cx="45" cy="74.5" r="5" fill={PINK} />
-            <circle cx="75" cy="74.5" r="5" fill={PINK} />
-            <g stroke={COAT_SHADE} strokeWidth="1.8" strokeLinecap="round">
-              <path d="M29 70.5v8M34 69.5v9M39 70.5v8" />
-              <path d="M81 70.5v8M86 69.5v9M91 70.5v8" />
-            </g>
-          </g>
-        )}
-
-        {/* Flat contact shadow beneath the paws — she floats without it, but a
-          rider is meant to float, so it only exists in the perched pose.
-          Lighter and narrower than Potter's identical ellipse: his lands on a
-          near-black robe and disappears into it, hers lands on a white body and
-          at his .16/48 read as a grey smear wiped across her front. */}
-        {!riding && (
-          <ellipse
-            cx="60"
-            cy="85"
-            rx="40"
-            ry="5.5"
-            fill="#0d1024"
-            opacity=".11"
-          />
-        )}
       </g>
 
       {/* Outside `.potter__facing` so it never renders reversed.
-        A touch smaller and further into the corner than Potter's, which sits at
-        (102,14) r11: at his coordinates this badge landed exactly on her right
-        hood bobble and swallowed it, and the bobbles are half of what makes the
-        hood read as Kuromi's. At (105,11) r10 it covers only the upper arc of
-        the hood point and the bobble below it stays whole. */}
+        Beside her head rather than in the corner above it, which is where
+        Potter's sits: this hood's right horn ball lands at (109.4,9.6) r4.2,
+        exactly under a corner badge, and it would swallow the one bobble that
+        edge of the silhouette has. The flank at y=70 is the only other gap big
+        enough — clear of the hood's widest point by three units, clear of the
+        horn by six, and above BOTH cut lines so it survives being perched
+        (y≈103) and being ridden (y=98). */}
       {!thoughtsOn && (
         <g className="potter__muted">
           <circle
-            cx="105"
-            cy="11"
-            r="10"
+            cx="109.5"
+            cy="70"
+            r="9"
             fill="var(--surface-2)"
             stroke="var(--line)"
             strokeWidth="1.5"
           />
           <path
-            d="M100.5 11h9"
+            d="M105.5,70h8"
             stroke="var(--muted)"
             strokeWidth="2.6"
             strokeLinecap="round"
