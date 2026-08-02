@@ -149,7 +149,14 @@ export default function RandomTestUpsell() {
 
             {/* A real radio group, not two decorated divs. Arrow keys move
                 between plans and only the checked one is a tab stop, which is
-                what a screen reader and a keyboard both expect of a choice. */}
+                what a screen reader and a keyboard both expect of a choice.
+                The group itself is never a tab stop — only the checked
+                `radio` is (roving tabindex, below) — so `onKeyDown` here
+                catches the arrow key after it bubbles up from whichever
+                button currently has focus. jsx-a11y reads any interactive
+                role with a key handler as needing its OWN focus, which would
+                add a second, redundant stop in the tab order. */}
+            {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus */}
             <div
               role="radiogroup"
               aria-label="Choose a plan"

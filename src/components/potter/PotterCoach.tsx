@@ -41,6 +41,10 @@ export default function PotterCoach({
   const drag = usePotterDrag("test");
   const [talk, setTalk] = useState(true);
   const [shown, setShown] = useState(true);
+  // Deliberately impure: only the value from the very first render is ever
+  // used (useRef's initial-value argument is discarded on every render after
+  // mount), so this reads the real mount time exactly once.
+  // eslint-disable-next-line react-hooks/purity
   const enteredAt = useRef(Date.now());
   const hideTimer = useRef<number | null>(null);
 

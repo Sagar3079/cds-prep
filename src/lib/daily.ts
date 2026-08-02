@@ -83,6 +83,9 @@ export function pickDailyQuestions(
   all: Question[],
   date: string,
   count = 10,
+  // Accepted for call-site compatibility with the other pick* functions and
+  // deliberately never read — see the invariant above and CLAUDE.md.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   excludeIds: string[] = []
 ): Question[] {
   const pool = answeredPool(all);

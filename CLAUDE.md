@@ -194,10 +194,20 @@ npm install
 npm run dev        # http://localhost:3000
 npm run build
 npm run typecheck  # tsc --noEmit
+npm run lint        # eslint . — flat config in eslint.config.mjs
+npm run visual      # scripts/visual-check.mjs against a running dev server
 ```
 
-There is no `lint` script. `next lint` was removed in Next 16 and eslint is not yet
-configured here — setting it up is an open task, not something to work around.
+`next lint` was removed in Next 16; `eslint.config.mjs` (ESLint 9 flat config,
+`eslint-config-next` + `typescript-eslint` + `eslint-plugin-jsx-a11y`) replaces it. One
+wrinkle: this repo's `typescript` dependency is 7.x (the Go-native compiler), and
+`typescript-eslint` has no API to target TS 7 yet — it only runs against a classic-API
+`typescript`. `scripts/link-lint-typescript.mjs` (a `postinstall` step, re-run on every
+`npm install`) gives just the lint toolchain a private copy of the `@typescript/typescript6`
+compatibility shim via a symlink inside its own `node_modules`, without touching the
+project's real `typescript` dependency — `tsc`/`next build` are unaffected. See that
+script's header comment for the full story if `npm run lint` ever starts failing with
+"typescript-eslint does not support TS 7.0".
 
 Data pipeline (Python, needs the gitignored `pdfs/`):
 
@@ -210,9 +220,17 @@ python scripts/seed_questions.py    # rebuild src/data/questions.json
 
 1. `npm run build` passes.
 2. `npm run typecheck` passes.
-3. Keyboard-only pass over any screen you touched; focus is visible throughout.
-4. If you touched `daily.ts`: the same date still yields the same set *regardless of
+3. `npm run lint` exits 0. Warnings are fine if they're already-known, listed debt
+   (see `eslint.config.mjs`'s comments); a *new* warning your change introduced is not —
+   fix it or justify a scoped `eslint-disable-next-line` with a reason, never a blanket
+   rule-off.
+4. If you touched anything with a viewport-dependent layout (mobile nav, the run header,
+   Potter, any panel that scrolls): `npm run visual` passes at every viewport it checks,
+   against a running `npm run dev`. It fails loudly, not silently, on horizontal scroll,
+   `.panel-body > main` overflowing at phone width, and Potter losing his self-skip gate.
+5. Keyboard-only pass over any screen you touched; focus is visible throughout.
+6. If you touched `daily.ts`: the same date still yields the same set *regardless of
    what is in localStorage*, and a shuffled option still scores correctly.
-5. If you touched `storage.ts`: a second attempt on the same day does not overwrite the
+7. If you touched `storage.ts`: a second attempt on the same day does not overwrite the
    first, and a date near midnight IST resolves to the local day.
-6. If you touched anything user-facing: run `/impeccable audit` on it.
+8. If you touched anything user-facing: run `/impeccable audit` on it.

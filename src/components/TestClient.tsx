@@ -407,9 +407,14 @@ export default function TestClient({
   // True only briefly after an actual selection on THIS question.
   // `answers[idx] !== null` meant "is answered", so returning to an answered
   // question fired the speed-praise and streak lines when nothing was clicked.
+  // Deliberately impure: this has to read the wall clock at render time to
+  // decide whether "just answered" feedback is still within its window —
+  // there is no pure derivation of "has less than 2500ms elapsed" from props
+  // or state alone.
   const justAnswered =
     lastPick !== null &&
     lastPick.idx === idx &&
+    // eslint-disable-next-line react-hooks/purity
     Date.now() - lastPick.at < 2500;
 
   const blanks = answers.reduce<number[]>(
@@ -784,12 +789,22 @@ export default function TestClient({
       </div>
 
       {confirmOpen && (
+        // The backdrop is a dismiss convenience for mouse/touch only — every
+        // keyboard path (Escape, focus trap) is handled by the dialog itself
+        // below via `onDialogKeyDown`, so the backdrop needs no key handler
+        // of its own.
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/50 backdrop-blur-sm"
           onClick={(e) => {
             if (e.target === e.currentTarget) setConfirmOpen(false);
           }}
         >
+          {/* `onKeyDown` here is the Escape/Tab-trap handler for the whole
+              dialog, not a control the user tabs to directly — `alertdialog`
+              isn't in jsx-a11y's interactive-role list, but this is the
+              standard modal keyboard-trap pattern, not a stray listener. */}
+          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
           <div
             ref={dialogRef}
             role="alertdialog"

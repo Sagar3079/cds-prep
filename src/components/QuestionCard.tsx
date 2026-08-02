@@ -409,6 +409,12 @@ export default function QuestionCard({
         <div
           role="region"
           aria-label="Reading passage"
+          // `role="region"` is a landmark, not an interactive role, so
+          // jsx-a11y reads this tabIndex as misplaced — but this box scrolls
+          // (`overflow-y-auto`) and is the WCAG-recommended way to make a
+          // scrollable content region keyboard-operable (arrow/Page keys),
+          // which needs it to be focusable.
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
           tabIndex={0}
           className={`text-sm text-ink bg-surface border border-line px-4 py-3 rounded-xl max-h-48 overflow-y-auto leading-relaxed ${FOCUS_RING}`}
         >
