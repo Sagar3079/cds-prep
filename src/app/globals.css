@@ -667,61 +667,119 @@ mark.target-word {
 .potter-thought[data-leaving="true"] { animation: thoughtOut 0.28s var(--ease) both; }
 @keyframes thoughtOut { to { opacity: 0; transform: scale(0.86); } }
 
-/* ---- the reviewer: rides the scroll down the answer list ----
-   `right: -10px` is only the origin of the weave; the whole horizontal sweep
-   is a negative translate from here, so this is the far-right end of his path.
-   He crosses the column, so the wrapper takes no pointer events — otherwise a
-   79px-wide mascot would sit over whatever is beneath him. `.potter--tappable`
-   re-enables them on the figure itself, which must stay tappable to mute him. */
-/* Potter flies in a reserved lane down the right of the review list.
-   Inside a 460px panel there is no spare margin, so the lane is made rather
-   than found: `.review-list` narrows the cards by exactly --potter-lane and he
-   occupies what is left. Without it he sits on top of the question text, which
-   is the one thing a companion on a review screen must never do. */
+/* ---- the reviewer: perches on the card he is reading ----
+   He rides the scroll down the review list and settles on the TOP EDGE of the
+   active card, near its right side, standing on the edge with the bottom of the
+   broom over the card's own top padding.
+
+   He is ALWAYS in front. Two earlier versions were not, and both failed the
+   same way. Sitting under the cards sold the perch nicely — a real z-order
+   overlap, not a mask, so it survived any card height and any theme — but the
+   gap he falls down is one card tall, so behind the cards the whole fall was
+   invisible: a sweep of the scroll range found him fully hidden at 34% of
+   positions, six in a row at one point. Lifting him only for the crossing fixed
+   the sweep but not the impression: perched, all that showed above a tall card
+   was the top of his hair, and the reaction to it was "it's hiding behind, make
+   it come to front".
+
+   So the overlap is gone and he simply stands on the edge. The 20px that used
+   to be hidden lands on the card's top padding, which is empty — the question
+   label sits at the left and he perches at the right — so nothing he covers is
+   text. `data-phase` is still written by the rAF loop and still drives his lean
+   and his dive; it no longer decides which layer he is on.
+
+   This replaces a reserved 78px lane down the right of the list. The lane cost
+   every card a fifth of its width and left a 95px dead gutter beside all of
+   them; inside a 460px panel that is the most expensive space there is. The gap
+   between cards costs nothing by comparison — a review list is scrolled, not
+   read at a glance — so the room he needs was moved there.
+
+   The wrapper still takes no pointer events: the bubble beside him is 200px
+   wide and would otherwise swallow clicks meant for the card underneath.
+   `.potter--tappable` re-enables them on the figure itself, which must stay
+   tappable to mute him. */
 .potter-rider {
-  --potter-lane: 78px;
   position: absolute;
-  right: 0;
   top: 0;
-  width: var(--potter-lane);
-  display: flex;
-  justify-content: center;
-  z-index: 30;
+  /* Just inside the card's own 18px padding, so he perches ON the card rather
+     than on its rounded corner. The drift the loop writes is a translate from
+     here, so this is the centre of his path, not one end of it. */
+  right: 22px;
+  width: max-content;
   will-change: transform;
   pointer-events: none;
 }
-.review-list {
-  --potter-lane: 78px;
-  /* Deliberately not transitioned: animating padding reflows all ten review
-     cards every frame, and this only changes on mount or a settings toggle —
-     smoothing it would trade a reflow storm for a barely-visible snap. */
-  padding-right: var(--potter-lane);
-}
-/* No lane when he is not flying — the cards get the full width back. */
-.review-list[data-rider="off"] {
-  padding-right: 0;
+/* One above `.review-list > li` — enough to clear the cards, low enough that
+   the panel chrome outside this stacking context still paints over him.
+   `data-phase` is still written by the loop and still drives his lean and dive;
+   it no longer drives the layer. See the note above for why. */
+.potter-rider {
+  z-index: 2;
 }
 /* Rolled into the turn by the rAF loop. Separate from the wrapper so the bank
-   composes with the translate instead of fighting it for the same property. */
+   composes with the translate instead of fighting it for the same property.
+   `display: flex` is load-bearing: `.potter` is a <button>, i.e. inline-block,
+   and the line box under it added 6px of descender below him. The bubble stands
+   its foot on the wrapper's BOTTOM edge, so that phantom 6px pushed the bubble
+   through the top edge of the card and got its last line clipped. */
 .potter-rider__tilt {
+  display: flex;
   transform-origin: 50% 58%;
   will-change: transform;
 }
-/* Faded by the loop as he crosses the middle — `.potter-thought`'s own entry
+/* Faded by the loop while he is in transit — `.potter-thought`'s own entry
    animation fills forwards, so the bubble's own opacity is not available to
    drive. Must stay unpositioned: the bubble is absolute against the
    `.relative` box, not against this. */
 .potter-rider__say {
   will-change: opacity;
 }
-/* Once he is past the middle the bubble has no room on his left, so it swaps
-   to his right — same geometry as `.potter-thought--left`, driven by the loop
-   rather than by a prop, and only ever at the point where it is invisible. */
-.potter-rider[data-lean="left"] .potter-thought {
-  right: auto;
-  left: calc(100% - 10px);
-  border-radius: 13px 13px 13px 3px;
-  transform-origin: 0 50%;
+/* His bubble opens into the SAME empty band, with its foot on the card's top
+   edge — `--potter-sink` is exactly how much of him is behind the card — so it
+   grows upward into the gap and can never grow down over the question. Being
+   inside the rider's stacking context it is also under the cards, which is the
+   belt-and-braces half of "never over card text": were it ever too tall it
+   would be hidden rather than cover anything.
+   200px wide because the width is now free and two lines at this size hold
+   every line in `reviewLine()`; the band below is sized for two. */
+.potter-rider .potter-thought {
+  top: auto;
+  bottom: var(--potter-sink, 20px);
+  /* (0,2,0), so this also outranks `.potter-thought--left`'s narrower cap when
+     a drag flips the bubble to his other side. */
+  max-width: 200px;
+}
+
+/* The review list itself. No lane: the cards get the full column width. */
+.review-list {
+  /* The band between cards that his visible upper half lives in. MUST stay
+     >= PERCH in PotterRider.tsx (SIZE 66 x RIDE_LEDGE_RATIO 98/140 = 46px) or
+     his head is clipped by the card above — `npm run visual` asserts it against
+     the live layout rather than trusting this comment.
+     Deliberately not transitioned: animating it reflows all ten review cards
+     every frame, and it only changes on mount or a Settings toggle. */
+  --potter-band: 52px;
+  padding-right: 0;
+}
+.review-list > li + li {
+  margin-top: 0.875rem;
+}
+/* The cards paint over him. Without the z-index the rider — a positioned
+   element earlier in the DOM — wins, and his legs hang in front of the
+   question. */
+.review-list > li {
+  position: relative;
+  z-index: 1;
+}
+/* Only opened while he is actually there; with him hidden or off-gate the list
+   goes back to a normal 14px rhythm. The padding-top gives the FIRST card a
+   band too — without it he is clamped to the top of the list and disappears
+   behind card one, the one card he is guaranteed to visit. */
+.review-list[data-rider="on"] {
+  padding-top: var(--potter-band);
+}
+.review-list[data-rider="on"] > li + li {
+  margin-top: var(--potter-band);
 }
 
 /* A mirrored figure should turn, not snap. The muted badge lives outside this

@@ -279,7 +279,11 @@ export default function ResultsPage() {
   const [state, setState] = useState<ReadState>({ status: "loading" });
   const [reducedMotion, setReducedMotion] = useState(false);
   const [onlyMissed, setOnlyMissed] = useState(false);
-  /** Reserve the flight lane only while he is actually there. */
+  /**
+   * Open the band between review cards that Potter perches in, and only while
+   * he is actually there — hidden in Settings, or on a narrow / reduced-motion
+   * viewport, the list goes back to its normal 14px rhythm.
+   */
   const [riderOn, setRiderOn] = useState(false);
 
   useEffect(() => {
@@ -526,10 +530,10 @@ export default function ResultsPage() {
           onActiveChange={setRiderOn}
         />
 
-        <ol
-          className="review-list space-y-3.5"
-          data-rider={riderOn ? "on" : "off"}
-        >
+        {/* The row rhythm is owned by `.review-list` in globals.css, not by a
+            `space-y-*` utility: the gap has to change with `data-rider`, and an
+            unlayered component class beats a Tailwind utility anyway. */}
+        <ol className="review-list" data-rider={riderOn ? "on" : "off"}>
           {visible.map(({ q, i }, position) => (
             <li
               key={`${onlyMissed ? "missed" : "all"}-${i}-${q.id}`}

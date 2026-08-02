@@ -2,7 +2,7 @@
 
 import { useId, useRef } from "react";
 import type { KeyboardEvent, ReactNode } from "react";
-import type { Question } from "@/types";
+import type { Question, QuestionPart } from "@/types";
 
 const LETTER_LABELS = ["A", "B", "C", "D"] as const;
 
@@ -113,6 +113,56 @@ function formatBlanks(text: string, topic?: string): string {
 
 function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/** `S1`/`S6` are the sentences the paper gives you; `P`–`S` are the jumble. */
+const SEGMENT_LABEL = /(?:^|\s)(S1|S6|[PQRS])\s*:\s*/g;
+
+/**
+ * Sentence-ordering questions arrive as one run-on paragraph:
+ * `"S1 : Good memory is so common … S6 : She wheeled away … P : I have heard of
+ * a father who … Q : A little later … The proper sequence should be"`.
+ *
+ * Six sentences in a single wall of text is unreadable on a phone, and the whole
+ * task is comparing them against each other. Split them back onto their own
+ * lines so they can be scanned — the paper prints them as a list, and this only
+ * restores that.
+ *
+ * Returns null unless at least four labels are present, so an ordinary stem that
+ * happens to contain "P :" is never chopped up. The trailing instruction ("The
+ * proper sequence should be") is handed back separately as `tail`; it is the
+ * actual question and belongs under the list, not inside the last segment.
+ *
+ * Note this cannot rescue the eleven `Ordering Of Words` questions whose labels
+ * OCR'd into a run at the end of the text — `"… began to replace P Q R the
+ * coarse woollens S"`. There the segment boundaries are gone, and inventing them
+ * would mean guessing at where each fragment starts.
+ */
+function splitLabelledStem(
+  stem: string,
+): { parts: QuestionPart[]; tail: string } | null {
+  const hits = [...stem.matchAll(SEGMENT_LABEL)];
+  if (hits.length < 4) return null;
+
+  const parts: QuestionPart[] = [];
+  for (let i = 0; i < hits.length; i++) {
+    const h = hits[i];
+    const from = h.index + h[0].length;
+    const to = i + 1 < hits.length ? hits[i + 1].index : stem.length;
+    const text = stem.slice(from, to).trim();
+    if (text) parts.push({ label: h[1], text, fixed: /^S[16]$/.test(h[1]) });
+  }
+  if (parts.length < 4) return null;
+
+  // The instruction is glued to the end of the final segment.
+  const last = parts[parts.length - 1];
+  const cut = /\s*(The proper sequence should be.*)$/i.exec(last.text);
+  let tail = "";
+  if (cut) {
+    tail = cut[1].trim();
+    last.text = last.text.slice(0, cut.index).trim();
+  }
+  return { parts, tail };
 }
 
 /** Locate `word` as a whole word in `text`; returns its [start, end) or null. */
@@ -296,6 +346,12 @@ export default function QuestionCard({
   const stem = formatBlanks(question.question, question.topic);
   const targetRange = isSynAnt ? findTargetRange(stem, question.target) : null;
 
+  // A stem carrying its own `S1 :`/`P :` labels is a sentence-ordering question
+  // whose parts were never split out into `parts`. Recover them for display, so
+  // six sentences are six lines instead of one paragraph.
+  const split = question.parts?.length ? null : splitLabelledStem(stem);
+  const parts = question.parts?.length ? question.parts : split?.parts;
+
   // Never promise a highlight we did not render.
   const prompt = !isSynAnt
     ? null
@@ -362,6 +418,36 @@ export default function QuestionCard({
     }
   };
 
+  const partsBlock = parts && parts.length > 0 && (
+    <div className="space-y-1.5">
+      {parts.map((p) => (
+        <div
+          key={p.label}
+          className={`flex items-start gap-2.5 px-3 py-2 rounded-xl border ${
+            p.fixed
+              ? "bg-surface border-dashed border-line"
+              : "bg-paper border-line"
+          }`}
+        >
+          <span
+            className={`shrink-0 min-w-[2rem] h-6 px-1 rounded-md text-xs font-bold flex items-center justify-center ${
+              p.fixed ? "bg-surface-2 text-muted" : "bg-accent-soft text-accent-ink"
+            }`}
+          >
+            {p.label}
+          </span>
+          <span
+            className={`min-w-0 text-[0.875rem] leading-snug pt-0.5 ${
+              p.fixed ? "text-muted italic" : "text-ink"
+            }`}
+          >
+            {p.text}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="card space-y-4">
       {/* A plain div, not <header>: outside a sectioning ancestor a <header>
@@ -399,47 +485,31 @@ export default function QuestionCard({
         </div>
       )}
 
+      {/* When the parts were recovered from the stem, they read BEFORE the
+          instruction, the way the paper prints them: the sentences, then "The
+          proper sequence should be", then the options. A question that already
+          carried `parts` keeps its original order. Done by placing the block
+          rather than with flex `order`, which would have jumped it past the
+          options to the very bottom of the card. */}
+      {split && partsBlock}
+
       <div className="space-y-1.5">
-        {prompt && <p className="text-sm text-muted leading-snug">{prompt}</p>}
+        {prompt && (
+          <p className="text-[0.8125rem] text-muted leading-snug">{prompt}</p>
+        )}
         <p
           id={stemId}
-          className="text-[1.3125rem] font-medium text-ink leading-[1.45] text-pretty"
+          className={`font-medium text-ink text-pretty ${
+            split
+              ? "text-[0.9375rem] leading-snug"
+              : "text-[1.125rem] leading-[1.4]"
+          }`}
         >
-          {stemNode}
+          {split ? split.tail || "Put the parts in the correct order." : stemNode}
         </p>
       </div>
 
-      {question.parts && question.parts.length > 0 && (
-        <div className="space-y-1.5">
-          {question.parts.map((p) => (
-            <div
-              key={p.label}
-              className={`flex items-start gap-2.5 px-3 py-2 rounded-xl border ${
-                p.fixed
-                  ? "bg-surface border-dashed border-line"
-                  : "bg-paper border-line"
-              }`}
-            >
-              <span
-                className={`shrink-0 min-w-[2rem] h-6 px-1 rounded-md text-xs font-bold flex items-center justify-center ${
-                  p.fixed
-                    ? "bg-surface-2 text-muted"
-                    : "bg-accent-soft text-accent-ink"
-                }`}
-              >
-                {p.label}
-              </span>
-              <span
-                className={`min-w-0 text-[0.95rem] leading-snug pt-0.5 ${
-                  p.fixed ? "text-muted italic" : "text-ink"
-                }`}
-              >
-                {p.text}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
+      {!split && partsBlock}
 
       {showResult ? (
         <ReviewOptions
@@ -470,7 +540,7 @@ export default function QuestionCard({
                 onKeyDown={(e) => onOptionKeyDown(e, i)}
               >
                 <span className="opt-badge">{labels[i]}</span>
-                <span className="flex-1 min-w-0 text-base leading-[1.35] break-words">
+                <span className="flex-1 min-w-0 text-[0.9375rem] leading-[1.35] break-words">
                   {option}
                 </span>
                 {/* The tick holds its space at all times, so selecting an option
@@ -544,7 +614,7 @@ function ReviewOptions({
           return (
             <li key={i} className={`${REVIEW_ROW} ${tone}`}>
               <span className="opt-badge">{labels[i]}</span>
-              <span className="grow shrink basis-40 min-w-0 text-base leading-[1.35] break-words text-ink">
+              <span className="grow shrink basis-40 min-w-0 text-[0.9375rem] leading-[1.35] break-words text-ink">
                 {option}
               </span>
               {status}

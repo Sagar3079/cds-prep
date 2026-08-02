@@ -48,6 +48,16 @@ export interface PotterProps {
 export const LEDGE_RATIO = 74 / 140;
 
 /**
+ * The same line for the RIDING pose, where he straddles a broom instead of
+ * gripping a ledge. y = 98 of 140 runs through the broom handle (96.5–103.5),
+ * just under his hands: everything below it — the lower half of the handle, the
+ * bristle head and both dangling legs — goes behind the card he is perched on,
+ * and his torso, arms and head stay above it. Cut any higher and the broom
+ * floats free of the card; any lower and his legs dangle in front of the text.
+ */
+export const RIDE_LEDGE_RATIO = 98 / 140;
+
+/**
  * Idle beats. He plays one every 5–12s so he is never merely breathing.
  * `nudge` is him pushing his glasses back up his nose — the most characterful
  * of the four, so it gets two entries and comes up twice as often.

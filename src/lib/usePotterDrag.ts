@@ -12,8 +12,15 @@ const ZERO: DragOffset = { x: 0, y: 0 };
 /** Below this, the gesture was a tap, not a drag. Fingers wobble. */
 const SLOP = 5;
 
-/** How much of him has to stay inside the panel, in px. */
-const KEEP_VISIBLE = 32;
+/**
+ * Gap kept between him and the panel wall, in px.
+ *
+ * Wide enough to absorb the review rider's weave. The clamp is a snapshot taken
+ * from a live rect, but on the review screen a second transform — the flight —
+ * keeps moving him afterwards, so a flush 6px inset still let the weave carry
+ * him a few px past the wall. This is the slack that costs nothing visually.
+ */
+const INSET = 18;
 
 /**
  * Lets Potter be dragged out of the way and stay there.
@@ -49,6 +56,11 @@ export function usePotterDrag(key: string) {
    * reloads — the only way back was a Settings button nobody would think to
    * look for. Measured live rather than from stored numbers, because the panel
    * and his own size both change with the viewport.
+   *
+   * The bound is the WHOLE figure, not a sliver of it. An earlier version only
+   * guaranteed 32px stayed inside, which let a drag park him straddling the
+   * panel wall — half a wizard hanging off the edge of the phone, sheared by
+   * the overflow. Inside the frame is the only place he belongs.
    */
   const clamp = useCallback((want: DragOffset): DragOffset => {
     const host = hostRef.current;
@@ -56,22 +68,97 @@ export function usePotterDrag(key: string) {
     if (!host || !panel) return want;
 
     const p = panel.getBoundingClientRect();
-    const h = host.getBoundingClientRect();
+    // The figure, not the wrapper it hangs in. The wrapper's box is not his:
+    // the rider's bank rotates him, so he reaches past it on both sides, and
+    // clamping the wrapper still left ~12px of wizard outside the panel wall.
+    const fig = host.querySelector<HTMLElement>(".potter") ?? host;
+    const h = fig.getBoundingClientRect();
     // Where he sits with NO offset — the rect already includes the current one.
     const baseLeft = h.left - applied.current.x;
     const baseTop = h.top - applied.current.y;
 
+    // If he is somehow larger than the panel, pin to the top-left rather than
+    // inverting the range and snapping him to the far corner.
+    const fit = (
+      want: number,
+      base: number,
+      size: number,
+      lo: number,
+      hi: number,
+    ) => {
+      const min = lo + INSET - base;
+      const max = hi - INSET - (base + size);
+      return max < min ? min : Math.min(Math.max(want, min), max);
+    };
+
     return {
-      x: Math.min(
-        Math.max(want.x, p.left + KEEP_VISIBLE - (baseLeft + h.width)),
-        p.right - KEEP_VISIBLE - baseLeft,
-      ),
-      y: Math.min(
-        Math.max(want.y, p.top + KEEP_VISIBLE - (baseTop + h.height)),
-        p.bottom - KEEP_VISIBLE - baseTop,
-      ),
+      x: fit(want.x, baseLeft, h.width, p.left, p.right),
+      y: fit(want.y, baseTop, h.height, p.top, p.bottom),
     };
   }, []);
+
+  /**
+   * Re-apply the clamp against the CURRENT layout.
+   *
+   * Restoring a stored offset cannot clamp on its own: the rider renders
+   * `null` until the review list arrives, so at the moment the stored value is
+   * read there is no host to measure and `clamp` passes it straight through.
+   * A saved `{x: 900, y: -900}` therefore survived intact and put him 476px
+   * above the panel — the "where has he gone" bug in a new disguise. This runs
+   * again as soon as he is measurable, and on every resize, because a position
+   * that fitted a wide window does not fit a narrow one.
+   */
+  const reclamp = useCallback(() => {
+    setOffset((cur) => {
+      const next = clamp(cur);
+      return next.x === cur.x && next.y === cur.y ? cur : next;
+    });
+  }, [clamp]);
+
+  useEffect(() => {
+    let raf = 0;
+    let tries = 0;
+    const tick = () => {
+      if (hostRef.current?.closest(".app-panel")) {
+        reclamp();
+        return;
+      }
+      // ~1s of frames. He may never mount at all (hidden in Settings, or the
+      // screen is too narrow for him), so this gives up rather than spinning.
+      if (tries++ < 60) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    // Scroll, too, and on `document` in the capture phase so it catches the
+    // panel's inner scroller without having to find it. On the review screen
+    // the drag offset is not the only transform on him — the flight loop adds
+    // its own, and it clamps itself in list coordinates that know nothing about
+    // a drag. Their sum is what has to stay inside the panel, and their sum
+    // only exists at paint time, so one snapshot at mount cannot bound it.
+    //
+    // Coalesced to a frame, and `reclamp` bails without a state update when
+    // nothing changed, so an ordinary scroll costs one pair of rect reads and
+    // no re-render.
+    let pending = 0;
+    const onScroll = () => {
+      if (pending) return;
+      pending = requestAnimationFrame(() => {
+        pending = 0;
+        reclamp();
+      });
+    };
+    document.addEventListener("scroll", onScroll, {
+      capture: true,
+      passive: true,
+    });
+    window.addEventListener("resize", reclamp);
+    return () => {
+      cancelAnimationFrame(raf);
+      cancelAnimationFrame(pending);
+      document.removeEventListener("scroll", onScroll, { capture: true });
+      window.removeEventListener("resize", reclamp);
+    };
+  }, [reclamp]);
 
   // Read after mount only — the server cannot see localStorage.
   useEffect(() => {
