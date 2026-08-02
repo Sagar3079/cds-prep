@@ -70,6 +70,26 @@ function write(outcome: SubmitOutcome, subject: Subject): void {
   }
 }
 
+/**
+ * A random run reports nothing — but it must also erase whatever the LAST
+ * daily run wrote, or the random set's /results page inherits that note and
+ * claims a leaderboard outcome ("Added to today's board…") for a run that
+ * never touched the board. Same storage-plus-event shape as `write`, so a
+ * note already on screen empties too.
+ */
+export function clearRunStatus(): void {
+  try {
+    sessionStorage.removeItem(STATUS_KEY);
+  } catch {
+    /* storage blocked — nothing was readable there anyway */
+  }
+  try {
+    window.dispatchEvent(new Event(STATUS_EVENT));
+  } catch {
+    /* ignore */
+  }
+}
+
 function read(): Status | null {
   try {
     const raw = sessionStorage.getItem(STATUS_KEY);

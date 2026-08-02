@@ -20,7 +20,7 @@ export default async function TestPage({
   // three questions, or none, is worse than saying plainly that it isn't ready.
   if (!isSubjectReady(subject)) {
     return (
-      <div className="px-4 py-8">
+      <div className="px-4 py-6">
         <div className="shell">
           <div className="card fade-up flex flex-col items-center gap-4 py-12 text-center">
             {/* One expression, not `{expr} text`: where a text child is the
@@ -48,7 +48,13 @@ export default async function TestPage({
   }
 
   return (
-    <div className="px-4 py-8">
+    // pt-6 matches every other screen — this page alone had py-8, and the
+    // extra vertical padding is what pushed the options past the fold at
+    // 360x800 (the fit check in scripts/visual-check.mjs). The bottom is
+    // pb-2, not pb-6: during a run the sticky Prev/Next/Submit bar sits at
+    // `bottom: 0` and paints over whatever is beneath it, so full bottom
+    // padding under that bar is dead scroll height the phone cannot spare.
+    <div className="px-4 pt-6 pb-2">
       <TestClient questions={questions} mode={mode} subject={subject} />
     </div>
   );

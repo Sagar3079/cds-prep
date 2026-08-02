@@ -717,7 +717,12 @@ mark.target-word {
   top: 4%;
   right: calc(100% - 10px);
   width: max-content;
-  max-width: 158px;
+  /* The same viewport-aware cap the --left variant already has. A flat 158px
+     let the bubble run past its room on narrow phones: opening left from the
+     home perch it reached the heading's glyphs at 360px (measured 21px of
+     overlap on "today?"), and from the test coach it went through the panel's
+     left wall. 50vw − 68px is the width that stays clear of both. */
+  max-width: min(158px, calc(50vw - 68px));
   padding: 7px 10px;
   border-radius: 13px 13px 3px 13px;
   background: var(--paper);

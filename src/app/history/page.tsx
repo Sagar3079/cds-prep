@@ -234,6 +234,12 @@ export default function HistoryPage() {
                       <p className="truncate font-bold text-ink">
                         {formatDay(a.date)}
                       </p>
+                      {/* Only GK is labelled: every row written before GK
+                          existed is English and carries no subject, so
+                          stamping the default would chip every legacy row. */}
+                      {a.subject === "gk" && (
+                        <span className="chip chip-blue">GK</span>
+                      )}
                       {a.mode === "random" && (
                         <span className="chip chip-blue">RANDOM</span>
                       )}

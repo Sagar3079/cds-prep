@@ -42,10 +42,14 @@ export default function TopicInsight({
       <section className="card fade-up">
         <h2 className="text-[0.9375rem] font-bold text-ink">Practice adapts to you</h2>
         <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-muted">
-          Once you&apos;ve answered {CONFIDENCE_FLOOR} questions in a topic, a random
-          set starts favouring the topics you get wrong and easing off the ones you
-          have down. Today&apos;s test stays the same for everyone, so your score
-          still compares.
+          {/* Explicit {" "} after the expression — the JSX transform here
+              drops the space that separates an expression from the text
+              after it (see app/test/page.tsx for the same trap), and this
+              line rendered as "answered 4questions". */}
+          Once you&apos;ve answered {CONFIDENCE_FLOOR}{" "}
+          questions in a topic, a random set starts favouring the topics you
+          get wrong and easing off the ones you have down. Today&apos;s test
+          stays the same for everyone, so your score still compares.
         </p>
       </section>
     );

@@ -26,6 +26,15 @@ export default function Home() {
   const gkOfficial = bankFor("gk").filter(
     (q) => q.answerSource === "official-key",
   ).length;
+  // Counted from the bank, not claimed: the previous copy hardcoded "110
+  // questions from real papers (2015–2018)" and went stale as papers landed —
+  // the bank now carries 486 transcribed items spanning 2015–2025. Only ids
+  // starting `cds` come from a real paper; `year`/`session` on the rest are
+  // placeholders (see CLAUDE.md), so the id prefix is the honest signal.
+  const enFromPapers = questions.filter((q) => q.id.startsWith("cds")).length;
+  const enOfficial = questions.filter(
+    (q) => q.answerSource === "official-key",
+  ).length;
   const minutes = Math.round(MARKING.durationSec / 60);
 
   return (
@@ -101,11 +110,11 @@ export default function Home() {
           </h2>
           <p className="mt-1.5 text-sm leading-relaxed text-muted">
             English: {questions.length} questions — mostly Synonyms, Antonyms,
-            Comprehension, Idioms and Phrases and Spotting Errors. Only 110 are
-            transcribed from real CDS-1 papers (2015–2018); the rest are
-            hand-written practice items whose year and session labels are
-            placeholders, so treat any single answer as practice rather than an
-            official key.
+            Comprehension, Idioms and Phrases and Spotting Errors.{" "}
+            {enFromPapers} are transcribed from real CDS papers and{" "}
+            {enOfficial} of those carry the official UPSC key; the rest are
+            hand-written practice items, so treat any unkeyed answer as
+            practice rather than authority.
           </p>
           {gkReady && (
             // Stated separately because the provenance is genuinely different,

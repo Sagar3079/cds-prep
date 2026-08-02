@@ -9,7 +9,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import type { Question, Subject } from "@/types";
-import { reportRun } from "./LeaderboardNote";
+import { clearRunStatus, reportRun } from "./LeaderboardNote";
 import PotterCoach from "./potter/PotterCoach";
 import { HEAD_ROOM } from "./potter/PotterPerch";
 import QuestionCard from "./QuestionCard";
@@ -370,8 +370,12 @@ export default function TestClient({
     // redirect, and cannot reject — see `reportRun`. Daily only: the board is
     // "today's daily test, first attempt", so a random set would both
     // misrepresent it and spend the account's one entry for the day. The
-    // subject decides which of the two boards it lands on.
+    // subject decides which of the two boards it lands on. A random run
+    // clears the stored status instead: leaving the previous daily run's
+    // note in sessionStorage let the random set's results page claim that
+    // run's leaderboard outcome as its own.
     if (!isRandom) reportRun(quiz, answers, timeTaken, subject);
+    else clearRunStatus();
 
     clearProgress(mode, subject);
     setSubmitted(true);

@@ -200,60 +200,72 @@ export function usePotterDrag(
     }
   }, [storageKey, clamp]);
 
-  const onPointerDown = useCallback((e: React.PointerEvent) => {
-    if (e.button !== 0) return;
-    start.current = {
-      px: e.clientX,
-      py: e.clientY,
-      ox: applied.current.x,
-      oy: applied.current.y,
-    };
-    moved.current = false;
-    // Capture is deliberately NOT taken here. Capturing on pointerdown
-    // redirects every following pointer event to this wrapper, so the click
-    // never reaches the <button> inside it — which is why tapping him to mute
-    // stopped working. It is taken below, once it is a real drag.
-  }, []);
-
-  const onPointerMove = useCallback(
+  const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
-      const s = start.current;
-      if (!s) return;
-      const dx = e.clientX - s.px;
-      const dy = e.clientY - s.py;
-      if (!moved.current && Math.hypot(dx, dy) < SLOP) return;
-      if (!moved.current) {
-        moved.current = true;
-        setDragging(true);
-        try {
-          (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-        } catch {
-          /* some pointer types refuse capture; the drag still works */
+      if (e.button !== 0) return;
+      const host = e.currentTarget as HTMLElement;
+      const pointerId = e.pointerId;
+      const s = {
+        px: e.clientX,
+        py: e.clientY,
+        ox: applied.current.x,
+        oy: applied.current.y,
+      };
+      start.current = s;
+      moved.current = false;
+      // Capture is deliberately NOT taken here. Capturing on pointerdown
+      // redirects every following pointer event to this wrapper, so the click
+      // never reaches the <button> inside it — which is why tapping him to
+      // mute stopped working. It is taken below, once it is a real drag.
+      //
+      // The gesture is tracked on `window`, not on the wrapper. Until the
+      // slop is crossed no capture is held, so a wrapper-bound handler only
+      // hears moves whose target is inside his own subtree — and half of him
+      // sits BEHIND a card on every perch, so a drag that set off downward
+      // put its very first move on the card and died silently, storing
+      // nothing. Window listeners hear the whole gesture wherever the
+      // pointer is; per-gesture closures keep add/remove exactly paired.
+      const move = (ev: PointerEvent) => {
+        if (ev.pointerId !== pointerId || start.current !== s) return;
+        const dx = ev.clientX - s.px;
+        const dy = ev.clientY - s.py;
+        if (!moved.current && Math.hypot(dx, dy) < SLOP) return;
+        if (!moved.current) {
+          moved.current = true;
+          setDragging(true);
+          try {
+            host.setPointerCapture(pointerId);
+          } catch {
+            /* some pointer types refuse capture; the drag still works */
+          }
         }
-      }
-      setOffset(clamp({ x: s.ox + dx, y: s.oy + dy }));
+        setOffset(clamp({ x: s.ox + dx, y: s.oy + dy }));
+      };
+      const end = (ev: PointerEvent) => {
+        if (ev.pointerId !== pointerId) return;
+        window.removeEventListener("pointermove", move);
+        window.removeEventListener("pointerup", end);
+        window.removeEventListener("pointercancel", end);
+        if (start.current !== s) return;
+        start.current = null;
+        setDragging(false);
+        if (!moved.current) return;
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(applied.current));
+        } catch {
+          /* private mode — the position just won't survive a reload */
+        }
+        try {
+          host.releasePointerCapture(pointerId);
+        } catch {
+          /* capture already lost */
+        }
+      };
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", end);
+      window.addEventListener("pointercancel", end);
     },
-    [clamp],
-  );
-
-  const finish = useCallback(
-    (e: React.PointerEvent) => {
-      if (!start.current) return;
-      start.current = null;
-      setDragging(false);
-      if (!moved.current) return;
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(applied.current));
-      } catch {
-        /* private mode — the position just won't survive a reload */
-      }
-      try {
-        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-      } catch {
-        /* capture already lost */
-      }
-    },
-    [storageKey],
+    [clamp, storageKey],
   );
 
   /**
@@ -290,11 +302,10 @@ export function usePotterDrag(
     /** True if the pointer travelled far enough that this was a drag, not a tap. */
     wasDragged: () => moved.current,
     reset,
+    // Only the start lives on the wrapper — move/up/cancel are window-level
+    // for the length of each gesture, attached in onPointerDown.
     handlers: {
       onPointerDown,
-      onPointerMove,
-      onPointerUp: finish,
-      onPointerCancel: finish,
     },
   };
 }
