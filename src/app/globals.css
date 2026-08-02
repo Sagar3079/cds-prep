@@ -689,8 +689,10 @@ mark.target-word {
 }
 .review-list {
   --potter-lane: 66px;
+  /* Deliberately not transitioned: animating padding reflows all ten review
+     cards every frame, and this only changes on mount or a settings toggle —
+     smoothing it would trade a reflow storm for a barely-visible snap. */
   padding-right: var(--potter-lane);
-  transition: padding-right 0.3s var(--ease);
 }
 /* No lane when he is not flying — the cards get the full width back. */
 .review-list[data-rider="off"] {
