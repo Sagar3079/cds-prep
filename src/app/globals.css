@@ -251,6 +251,9 @@ body {
 .panel-body > main {
   position: absolute;
   inset: 0;
+  /* A little runway so the last card can clear the bottom edge instead of
+     ending flush against the tab bar. */
+  padding-bottom: 0.5rem;
   overflow-y: auto;
   overscroll-behavior: contain; /* don't hand the scroll back to the page */
   /* The native bar is a chunky desktop widget that breaks the device
@@ -676,7 +679,7 @@ mark.target-word {
    occupies what is left. Without it he sits on top of the question text, which
    is the one thing a companion on a review screen must never do. */
 .potter-rider {
-  --potter-lane: 66px;
+  --potter-lane: 78px;
   position: absolute;
   right: 0;
   top: 0;
@@ -688,7 +691,7 @@ mark.target-word {
   pointer-events: none;
 }
 .review-list {
-  --potter-lane: 66px;
+  --potter-lane: 78px;
   /* Deliberately not transitioned: animating padding reflows all ten review
      cards every frame, and this only changes on mount or a settings toggle —
      smoothing it would trade a reflow storm for a barely-visible snap. */

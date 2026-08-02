@@ -188,12 +188,15 @@ export default function PotterRider({
 
       base.current = anchors[0];
       wave.current = Math.min(1600, Math.max(420, pitch * WAVE_CARDS));
-      // Edge to edge of the column, plus a little overhang at both ends so the
-      // extremes of the sweep clear the cards rather than resting on them.
-      amp.current = Math.max(
-        0,
-        parent.clientWidth - host.offsetWidth + EDGE * 2,
-      );
+      // The sweep is confined to his reserved lane, NOT the column.
+      //
+      // This used to be `parent.clientWidth - host.offsetWidth`, i.e. edge to
+      // edge of the review column. Once the lane existed that no longer made
+      // sense: he kept arcing ~200px each way, straight over the question text
+      // the lane was created to protect, and spent most of the cycle outside
+      // the lane entirely. A drift the width of the lane reads as flight
+      // without ever crossing a card.
+      amp.current = Math.max(14, host.offsetWidth * 0.3);
 
       // The range of list positions that still has him inside the panel, so the
       // loop can hold him there without doing any layout reads of its own.
@@ -354,7 +357,7 @@ export default function PotterRider({
               mood={say.mood}
               look={face}
               lookY={-0.35}
-              size={78}
+              size={74}
               thoughtsOn={talk}
               // A drag must not also fire the mute toggle on release.
               onToggle={() => {
