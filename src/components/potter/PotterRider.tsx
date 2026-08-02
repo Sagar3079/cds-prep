@@ -208,7 +208,10 @@ export default function PotterRider({
    */
   onActiveChange?: (active: boolean) => void;
 }) {
-  const drag = usePotterDrag("review");
+  // Scroll-clamped: his drag offset composes with the flight transform below,
+  // and only their sum is bound by the panel. The perches do NOT opt in — they
+  // are meant to scroll away with the page.
+  const drag = usePotterDrag("review", { clampOnScroll: true });
   const hostRef = useRef<HTMLDivElement | null>(null);
   const tiltRef = useRef<HTMLDivElement | null>(null);
   const sayRef = useRef<HTMLDivElement | null>(null);

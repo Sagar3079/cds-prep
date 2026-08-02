@@ -32,7 +32,10 @@ const INSET = 18;
  * Returns `wasDragged`, which the tap handler must check: without it, every
  * drag would also fire the mute toggle on release.
  */
-export function usePotterDrag(key: string) {
+export function usePotterDrag(
+  key: string,
+  { clampOnScroll = false }: { clampOnScroll?: boolean } = {},
+) {
   const storageKey = `cds-potter-pos-${key}`;
   const [offset, setOffset] = useState<DragOffset>(ZERO);
   const [dragging, setDragging] = useState(false);
@@ -129,12 +132,19 @@ export function usePotterDrag(key: string) {
     };
     raf = requestAnimationFrame(tick);
 
-    // Scroll, too, and on `document` in the capture phase so it catches the
-    // panel's inner scroller without having to find it. On the review screen
-    // the drag offset is not the only transform on him — the flight loop adds
-    // its own, and it clamps itself in list coordinates that know nothing about
-    // a drag. Their sum is what has to stay inside the panel, and their sum
-    // only exists at paint time, so one snapshot at mount cannot bound it.
+    // Scroll is OPT-IN, and only the review rider opts in.
+    //
+    // There the drag offset is not the only transform on him: the flight loop
+    // adds its own and clamps itself in list coordinates that know nothing
+    // about a drag, so their sum can leave the panel, and their sum only exists
+    // at paint time — one snapshot at mount cannot bound it.
+    //
+    // Everywhere else he is absolutely positioned against the page and is
+    // SUPPOSED to scroll away with it. Clamping him on scroll pins him to the
+    // panel while the card travels out from under him, which on the home screen
+    // grew the offset from 0 to 365px of pure scrolling and slid him down
+    // behind the card he was perched on. A clamp must correct a drag, never
+    // invent one.
     //
     // Coalesced to a frame, and `reclamp` bails without a state update when
     // nothing changed, so an ordinary scroll costs one pair of rect reads and
@@ -147,18 +157,22 @@ export function usePotterDrag(key: string) {
         reclamp();
       });
     };
-    document.addEventListener("scroll", onScroll, {
-      capture: true,
-      passive: true,
-    });
+    if (clampOnScroll) {
+      document.addEventListener("scroll", onScroll, {
+        capture: true,
+        passive: true,
+      });
+    }
     window.addEventListener("resize", reclamp);
     return () => {
       cancelAnimationFrame(raf);
       cancelAnimationFrame(pending);
-      document.removeEventListener("scroll", onScroll, { capture: true });
+      if (clampOnScroll) {
+        document.removeEventListener("scroll", onScroll, { capture: true });
+      }
       window.removeEventListener("resize", reclamp);
     };
-  }, [reclamp]);
+  }, [reclamp, clampOnScroll]);
 
   // Read after mount only — the server cannot see localStorage.
   useEffect(() => {

@@ -25,7 +25,15 @@ export default function Home() {
       <div className="stagger flex flex-col gap-3.5">
         <header>
           <HomeDate />
-          <h1 className="mt-0.5 text-[1.6875rem] leading-tight font-extrabold tracking-[-0.025em] text-ink text-balance">
+          {/* The right side of this row belongs to Potter's thought bubble.
+              He perches on the card below, but the bubble opens beside his
+              HEAD, which is level with this heading — so an unreserved heading
+              runs straight under it and reads "Ready for tod…". It cannot be
+              solved by lifting the bubble over the heading instead: the drag
+              wrapper carries a transform, which makes a stacking context the
+              bubble cannot escape. Reserving the space is what is left, and it
+              costs a heading that was already short a line wrap. */}
+          <h1 className="mt-0.5 pr-[268px] text-[1.6875rem] leading-tight font-extrabold tracking-[-0.025em] text-ink text-balance">
             Ready for today?
           </h1>
         </header>
