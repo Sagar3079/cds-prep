@@ -22,6 +22,17 @@ const TABS = [
     ),
   },
   {
+    href: "/leaderboard",
+    label: "Ranks",
+    icon: (
+      <>
+        <path d="M7 21h10M12 17v4" />
+        <path d="M6 4h12v5a6 6 0 0 1-12 0V4Z" />
+        <path d="M6 6H3.5v1.5A3.5 3.5 0 0 0 6.6 11M18 6h2.5v1.5A3.5 3.5 0 0 1 17.4 11" />
+      </>
+    ),
+  },
+  {
     href: "/settings",
     label: "Settings",
     icon: (

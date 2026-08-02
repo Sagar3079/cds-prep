@@ -51,3 +51,4 @@ scripts/ocr_log.txt
 .visual/
 
 .vercel
+.env*
