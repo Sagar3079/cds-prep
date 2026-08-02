@@ -6,6 +6,23 @@ import Potter, { LEDGE_RATIO } from "./Potter";
 import { usePotterDrag } from "@/lib/usePotterDrag";
 
 const SIZE = 118;
+/**
+ * How far the painted art reaches above his own box, in px.
+ *
+ * The ambient loops translate the whole `<svg>` — the breath, the head bob —
+ * so the figure you see is not the box that bounds him. Reserving only the
+ * ledge height still lost 12.2px off the top of his head.
+ */
+const ART_OVERHANG = 14;
+
+/**
+ * How much of him stands above the thing he is perched on, in px.
+ *
+ * Exported so a sticky container can leave room for it. Stuck at `top: 0` the
+ * card pins to the panel edge while he keeps his position ABOVE it, i.e.
+ * off-screen, and the scroller shears his head — measured at 24.2px gone.
+ */
+export const HEAD_ROOM = Math.round(SIZE * LEDGE_RATIO) + ART_OVERHANG;
 import { homeLine } from "@/lib/potter";
 import { getStats, hasAttemptOn, todayKey } from "@/lib/storage";
 import {

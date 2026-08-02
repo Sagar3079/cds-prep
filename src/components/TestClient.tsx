@@ -10,6 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import type { Question } from "@/types";
 import PotterCoach from "./potter/PotterCoach";
+import { HEAD_ROOM } from "./potter/PotterPerch";
 import QuestionCard from "./QuestionCard";
 import Timer from "./Timer";
 import {
@@ -615,7 +616,17 @@ export default function TestClient({
           that box was 0px tall and space-y pushed the card 16px lower again,
           leaving him gripping thin air. The card is z-40 and he is not, so it
           covers his lower half. */}
-      <div className="relative">
+      {/* STICKY LIVES HERE, not on the card. Potter is positioned against this
+          box, so sticking the card alone pinned the card to the panel edge and
+          let him carry on scrolling up and out of it — the scroller sheared
+          24.2px off his head while the seat he was sitting on stayed put. The
+          pair has to stick as one, and the offset is his exposed height so
+          there is always room for him above the card.
+
+          `sticky` replaces `relative` rather than joining it: both set
+          `position`, and a sticky box is just as good a containing block for
+          his absolute positioning. */}
+      <div className="sticky z-40" style={{ top: HEAD_ROOM }}>
         <PotterCoach
           index={idx}
           total={quiz.length}
@@ -632,7 +643,7 @@ export default function TestClient({
             Stacked, the ring alone is 150px and the run header ate 235px of an
             844px phone, which pushed the options off the bottom and forced a
             scroll between reading the question and answering it. */}
-        <div className="card run-head sticky top-0 z-40 flex flex-col items-center gap-3">
+        <div className="card run-head flex flex-col items-center gap-3">
           <Timer seconds={seconds} total={MARKING.durationSec} />
 
           <div className="run-head__meta flex flex-col items-center gap-3">

@@ -580,9 +580,11 @@ mark.target-word {
   padding: 0;
   border: 0;
   background: none;
-  /* His own box is all that ever changes; nothing outside it depends on his
-     layout. Lets the compositor skip the rest of the page when he repaints. */
-  contain: layout paint;
+  /* NO `contain: paint` here. It was added as a compositing hint and it clips:
+     every ambient loop lifts part of him a pixel or two above his own box —
+     the breath, the head bob, the hair — and paint containment cut his head
+     off at the top on every swing. The hint was never worth anything anyway;
+     an A/B at 6x CPU throttle could not measure a difference. */
 }
 
 /* ---- phones: the single biggest cost in this file ----

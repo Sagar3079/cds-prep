@@ -112,6 +112,11 @@ export function usePotterDrag(
    * that fitted a wide window does not fit a narrow one.
    */
   const reclamp = useCallback(() => {
+    // Nothing to correct if he has never been moved, and this runs on every
+    // scroll frame of the review screen. `clamp` reads two rects, which during
+    // a touch scroll is a forced synchronous layout per frame — paid by every
+    // reader, for a drag almost none of them have made.
+    if (applied.current.x === 0 && applied.current.y === 0) return;
     setOffset((cur) => {
       const next = clamp(cur);
       return next.x === cur.x && next.y === cur.y ? cur : next;

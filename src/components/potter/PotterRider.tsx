@@ -362,6 +362,7 @@ export default function PotterRider({
       // behind it.)
       const top = originY - view.top; // list origin, relative to the panel top
       const listSpan = Math.max(0, parent.clientHeight - host.offsetHeight);
+
       lo.current = Math.max(MARGIN - top, 0);
       hi.current = Math.max(
         lo.current,
@@ -561,6 +562,13 @@ export default function PotterRider({
     setVisible(true);
     raf = requestAnimationFrame(step);
 
+    // Deliberately NOT coalesced to the rAF loop. `measure` reads six rects, so
+    // running it off the scroll event forces a synchronous layout inside the
+    // handler, and deferring it by one frame is the obvious fix — but it moves
+    // the crossing threshold and the bubble's fade a frame late, and the visual
+    // suite caught the bubble sitting 13px over a card as a result. The timing
+    // of the handover is load-bearing; the layout read is not worth breaking it
+    // for. The drag hook's per-frame clamp was the removable cost, and it went.
     scroller.addEventListener("scroll", measure, { passive: true });
     // The scroller is `inset: 0`, so its own box only changes on a window
     // resize. Observing the list too is what catches the review filter
