@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 /** Paise, so no float ever touches a price. Rendered by `rupees()`. */
 const PLANS = [
@@ -35,6 +36,22 @@ const rupees = (paise: number) =>
  */
 export default function RandomTestUpsell() {
   const [open, setOpen] = useState(false);
+  /**
+   * The device panel, which is where this sheet belongs.
+   *
+   * It is rendered THROUGH A PORTAL rather than in place. In place, the nearest
+   * positioned ancestor is inside the scrolling review, so `inset: 0` sized the
+   * scrim to a 510px box 40px down the list and the sheet floated among the
+   * questions. `position: fixed` fixed the position but anchored it to the
+   * window, so on a desktop it dimmed the whole page instead of the phone.
+   * Portalling into `.app-panel` — which is `position: relative` — gives an
+   * absolute scrim the right containing block and keeps the overlay inside the
+   * device, which is the only thing that is the app.
+   */
+  const [panel, setPanel] = useState<Element | null>(null);
+  useEffect(() => {
+    setPanel(document.querySelector(".app-panel"));
+  }, []);
   const sheetRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<HTMLButtonElement>(null);
 
@@ -85,7 +102,9 @@ export default function RandomTestUpsell() {
         </button>
       </div>
 
-      {open && (
+      {open &&
+        panel &&
+        createPortal(
         <div
           className="upsell-scrim"
           onClick={(e) => {
@@ -166,8 +185,9 @@ export default function RandomTestUpsell() {
               Not now
             </button>
           </div>
-        </div>
-      )}
+        </div>,
+          panel,
+        )}
     </>
   );
 }

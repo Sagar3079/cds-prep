@@ -1021,14 +1021,11 @@ mark.target-word {
    belongs to. `position: fixed` would do exactly that, so this is absolute
    against `.app-panel`, which is the only box that is the app. */
 .upsell-scrim {
-  /* `fixed`, not `absolute`. Absolute resolves against the nearest positioned
-     ancestor, and inside the review that is neither the panel nor the scroller
-     — measured, the scrim came out 510px tall starting 40px down, so the sheet
-     floated in the middle of the questions instead of sitting on the device.
-     Fixed is the one anchor that cannot be got wrong. The cost is that on a
-     desktop it dims the page around the phone frame rather than just the frame;
-     on a phone, where the panel IS the viewport, they are the same thing. */
-  position: fixed;
+  /* Absolute against `.app-panel`, which the component portals into. Rendered
+     in place this resolved against a box inside the scrolling review and the
+     sheet floated among the questions; `fixed` cured that but anchored it to
+     the window, dimming the whole desktop page instead of the phone. */
+  position: absolute;
   inset: 0;
   z-index: 60;
   display: flex;
