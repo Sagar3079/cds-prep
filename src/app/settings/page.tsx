@@ -207,9 +207,18 @@ export default function SettingsPage() {
           Your data
         </h2>
         <p className="text-[0.8125rem] leading-relaxed text-muted">
-          Every attempt, streak and preference lives in this browser only. There
-          is no account and nothing is sent anywhere. Clearing site data resets
-          it all.
+          Every attempt, streak and preference lives in this browser only.
+          Clearing site data resets it all.
+        </p>
+        <p className="text-[0.8125rem] leading-relaxed text-muted">
+          The leaderboard is the exception, and only if you join it. Joining
+          stores your email address, the username you pick and your daily score
+          on a server. Your email is never shown to anyone — the board shows a
+          masked form like{" "}
+          <span className="whitespace-nowrap">s••••@gmail.com</span> unless you
+          set a username. It is not verified yet, so treat it as an unconfirmed
+          address rather than proof of who you are. Leaderboard entries are
+          deleted two days after the day they belong to.
         </p>
         <Link
           href="/history"

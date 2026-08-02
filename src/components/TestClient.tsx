@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import type { Question } from "@/types";
+import { reportRun } from "./LeaderboardNote";
 import PotterCoach from "./potter/PotterCoach";
 import { HEAD_ROOM } from "./potter/PotterPerch";
 import QuestionCard from "./QuestionCard";
@@ -322,6 +323,13 @@ export default function TestClient({
     } catch {
       handedOff = false;
     }
+
+    // Everything above this line is the actual result: marked, saved, handed
+    // off. The leaderboard comes after it and only after it, does not block the
+    // redirect, and cannot reject — see `reportRun`. Daily only: the board is
+    // "today's daily test, first attempt", so a random set would both
+    // misrepresent it and spend the account's one entry for the day.
+    if (!isRandom) reportRun(quiz, answers, timeTaken);
 
     clearProgress(mode);
     setSubmitted(true);

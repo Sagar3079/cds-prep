@@ -4,7 +4,8 @@ Daily CDS (Combined Defence Services) English practice, built from UPSC previous
 papers. A small Next.js app: one timed test a day, real UPSC marking, instant review,
 and a streak history that lives entirely in your browser.
 
-No backend, no account, no data leaves your machine.
+Attempts, streaks and preferences stay in your browser. The one thing that leaves it is a
+leaderboard entry, and only if you join — see *What is stored, and where*.
 
 ## Run locally
 
@@ -30,7 +31,21 @@ you only need the data pipeline below if you want to rebuild or extend the quest
 - **History & streaks**, saved in `localStorage`.
 - **Adaptive practice** — random sets pull harder from topics you get wrong. The daily
   test does not adapt, so it stays comparable between people.
+- **Daily leaderboard** — optional. Today's daily test only, first attempt only, scored
+  on the server. Resets every day.
 - Light and dark themes, responsive, keyboard-navigable.
+
+## What is stored, and where
+
+Every attempt, streak and preference lives in this browser only, and nothing about them
+is sent anywhere.
+
+The leaderboard is the exception, and only if you join it. Joining stores your **email
+address**, the **username** you pick and your **daily score** on a server (Upstash Redis).
+Your email is never shown to anyone — the board shows a masked form like `s••••@gmail.com`
+unless you set a username. It is **not verified**: nothing checks that the address is
+yours, so treat it as an unconfirmed address rather than as identity. Leaderboard entries
+are deleted two days after the day they belong to.
 
 ## Answer accuracy — please read
 

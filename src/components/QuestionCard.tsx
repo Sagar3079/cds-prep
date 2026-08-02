@@ -7,6 +7,24 @@ import type { Question, QuestionPart } from "@/types";
 const LETTER_LABELS = ["A", "B", "C", "D"] as const;
 
 /**
+ * The one `answerSource` that traces to a key UPSC actually published (Series A,
+ * `answer_keys/keys.json`) — 464 of the 803 questions.
+ *
+ * Everything else is hand-written or hand-transcribed. `verified` was typed from
+ * the paper with no key to check it against; `verified-pyq-pattern` and
+ * `predicted-cds-pattern` are constants stamped on every record in their sets and
+ * record nothing about verification at all, despite one of them starting with the
+ * word "verified". A hand-typed key is not a key: the old `verified-key` tier came
+ * from `answer_keys/manual_keys.json`, which disagreed with the official key on
+ * 20.6% of its entries, and twelve wrong answers shipped under the app's strongest
+ * label before that was caught.
+ *
+ * So the line below is drawn in exactly one place — at the official key — and
+ * everything on the other side of it gets the same, plain warning.
+ */
+const OFFICIAL_KEY_SOURCE = "official-key";
+
+/**
  * `fixedOptions` marks a question whose option order carries meaning — the stem
  * labels its own fragments "(a) … / (b) …", or an option refers to another option
  * ("Both A and B", "None of the above"). Shuffling those makes the card
@@ -305,6 +323,13 @@ export default function QuestionCard({
   // hand-written ones are placeholders, so no paper is claimed for them.
   const fromPaper = question.id.startsWith("cds");
 
+  // Review screen only, and only for the questions that need it. During a run
+  // it would be noise — nobody is weighing whether to trust an answer they have
+  // not seen yet — and on an `official-key` item there is nothing to warn about,
+  // so the common case (464 of 803) stays completely clean.
+  const flagProvenance =
+    showResult && question.answerSource !== OFFICIAL_KEY_SOURCE;
+
   const rovingIndex = selected ?? 0;
 
   const moveTo = (to: number) => {
@@ -398,10 +423,9 @@ export default function QuestionCard({
           {/* The provenance chip ("Official UPSC key" / "Unverified practice
               item") used to sit here and was removed on request: it took a
               whole row on a phone and it is grading the bank, not the learner.
-              Provenance has NOT been dropped, only demoted — for anything that
-              is not an official key, the "Why this answer" panel still closes
-              with a clause saying so, which is where a learner is actually
-              weighing whether to trust the answer. */}
+              It has not come back as a chip. What replaced it is one muted line
+              under the answer on the review screen, and only for items that are
+              not from an official key — see `flagProvenance` below. */}
         </div>
       </div>
 
@@ -494,11 +518,15 @@ export default function QuestionCard({
         </div>
       )}
 
-      {/* The provenance box that stood here on the review screen is gone too.
-          It repeated for all ten questions and pushed the actual explanation
-          below the fold. What replaced it is one clause at the end of "Why this
-          answer", which only appears when the answer is NOT from an official
-          key — the case where a learner needs the warning. */}
+      {/* Deliberately a line of text, not a box, a chip or a row: the boxed
+          version of this pushed the explanation below the fold on every one of
+          ten cards. It sits directly under the answers because that is where
+          someone decides whether to believe one. */}
+      {flagProvenance && (
+        <p className="text-[0.75rem] leading-relaxed text-muted">
+          Practice item — not from an official answer key.
+        </p>
+      )}
     </div>
   );
 }

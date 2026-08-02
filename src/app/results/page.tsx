@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import RandomTestUpsell from "@/components/RandomTestUpsell";
 import AnswerExplanation from "@/components/AnswerExplanation";
+import LeaderboardNote from "@/components/LeaderboardNote";
 import PotterRider from "@/components/potter/PotterRider";
 import QuestionCard from "@/components/QuestionCard";
 import ScoreRing, { formatScore } from "@/components/ScoreRing";
@@ -15,7 +16,7 @@ const STORAGE_KEY = "cds-last-result";
 
 /**
  * Answers read from the answer key UPSC actually published for that paper —
- * 88 of the 427 in the bank (see the answer-accuracy section of README.md).
+ * 464 of the 803 in the bank (see the answer-accuracy section of README.md).
  * Everything else was hand-written, or hand-transcribed without a key.
  */
 const OFFICIAL_KEY_SOURCE = "official-key";
@@ -456,6 +457,12 @@ export default function ResultsPage() {
         </Link>
       </div>
 
+      {/* What the leaderboard did with this run, if anything. Renders nothing
+          while the POST is in flight, nothing for a random set, and nothing at
+          all if the request never happened — the score above does not depend on
+          it in any way. */}
+      <LeaderboardNote />
+
       {unofficial > 0 && (
         <div className="flex gap-3 rounded-2xl border border-dashed border-streak/55 bg-streak-soft px-4 py-3.5">
           <svg
@@ -475,9 +482,9 @@ export default function ResultsPage() {
               {unofficial} of these {set.total} answers were never checked
               against an official key.
             </strong>{" "}
-            They were written or transcribed by hand for practice, and the tag
-            on each question below says which is which. Where the answer looks
-            wrong, it may well be.
+            They were written or transcribed by hand for practice, and each one
+            is marked as such in the review below. Where the answer looks wrong,
+            it may well be.
           </p>
         </div>
       )}
