@@ -244,6 +244,29 @@ python scripts/ocr_and_parse.py     # OCR the source PDFs — slow
 python scripts/seed_questions.py    # rebuild src/data/questions.json
 ```
 
+Repair passes over an existing bank. All take `--check` to report without writing,
+and all re-derive from the source paper rather than inferring from the text:
+
+```bash
+python scripts/fix_passages.py       # give each comprehension item ITS passage
+python scripts/fix_topics.py         # file improvement items under the right topic
+python scripts/ocr_passages.py       # text sidecar for image-only papers
+python scripts/extract_underlines.py # read the printed underline into `target`
+```
+
+Two things these encode, both learned the hard way:
+
+- **A comprehension item's passage is joined by printed item number**, not by
+  position in the section. The original parse stamped the section's directions
+  block plus its first passage onto all seventeen items in CDS1-2018, so
+  thirteen questions displayed a passage that had nothing to do with them.
+- **`target` comes from the underline on the page, never from the options.**
+  `extract_underlines.py` locates each stem on the page FIRST and only then
+  looks for a rule inside that stem's own box; an earlier version matched rules
+  page-wide and was ~⅓ wrong, including matches scoring 1.00. Anything it
+  cannot resolve confidently is listed by id and left unhighlighted, because a
+  stem with no highlight is recoverable and a confidently wrong one is not.
+
 ## Before saying a change is done
 
 1. `npm run build` passes.

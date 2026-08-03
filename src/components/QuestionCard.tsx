@@ -105,12 +105,17 @@ function splitLabelledStem(
   return { parts, tail };
 }
 
-/** Locate `word` as a whole word in `text`; returns its [start, end) or null. */
+/**
+ * Locate `phrase` in `text` on whole-word boundaries; returns [start, end).
+ *
+ * Takes a phrase, not just a word: what a sentence-improvement item underlines
+ * is usually several words ("are touring", "passed from"), and an idiom is
+ * always more than one. Internal whitespace is matched loosely so a target
+ * recorded with a single space still finds a stem that wrapped across a line.
+ */
 function findWord(text: string, word: string): [number, number] | null {
-  const m = new RegExp(
-    `(^|[^A-Za-z])(${escapeRegExp(word)})(?![A-Za-z])`,
-    "i"
-  ).exec(text);
+  const pattern = escapeRegExp(word.trim()).replace(/\\?\s+/g, "\\s+");
+  const m = new RegExp(`(^|[^A-Za-z])(${pattern})(?![A-Za-z])`, "i").exec(text);
   if (!m) return null;
   const start = m.index + m[1].length;
   return [start, start + m[2].length];
@@ -123,20 +128,51 @@ const TARGET_LEAD_IN =
  *  but the tested word is identified by being in capitals. */
 const CAPS_AFTER_LEAD_IN = /^([A-Z][A-Z'’-]{2,})/;
 const CAPS_ANYWHERE = /\b([A-Z]{3,})\b/;
-const QUOTED_WORD = /['"‘’]([A-Za-z][A-Za-z'-]+)['"‘’]/;
+/**
+ * A phrase the paper itself put in quotes.
+ *
+ * This is the marker an idiom, a phrasal verb or a "what does X mean" item is
+ * printed with, and it is not a guess: the quotation marks are in the source
+ * paper, so the span they enclose is exactly the span being tested. Bounded at
+ * 60 characters so a quoted *sentence* inside a comprehension item cannot be
+ * mistaken for a quoted term.
+ */
+const QUOTED_PHRASE = /['"‘“]([A-Za-z][A-Za-z' ‐-―-]{1,58}[A-Za-z.])['"’”]/;
 const NOT_TARGETS = ["CDS", "UPSC"];
 
 /**
- * Range of the word a synonym/antonym item is testing. `question.target` is the
- * authoritative source; the fallbacks below only exist for records that predate
- * it and are deliberately allowed to fail — an unhighlighted stem is recoverable,
- * a confidently highlighted *wrong* word is not.
+ * Range of the word or phrase an item is testing.
+ *
+ * `question.target` is the authoritative source and is tried first for every
+ * topic. It used to be consulted only for synonyms and antonyms, which is why
+ * a sentence-improvement item never highlighted the part you are asked to
+ * improve, and an idiom never highlighted the idiom — the data was there and
+ * the render threw it away.
+ *
+ * The fallbacks after it are ordered by how much they are guessing. A quoted
+ * phrase is printed in the paper and is as good as `target`; the capitals
+ * heuristics only apply to synonym/antonym items, where a word in capitals IS
+ * the convention. Nothing here infers a target from sentence structure — an
+ * unhighlighted stem is recoverable, a confidently highlighted *wrong* word is
+ * not, and that trade was already settled once.
  */
-function findTargetRange(text: string, target?: string): [number, number] | null {
+function findTargetRange(
+  text: string,
+  target?: string,
+  synAnt = false,
+): [number, number] | null {
   if (target) {
     const range = findWord(text, target);
     if (range) return range;
   }
+
+  const quoted = QUOTED_PHRASE.exec(text);
+  if (quoted) {
+    const range = findWord(text, quoted[1]);
+    if (range) return range;
+  }
+
+  if (!synAnt) return null;
 
   const lead = TARGET_LEAD_IN.exec(text);
   if (lead) {
@@ -149,9 +185,6 @@ function findTargetRange(text: string, target?: string): [number, number] | null
   if (caps && !NOT_TARGETS.includes(caps[1])) {
     return [caps.index, caps.index + caps[1].length];
   }
-
-  const quoted = QUOTED_WORD.exec(text);
-  if (quoted) return findWord(text, quoted[1]);
 
   return null;
 }
@@ -284,7 +317,11 @@ export default function QuestionCard({
   const isAntonym = /antonym/i.test(question.topic || "");
 
   const stem = formatBlanks(question.question, question.topic);
-  const targetRange = isSynAnt ? findTargetRange(stem, question.target) : null;
+  // Every topic, not just synonyms and antonyms: an improvement item has a
+  // part to improve and an idiom has an idiom, and both were being rendered
+  // flat because the highlight was gated on the topic rather than on whether
+  // there was anything to highlight.
+  const targetRange = findTargetRange(stem, question.target, isSynAnt);
 
   // A stem carrying its own `S1 :`/`P :` labels is a sentence-ordering question
   // whose parts were never split out into `parts`. Recover them for display, so
@@ -292,24 +329,37 @@ export default function QuestionCard({
   const split = question.parts?.length ? null : splitLabelledStem(stem);
   const parts = question.parts?.length ? question.parts : split?.parts;
 
+  // An item whose options include some spelling of "No improvement" is asking
+  // you to improve one part of the sentence. Read off the options rather than
+  // the topic label: 29 of these ship filed under "General" or "Comprehension",
+  // and the instruction has to be right for all of them, not for the ones that
+  // happen to be catalogued correctly.
+  const isImprovement = question.options.some((o) =>
+    /^\s*no\s*improvement\s*$/i.test(o),
+  );
+
   // Never promise a highlight we did not render.
-  const prompt = !isSynAnt
-    ? null
-    : targetRange
+  const prompt = isSynAnt
+    ? targetRange
       ? isAntonym
         ? "Select the word opposite in meaning to the highlighted word"
         : "Select the word nearest in meaning to the highlighted word"
       : isAntonym
         ? "Select the option most nearly opposite in meaning"
-        : "Select the option closest in meaning";
+        : "Select the option closest in meaning"
+    : isImprovement
+      ? targetRange
+        ? "Choose the best replacement for the highlighted part"
+        : "Choose the best version of the sentence, or “No improvement”"
+      : null;
 
   const stemNode: ReactNode = targetRange ? (
     <>
-      {stem.slice(0, targetRange[0])}
+      {renderWithBlanks(stem.slice(0, targetRange[0]))}
       <mark className="target-word">
         {stem.slice(targetRange[0], targetRange[1])}
       </mark>
-      {stem.slice(targetRange[1])}
+      {renderWithBlanks(stem.slice(targetRange[1]))}
     </>
   ) : (
     renderWithBlanks(stem)
