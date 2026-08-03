@@ -155,6 +155,27 @@ guard that neutralises all CSS animation and transition, so components must not 
 own guards for CSS-driven effects. JS-driven animation (the results confetti) still has
 to check `matchMedia` itself.
 
+### `/landing` is a different world on purpose
+
+`src/app/landing/` does **not** use the tokens above. It is the advert traffic
+lands on, it commits to one dark look rather than following the viewer's theme,
+and all of its styling is scoped under `.lp` in `src/app/landing/landing.css`.
+Do not "bring it in line" with the app — that is not drift, it is the design.
+
+Three things about it that are load-bearing:
+
+- **`AppFrame` decides which routes get the device panel.** `/landing` is the
+  one route that escapes it. Adding another goes in `BARE_ROUTES`, and
+  `npm run landing` asserts the app's routes still get framed.
+- **Ads for it run on mobile only.** The phone layout is the design and desktop
+  is the courtesy — hero CTA above the fold, sticky action bar, ≥44px targets.
+  `npm run landing` fails on any of those.
+- **Every number on it is checked.** `npm run landing:facts` compares the
+  hardcoded `BANK_FACTS` against the real banks and fails on drift. There are
+  no student counts, ratings or testimonials on that page and there must not
+  be: we have no real ones, and invented ones on a page taking paid traffic are
+  a lie to the reader and grounds for an ad account ban.
+
 ### Two traps
 
 - The component classes in `globals.css` are **unlayered**, so they beat anything in
@@ -220,6 +241,8 @@ npm run build
 npm run typecheck  # tsc --noEmit
 npm run lint        # eslint . — flat config in eslint.config.mjs
 npm run visual      # scripts/visual-check.mjs against a running dev server
+npm run landing     # /landing gates — mobile CTA, sticky bar, reveals, framing
+npm run landing:facts  # every number on /landing still matches the banks
 
 node scripts/daily-snapshot.mjs before.json      # daily-set ids for 30 fixed dates
 node scripts/daily-snapshot.mjs --diff before.json after.json

@@ -1,10 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import Navbar from "@/components/Navbar";
-import PanelScroll from "@/components/PanelScroll";
-import SiteFooter from "@/components/SiteFooter";
-import StatusBar from "@/components/StatusBar";
-import TabBar from "@/components/TabBar";
+import AppFrame from "@/components/AppFrame";
 import { SITE } from "@/lib/legal";
 import "./globals.css";
 
@@ -44,22 +40,9 @@ export default function RootLayout({
       <body className={`${inter.className} antialiased`}>
         {/* One panel holds the whole app — a device, not a page. Pages
             contribute only their content; the frame, scrolling and navigation
-            all live here so no page mounts its own. */}
-        <div className="app-stage">
-          <div className="shell app-panel">
-            <StatusBar />
-            <Navbar />
-            {/* The footer lives INSIDE the scroller, not beside it: the policy
-                links have to be reachable from every route (a payment gateway's
-                reviewer opens the home page and looks for them), and a fixed
-                strip would eat height from a panel that is already a phone. */}
-            <PanelScroll>
-              {children}
-              <SiteFooter />
-            </PanelScroll>
-            <TabBar />
-          </div>
-        </div>
+            all live in `AppFrame`, which also knows the routes that must NOT
+            be framed. */}
+        <AppFrame>{children}</AppFrame>
       </body>
     </html>
   );

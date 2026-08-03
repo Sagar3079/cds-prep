@@ -1,0 +1,814 @@
+/* ============================================================
+   LANDING — a separate visual world from the app.
+   ============================================================
+   Everything here is scoped under `.lp`. The app's own tokens in globals.css
+   are a bright, white product surface; this page is the advert that precedes
+   it, and it commits to one look — a dark instrument panel — rather than
+   following the viewer's theme. That is deliberate: a landing page is a single
+   held frame, and a design that has to be good in two themes is usually only
+   good in one.
+
+   Motion budget: `transform` and `opacity` only. No `filter`, no `box-shadow`
+   transitions, nothing that repaints. The 3D is real CSS 3D — `perspective`
+   plus `rotate3d` on composited layers — so it stays on the GPU on a phone.
+   globals.css carries a global `prefers-reduced-motion` guard that neutralises
+   CSS animation and transition app-wide; the pointer parallax is JS-driven and
+   checks `matchMedia` itself.
+   ============================================================ */
+
+.lp {
+  /* Ground. Blue-biased near-black, not pure — pure #000 next to a saturated
+     orange reads as a hole in the page rather than a surface behind it. */
+  --lp-ground: #080b12;
+  --lp-ground-2: #0d1119;
+  --lp-panel: #141a26;
+  --lp-panel-2: #1b2331;
+  --lp-line: #232c3d;
+  --lp-line-bright: #35415a;
+
+  --lp-ink: #f2f5fc;
+  --lp-muted: #939ebb;
+  --lp-dim: #67718c;
+
+  /* The one place boldness is spent. Everything else stays quiet. */
+  --lp-signal: #ff7a2f;
+  --lp-signal-hot: #ff9552;
+  --lp-signal-ink: #ffc09a;
+  --lp-signal-glow: rgba(255, 122, 47, 0.28);
+
+  /* Structural blue, carried over from the app so the click-through does not
+     feel like a different company. Never the CTA. */
+  --lp-blue: #5b8cff;
+  --lp-blue-dim: rgba(91, 140, 255, 0.14);
+  --lp-ok: #3ddc97;
+  --lp-err: #ff6b6b;
+
+  --lp-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --lp-col: min(1140px, 100% - 2.5rem);
+
+  position: relative;
+  min-height: 100dvh;
+  background: var(--lp-ground);
+  color: var(--lp-ink);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  overflow-x: clip;
+}
+
+/* ---- the field ----
+   A perspective grid receding to a horizon: the floor the whole page stands
+   on. Two layers of gradient, no image, no canvas. It is `fixed` so the
+   content moves over a stationary world rather than dragging it along, which
+   is what makes the page feel like a space instead of a document. */
+.lp-field {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.lp-field::before {
+  /* Ambient light source, up and behind the hero card. */
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -12vh;
+  width: min(1200px, 140vw);
+  aspect-ratio: 1.6;
+  transform: translateX(-50%);
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    rgba(91, 140, 255, 0.16),
+    rgba(91, 140, 255, 0.05) 42%,
+    transparent 68%
+  );
+}
+.lp-grid {
+  position: absolute;
+  left: 50%;
+  bottom: -30vh;
+  width: 300vw;
+  height: 90vh;
+  transform: translateX(-50%) perspective(60vh) rotateX(72deg);
+  transform-origin: 50% 100%;
+  background-image:
+    linear-gradient(to right, var(--lp-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--lp-line) 1px, transparent 1px);
+  background-size: 5.5rem 5.5rem;
+  -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 72%);
+  mask-image: linear-gradient(to top, #000 0%, transparent 72%);
+  opacity: 0.65;
+}
+
+.lp-main {
+  position: relative;
+  z-index: 1;
+}
+
+.lp-wrap {
+  width: var(--lp-col);
+  margin-inline: auto;
+}
+
+/* ---- type ----
+   Display is a condensed grotesk set in caps: it belongs to instrument panels
+   and stencilled crates, which is the register a defence-services aspirant is
+   already in. Body is the app's own face, so the page and the product read as
+   one voice. Mono carries data — counts, marks, labels — and nothing else. */
+.lp h1,
+.lp h2,
+.lp h3,
+.lp .lp-display {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.005em;
+  line-height: 0.92;
+  text-wrap: balance;
+}
+.lp-eyebrow {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--lp-signal-ink);
+}
+.lp-eyebrow--blue { color: var(--lp-blue); }
+.lp-mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+.lp-lede {
+  font-size: clamp(1.0625rem, 0.95rem + 0.5vw, 1.3125rem);
+  line-height: 1.6;
+  color: var(--lp-muted);
+  max-width: 46ch;
+  text-wrap: pretty;
+}
+
+/* ---- nav ---- */
+.lp-nav {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: var(--lp-col);
+  margin-inline: auto;
+  padding: 1.5rem 0 0;
+}
+.lp-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+  font-size: 1.0625rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--lp-ink);
+}
+.lp-brand span[aria-hidden] {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  background: var(--lp-signal);
+  color: #1a0d05;
+  font-size: 0.9375rem;
+}
+.lp-nav-cta {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--lp-ink);
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--lp-line-bright);
+  border-radius: 0.6rem;
+  transition: border-color 0.2s var(--lp-ease), color 0.2s var(--lp-ease);
+}
+.lp-nav-cta:hover { border-color: var(--lp-signal); color: var(--lp-signal-ink); }
+
+/* ---- hero ---- */
+.lp-hero {
+  display: grid;
+  gap: clamp(2.5rem, 6vw, 4rem);
+  align-items: center;
+  padding: clamp(3rem, 8vw, 6rem) 0 clamp(3.5rem, 9vw, 7rem);
+}
+@media (min-width: 62rem) {
+  .lp-hero { grid-template-columns: 1.05fr 0.95fr; }
+}
+.lp-hero h1 {
+  font-size: clamp(3rem, 1.6rem + 6.6vw, 6.5rem);
+  letter-spacing: -0.02em;
+}
+/* The third line is the promise the other two set up, so it carries the
+   colour. One word in the accent, not the whole headline. */
+.lp-hero h1 em {
+  font-style: normal;
+  color: var(--lp-signal);
+}
+.lp-hero-rule {
+  width: 4.5rem;
+  height: 3px;
+  margin: 1.5rem 0;
+  background: var(--lp-signal);
+}
+
+.lp-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.875rem 1.25rem;
+  margin-top: 2rem;
+}
+.lp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.05rem 1.9rem;
+  border-radius: 0.7rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--lp-signal);
+  color: #180b03;
+  box-shadow: 0 0 0 0 var(--lp-signal-glow);
+  transition: transform 0.22s var(--lp-ease), box-shadow 0.28s var(--lp-ease),
+    background-color 0.22s var(--lp-ease);
+}
+.lp-btn:hover {
+  transform: translateY(-2px);
+  background: var(--lp-signal-hot);
+  box-shadow: 0 14px 40px -10px var(--lp-signal-glow);
+}
+.lp-btn:active { transform: translateY(0); }
+.lp-btn-arrow { transition: transform 0.22s var(--lp-ease); }
+.lp-btn:hover .lp-btn-arrow { transform: translateX(3px); }
+
+.lp-btn-quiet {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--lp-muted);
+  transition: color 0.2s var(--lp-ease);
+}
+.lp-btn-quiet:hover { color: var(--lp-ink); }
+
+.lp-reassure {
+  margin-top: 1.15rem;
+  font-size: 0.8125rem;
+  color: var(--lp-dim);
+}
+
+/* ---- 3D stage ----
+   `perspective` on the stage, `preserve-3d` on the deck: the cards are laid
+   out in real Z, so they occlude each other and the parallax is genuine
+   rotation rather than two layers sliding at different speeds. */
+.lp-stage {
+  perspective: 1400px;
+  perspective-origin: 50% 45%;
+  position: relative;
+  min-height: clamp(20rem, 52vw, 30rem);
+  display: grid;
+  place-items: center;
+}
+.lp-deck {
+  position: relative;
+  width: min(23rem, 82vw);
+  transform-style: preserve-3d;
+  /* Set from JS on pointer move; the CSS default is the resting pose. */
+  transform: rotateX(var(--rx, 8deg)) rotateY(var(--ry, -16deg));
+  transition: transform 0.5s var(--lp-ease);
+}
+.lp-deck[data-live="true"] { transition: none; }
+
+.lp-card {
+  position: absolute;
+  inset: 0;
+  border-radius: 1.1rem;
+  border: 1px solid var(--lp-line-bright);
+  background: linear-gradient(158deg, var(--lp-panel-2), var(--lp-panel));
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.9);
+  transform-style: preserve-3d;
+}
+/* The two behind are structure, not content: they say "there is a stack of
+   these" without competing with the face card for reading. */
+.lp-card--back2 {
+  transform: translate3d(0, -2.6rem, -150px) scale(0.94);
+  opacity: 0.4;
+}
+.lp-card--back1 {
+  transform: translate3d(0, -1.3rem, -75px) scale(0.97);
+  opacity: 0.7;
+}
+.lp-card--face {
+  position: relative;
+  padding: 1.4rem 1.35rem 1.5rem;
+}
+
+.lp-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--lp-line);
+}
+.lp-card-q {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  color: var(--lp-dim);
+  text-transform: uppercase;
+}
+.lp-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--lp-signal-ink);
+  font-variant-numeric: tabular-nums;
+}
+.lp-timer-dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--lp-signal);
+  animation: lpPulse 1.6s ease-in-out infinite;
+}
+@keyframes lpPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+.lp-card-stem {
+  margin: 1.05rem 0 1.15rem;
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  font-weight: 500;
+  color: var(--lp-ink);
+}
+.lp-card-stem mark {
+  background: rgba(255, 122, 47, 0.16);
+  color: var(--lp-signal-ink);
+  border-bottom: 2px solid var(--lp-signal);
+  border-radius: 0.2rem;
+  padding: 0.05em 0.2em;
+}
+.lp-opts { display: grid; gap: 0.5rem; }
+.lp-opt {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--lp-line);
+  background: rgba(255, 255, 255, 0.015);
+  font-size: 0.9375rem;
+  color: var(--lp-muted);
+}
+.lp-opt b {
+  display: grid;
+  place-items: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  flex: none;
+  border-radius: 0.35rem;
+  border: 1px solid var(--lp-line-bright);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--lp-dim);
+}
+.lp-opt--right {
+  border-color: rgba(61, 220, 151, 0.5);
+  background: rgba(61, 220, 151, 0.09);
+  color: var(--lp-ink);
+}
+.lp-opt--right b {
+  border-color: transparent;
+  background: var(--lp-ok);
+  color: #04160e;
+}
+
+/* Floating chips pinned in front of the deck — the depth cue that sells the
+   3D, because they sit visibly nearer the viewer than the card face. */
+.lp-chip {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.55rem;
+  border: 1px solid var(--lp-line-bright);
+  background: rgba(20, 26, 38, 0.92);
+  backdrop-filter: blur(6px);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  box-shadow: 0 18px 36px -16px rgba(0, 0, 0, 0.9);
+}
+/* Vertically spaced so no chip lands on the card's own header row — the mark
+   chip used to sit exactly over the running clock, which is the one element in
+   the mock that has to be legible. */
+.lp-chip--mark {
+  top: 30%;
+  right: -11%;
+  color: var(--lp-ok);
+  transform: translateZ(90px);
+}
+.lp-chip--neg {
+  bottom: 20%;
+  left: -13%;
+  color: var(--lp-err);
+  transform: translateZ(120px);
+}
+.lp-chip--streak {
+  bottom: -5%;
+  right: -4%;
+  color: var(--lp-signal-ink);
+  transform: translateZ(60px);
+}
+/* On a phone the deck is nearly the full column, so a chip hung outside it by
+   a percentage of that width runs off the screen and gets clipped. Tuck them
+   over the card instead: less depth, but a whole chip beats two-thirds of one. */
+@media (max-width: 40rem) {
+  .lp-chip { font-size: 0.6875rem; padding: 0.4rem 0.65rem; }
+  .lp-chip--mark { right: -2%; }
+  .lp-chip--neg { left: -3%; }
+  .lp-chip--streak { right: 2%; }
+}
+
+/* ---- section furniture ---- */
+.lp-section { padding: clamp(4rem, 10vw, 7.5rem) 0; }
+.lp-section--edge { border-top: 1px solid var(--lp-line); }
+.lp-section-head { max-width: 40rem; margin-bottom: clamp(2.5rem, 5vw, 3.5rem); }
+.lp-section-head h2 {
+  margin: 0.9rem 0 0;
+  font-size: clamp(2rem, 1.2rem + 3.2vw, 3.4rem);
+  letter-spacing: -0.015em;
+}
+.lp-section-head p { margin: 1.1rem 0 0; }
+
+/* ---- marking rule ---- */
+.lp-marks {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  perspective: 1200px;
+}
+.lp-mark {
+  padding: 1.6rem 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--lp-line);
+  background: linear-gradient(160deg, var(--lp-panel), var(--lp-ground-2));
+  transform: rotateY(calc(var(--i) * 1.5deg - 1.5deg));
+  transform-style: preserve-3d;
+  transition: transform 0.4s var(--lp-ease), border-color 0.4s var(--lp-ease);
+}
+.lp-mark:hover {
+  transform: rotateY(0deg) translateZ(24px);
+  border-color: var(--lp-line-bright);
+}
+.lp-mark-value {
+  font-family: var(--font-display), sans-serif;
+  font-size: 3.2rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.lp-mark--plus .lp-mark-value { color: var(--lp-ok); }
+.lp-mark--minus .lp-mark-value { color: var(--lp-err); }
+.lp-mark--zero .lp-mark-value { color: var(--lp-dim); }
+.lp-mark h3 {
+  margin: 0.9rem 0 0.4rem;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+}
+.lp-mark p { margin: 0; font-size: 0.875rem; line-height: 1.6; color: var(--lp-muted); }
+
+/* ---- provenance / stats ---- */
+/* Fixed 2-up, not `auto-fit`: with four cells and a half-width container,
+   auto-fit resolved to three columns and left one cell stranded beside a large
+   empty one. A count this small should be laid out, not negotiated. */
+.lp-stats {
+  display: grid;
+  gap: 1px;
+  grid-template-columns: repeat(2, 1fr);
+  background: var(--lp-line);
+  border: 1px solid var(--lp-line);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+.lp-stat { padding: 1.6rem 1.4rem; background: var(--lp-ground-2); }
+.lp-stat dt {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lp-dim);
+}
+.lp-stat dd {
+  margin: 0.5rem 0 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(2.1rem, 1.6rem + 1.6vw, 2.9rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--lp-ink);
+}
+.lp-stat dd small {
+  display: block;
+  margin-top: 0.5rem;
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.5;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--lp-muted);
+}
+
+.lp-split {
+  display: grid;
+  gap: clamp(2rem, 5vw, 3.5rem);
+  align-items: center;
+}
+@media (min-width: 60rem) {
+  .lp-split { grid-template-columns: 1fr 1fr; }
+  .lp-split--flip > :first-child { order: 2; }
+}
+
+/* ---- steps ---- */
+.lp-steps { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+.lp-step {
+  position: relative;
+  padding: 1.75rem 1.5rem 1.6rem;
+  border-radius: 1rem;
+  border: 1px solid var(--lp-line);
+  background: var(--lp-ground-2);
+}
+.lp-step-n {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  color: var(--lp-signal);
+}
+.lp-step h3 { margin: 0.85rem 0 0.5rem; font-size: 1.15rem; letter-spacing: 0.01em; }
+.lp-step p { margin: 0; font-size: 0.9375rem; line-height: 1.65; color: var(--lp-muted); }
+
+/* ---- pricing ---- */
+.lp-plans { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+.lp-plan {
+  display: flex;
+  flex-direction: column;
+  padding: 1.75rem 1.5rem;
+  border-radius: 1.1rem;
+  border: 1px solid var(--lp-line);
+  background: var(--lp-ground-2);
+}
+.lp-plan--hero {
+  border-color: var(--lp-signal);
+  background: linear-gradient(165deg, rgba(255, 122, 47, 0.09), var(--lp-ground-2) 55%);
+}
+.lp-plan-name { font-size: 1.05rem; letter-spacing: 0.03em; }
+.lp-plan-price {
+  margin: 0.9rem 0 0.25rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: 2.8rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.lp-plan-per { font-size: 0.8125rem; color: var(--lp-dim); }
+.lp-plan ul { margin: 1.25rem 0 0; padding: 0; list-style: none; display: grid; gap: 0.6rem; }
+.lp-plan li {
+  display: flex;
+  gap: 0.6rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--lp-muted);
+}
+.lp-plan li svg { flex: none; margin-top: 0.15rem; color: var(--lp-ok); }
+.lp-plan-foot { margin-top: auto; padding-top: 1.5rem; }
+
+/* ---- faq ---- */
+.lp-faq { display: grid; gap: 0.75rem; max-width: 46rem; }
+.lp-faq details {
+  border: 1px solid var(--lp-line);
+  border-radius: 0.85rem;
+  background: var(--lp-ground-2);
+  overflow: hidden;
+}
+.lp-faq summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  list-style: none;
+  color: var(--lp-ink);
+}
+.lp-faq summary::-webkit-details-marker { display: none; }
+.lp-faq summary::after {
+  content: "+";
+  font-family: var(--font-mono), monospace;
+  font-size: 1.25rem;
+  color: var(--lp-signal);
+  transition: transform 0.25s var(--lp-ease);
+}
+.lp-faq details[open] summary::after { transform: rotate(45deg); }
+.lp-faq-body { padding: 0 1.25rem 1.25rem; font-size: 0.9375rem; line-height: 1.7; color: var(--lp-muted); }
+.lp-faq-body a { color: var(--lp-signal-ink); text-decoration: underline; text-underline-offset: 0.15em; }
+
+/* ---- closing ---- */
+.lp-close {
+  position: relative;
+  text-align: center;
+  padding: clamp(4.5rem, 11vw, 8rem) 0;
+  border-top: 1px solid var(--lp-line);
+}
+.lp-close h2 { font-size: clamp(2.4rem, 1.4rem + 4.4vw, 4.6rem); letter-spacing: -0.02em; }
+.lp-close .lp-lede { margin-inline: auto; }
+.lp-close .lp-cta-row { justify-content: center; }
+
+/* ---- footer ---- */
+.lp-foot {
+  border-top: 1px solid var(--lp-line);
+  padding: 2.25rem 0 3rem;
+  font-size: 0.8125rem;
+  color: var(--lp-dim);
+}
+.lp-foot-links { display: flex; flex-wrap: wrap; gap: 0.4rem 1.15rem; margin-bottom: 1rem; }
+.lp-foot-links a { color: var(--lp-muted); transition: color 0.2s var(--lp-ease); }
+.lp-foot-links a:hover { color: var(--lp-signal-ink); }
+.lp-foot p { margin: 0.35rem 0 0; line-height: 1.6; }
+
+/* ---- focus ----
+   One visible ring for the whole page. The dark ground swallows the browser
+   default. */
+.lp a:focus-visible,
+.lp button:focus-visible,
+.lp summary:focus-visible {
+  outline: 2px solid var(--lp-signal);
+  outline-offset: 3px;
+  border-radius: 0.4rem;
+}
+
+/* ============================================================
+   PHONE — the only device this page is advertised to.
+   ============================================================
+   Ads for this page run on mobile only, so the phone layout is the design and
+   the desktop one is the courtesy. Three things change, all of them about
+   getting a thumb onto the button:
+
+   1. The hero fits one screen. Headline, promise, button, reassurance — the
+      deck sits below the fold on purpose, because a picture of the product
+      never converted anyone who had already scrolled past the button.
+   2. A sticky action bar arrives once the hero button leaves. On a page this
+      long the CTA is otherwise off-screen for 90% of the session.
+   3. Vertical rhythm tightens hard. Scroll depth is the tax mobile pays.
+   ============================================================ */
+@media (max-width: 48rem) {
+  .lp { --lp-col: calc(100% - 2.25rem); }
+
+  .lp-hero {
+    min-height: calc(100dvh - 5rem);
+    align-content: start;
+    padding: 1.75rem 0 2.5rem;
+    gap: 2rem;
+  }
+  .lp-hero h1 {
+    /* Deliberately below the fluid clamp's mobile end: three lines of display
+       caps at 3rem ate the button. */
+    font-size: clamp(2.5rem, 1.35rem + 5.4vw, 3.25rem);
+  }
+  .lp-hero-rule { margin: 1.1rem 0; }
+  .lp-lede { font-size: 1rem; line-height: 1.55; }
+  .lp-cta-row { margin-top: 1.5rem; gap: 0.75rem 1rem; }
+  .lp-btn { width: 100%; justify-content: center; padding: 1.15rem 1.5rem; }
+  .lp-btn-quiet { padding: 0.5rem 0; min-height: 2.75rem; }
+
+  .lp-stage { min-height: 0; }
+  .lp-deck { width: min(19rem, 78vw); }
+
+  .lp-section { padding: 2.75rem 0; }
+  .lp-section-head { margin-bottom: 1.5rem; }
+  .lp-section-head h2 { font-size: clamp(1.85rem, 1.2rem + 3.2vw, 2.4rem); }
+
+  .lp-marks, .lp-steps, .lp-plans { gap: 0.6rem; }
+  .lp-step { padding: 1.35rem 1.15rem; }
+  .lp-stat { padding: 1.15rem 1rem; }
+
+  /* The three marking outcomes are three numbers and a word. Stacked they cost
+     a third of a screen to say something a single row says better — the whole
+     point is that you see +1, −0.25 and 0 in one glance. */
+  .lp-marks { grid-template-columns: repeat(3, 1fr); }
+  .lp-mark { padding: 0.9rem 0.6rem 1rem; transform: none; text-align: center; }
+  .lp-mark-value { font-size: clamp(1.5rem, 1rem + 2.6vw, 2.1rem); }
+  .lp-mark h3 { margin: 0.5rem 0 0.3rem; font-size: 0.75rem; letter-spacing: 0.04em; }
+  .lp-mark p { font-size: 0.75rem; line-height: 1.45; }
+
+  /* Free stays full width — it is the offer. The two paid plans pair off,
+     which also makes the price comparison the glance it should be. */
+  .lp-plans { grid-template-columns: repeat(2, 1fr); }
+  .lp-plan { padding: 1.2rem 1rem; }
+  .lp-plan--hero { grid-column: 1 / -1; }
+  .lp-plan-price { font-size: 2.2rem; margin-top: 0.7rem; }
+  .lp-plan ul { margin-top: 0.9rem; gap: 0.45rem; }
+  .lp-plan li { font-size: 0.8125rem; }
+  .lp-plan-foot { padding-top: 1.1rem; }
+
+  .lp-close { padding: 3.5rem 0 4rem; }
+  .lp-close h2 { font-size: clamp(2.1rem, 1.4rem + 4vw, 3rem); }
+
+  /* Clear the sticky bar so the last link is never trapped under it. */
+  .lp-foot { padding-bottom: 6.5rem; }
+
+  /* Tap targets. Every one of these was a 20px line of text — fine for a
+     cursor, a coin-toss for a thumb, and flagged by Google's own mobile
+     usability check on a page whose entire job is receiving mobile ad traffic.
+     Padding rather than font-size: the footer should stay quiet, just hittable. */
+  .lp-foot-links { gap: 0 0.4rem; }
+  .lp-foot-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 0.5rem;
+  }
+  .lp-foot p a { display: inline-block; padding: 0.6rem 0; }
+  .lp-brand { min-height: 2.75rem; }
+  .lp-nav-cta { min-height: 2.75rem; display: inline-flex; align-items: center; }
+  .lp-faq summary { min-height: 3.25rem; }
+}
+
+/* ---- sticky action bar (phone only) ----
+   Hidden until the hero's button has scrolled away, so it never competes with
+   the real one. `translateY` + `opacity`, both composited. */
+.lp-sticky {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1.1rem calc(0.7rem + env(safe-area-inset-bottom));
+  background: rgba(8, 11, 18, 0.92);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--lp-line-bright);
+  transform: translateY(110%);
+  transition: transform 0.34s var(--lp-ease);
+}
+.lp-sticky[data-shown="true"] { transform: none; }
+.lp-sticky-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  color: var(--lp-muted);
+}
+.lp-sticky-copy b {
+  display: block;
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--lp-ink);
+}
+.lp-sticky .lp-btn {
+  flex: none;
+  width: auto;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.9375rem;
+}
+@media (max-width: 48rem) {
+  .lp-sticky { display: flex; }
+}
+
+/* ---- scroll reveal ----
+   Opacity + a short lift. The observer adds `is-in`; without JS every element
+   is visible, because a landing page that needs JS to show its words is a
+   landing page that sometimes shows none. */
+.lp-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s var(--lp-ease), transform 0.7s var(--lp-ease);
+}
+.lp-reveal.is-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .lp-reveal { opacity: 1; transform: none; }
+}
