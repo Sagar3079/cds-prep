@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage from "@/components/LegalPage";
-import { MERCHANT, SITE, SUPPORT_EMAIL } from "@/lib/legal";
+import { SITE, SUPPORT_EMAIL } from "@/lib/legal";
 
 export const metadata: Metadata = {
   title: "About us · CDS Prep",
@@ -61,22 +61,12 @@ export default function AboutPage() {
       </p>
 
       <h2>Who runs it</h2>
-      {MERCHANT.legalName ? (
-        <p>
-          {SITE.name} is operated by <strong>{MERCHANT.legalName}</strong>. You
-          can reach a human at{" "}
-          <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>, and the full
-          contact details are on the{" "}
-          <Link href="/contact">contact page</Link>.
-        </p>
-      ) : (
-        <p>
-          {SITE.name} is a small independent project. You can reach a human at{" "}
-          <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>, and the full
-          contact details are on the{" "}
-          <Link href="/contact">contact page</Link>.
-        </p>
-      )}
+      <p>
+        {SITE.name} is a small independent project, run by email. One address —{" "}
+        <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a> — reaches a
+        person, for anything from a wrong answer in the bank to a billing
+        question. See the <Link href="/contact">contact page</Link>.
+      </p>
 
       <h2>What we do not claim</h2>
       <p className="legal-note">

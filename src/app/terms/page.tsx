@@ -3,7 +3,6 @@ import Link from "next/link";
 import LegalPage from "@/components/LegalPage";
 import {
   BILLING_LIVE,
-  MERCHANT,
   REFUND_ELIGIBILITY_DAYS,
   SITE,
   SUPPORT_EMAIL,
@@ -15,9 +14,14 @@ export const metadata: Metadata = {
     "The terms you agree to by using CDS Prep — accounts, subscriptions, acceptable use, and the limits of what this app claims.",
 };
 
-/** The operator's name where one is set, and an honest stand-in where it is
- *  not, so no sentence in the contract ever reads "operated by null". */
-const OPERATOR = MERCHANT.legalName ?? `the operator of ${SITE.domain}`;
+/**
+ * The counterparty, named the way the rest of the site names it.
+ *
+ * A contract still needs two sides even when one of them publishes no trading
+ * name, so this is the operator of the domain — which is who you are actually
+ * agreeing with, and is reachable at one address on every page.
+ */
+const OPERATOR = `the operator of ${SITE.domain}`;
 
 export default function TermsPage() {
   return (
@@ -212,10 +216,9 @@ export default function TermsPage() {
 
       <h2>11. Governing law</h2>
       <p>
-        These terms are governed by the laws of India.{" "}
-        {MERCHANT.jurisdiction
-          ? `The courts at ${MERCHANT.jurisdiction} have exclusive jurisdiction over any dispute arising from them.`
-          : "Any dispute arising from them is subject to the exclusive jurisdiction of the competent courts in India."}
+        These terms are governed by the laws of India, and any dispute arising
+        from them is subject to the exclusive jurisdiction of the competent
+        courts in India.
       </p>
 
       <h2>12. Contact</h2>

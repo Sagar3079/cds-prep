@@ -1,20 +1,21 @@
 /**
- * Merchant identity and policy facts, in one place.
+ * Support identity and policy facts, in one place.
  *
  * Indian payment gateways (Razorpay, PayU, Cashfree) will not activate an
  * account until the site carries a reachable About, Contact, Terms, Privacy,
- * Refund/Cancellation, Shipping/Delivery and Pricing page, and until the
- * contact details on them match what was submitted during onboarding. Every
- * one of those pages reads from this file, so the details cannot drift apart
- * between pages — which is the thing a reviewer checks first.
+ * Refund/Cancellation, Shipping/Delivery and Pricing page. Every one of those
+ * pages reads from this file, so the details cannot drift apart between pages
+ * — which is the thing a reviewer checks first.
  *
- * NOTHING HERE IS INVENTED. The three fields below that are `null` are facts
- * only the business owner has; a plausible-looking address on a live payments
- * page is worse than a missing one, so they render as nothing until filled in
- * rather than as a placeholder somebody might ship.
+ * DELIBERATELY EMAIL-ONLY. There is no postal address, phone number or trading
+ * name here, and no page renders a slot for one. Support runs through a single
+ * mailbox, every policy says so, and the promise the site makes is one it can
+ * actually keep. Note for whoever fills in the gateway's onboarding form: the
+ * form itself will still ask for a registered address and a contact number,
+ * and that is answered there, not here.
  */
 
-/** The support address, used on every page and in every policy. */
+/** The one support address. Every page, every policy, every error screen. */
 export const SUPPORT_EMAIL = "support@prepcadet.in";
 
 export const SITE = {
@@ -22,63 +23,6 @@ export const SITE = {
   domain: "prepcadet.in",
   url: "https://prepcadet.in",
 } as const;
-
-export const MERCHANT = {
-  /**
-   * The name the bank account and the gateway registration are in — a
-   * proprietorship name, an LLP, or a private limited company. This is the
-   * name that must appear on Terms, Refunds and the card statement.
-   *
-   * TODO(owner): set before submitting to a payment gateway.
-   */
-  legalName: null as string | null,
-
-  /**
-   * Full registered/operating address including PIN code. Gateways require a
-   * verifiable postal address on the Contact page.
-   *
-   * TODO(owner): set before submitting to a payment gateway.
-   */
-  address: null as string | null,
-
-  /**
-   * A phone number that is actually answered, with country code.
-   *
-   * TODO(owner): set before submitting to a payment gateway.
-   */
-  phone: null as string | null,
-
-  /**
-   * The city whose courts govern disputes. Should be where the business
-   * operates from; the gateway does not check this, but a contract naming no
-   * forum is a contract worth less than the paper it isn't on.
-   *
-   * TODO(owner): set to your city, e.g. "Bengaluru, Karnataka".
-   */
-  jurisdiction: null as string | null,
-
-  /** GST number, if registered. Left null when the business is below the
-   *  threshold — an unregistered seller must NOT display a GSTIN. */
-  gstin: null as string | null,
-} as const;
-
-/** True once every field a gateway reviewer looks for has been filled in. */
-export const merchantComplete =
-  MERCHANT.legalName !== null &&
-  MERCHANT.address !== null &&
-  MERCHANT.phone !== null;
-
-/** Which of them are still missing, for the dev-only nag on /contact. */
-export const missingMerchantFields = (
-  [
-    ["legalName", MERCHANT.legalName],
-    ["address", MERCHANT.address],
-    ["phone", MERCHANT.phone],
-    ["jurisdiction", MERCHANT.jurisdiction],
-  ] as const
-)
-  .filter(([, v]) => v === null)
-  .map(([k]) => k);
 
 /**
  * Support turnaround, stated once and quoted by every policy that promises a

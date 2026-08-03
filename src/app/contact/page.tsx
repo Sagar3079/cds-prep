@@ -1,13 +1,6 @@
 import type { Metadata } from "next";
 import LegalPage from "@/components/LegalPage";
-import {
-  MERCHANT,
-  REPLY_WINDOW,
-  SITE,
-  SUPPORT_EMAIL,
-  SUPPORT_HOURS,
-  missingMerchantFields,
-} from "@/lib/legal";
+import { REPLY_WINDOW, SITE, SUPPORT_EMAIL, SUPPORT_HOURS } from "@/lib/legal";
 
 export const metadata: Metadata = {
   title: "Contact us · CDS Prep",
@@ -29,16 +22,6 @@ export default function ContactPage() {
             <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
           </dd>
         </div>
-        {MERCHANT.phone && (
-          <div>
-            <dt>Phone</dt>
-            <dd>
-              <a href={`tel:${MERCHANT.phone.replace(/[^+\d]/g, "")}`}>
-                {MERCHANT.phone}
-              </a>
-            </dd>
-          </div>
-        )}
         <div>
           <dt>Hours</dt>
           <dd>{SUPPORT_HOURS}</dd>
@@ -47,25 +30,21 @@ export default function ContactPage() {
           <dt>Reply time</dt>
           <dd>Usually {REPLY_WINDOW}</dd>
         </div>
-        {MERCHANT.legalName && (
-          <div>
-            <dt>Operated by</dt>
-            <dd>{MERCHANT.legalName}</dd>
-          </div>
-        )}
-        {MERCHANT.address && (
-          <div>
-            <dt>Address</dt>
-            <dd className="whitespace-pre-line">{MERCHANT.address}</dd>
-          </div>
-        )}
-        {MERCHANT.gstin && (
-          <div>
-            <dt>GSTIN</dt>
-            <dd>{MERCHANT.gstin}</dd>
-          </div>
-        )}
       </dl>
+
+      <h2>Why there is no phone number</h2>
+      <p>
+        {/* Explicit space: without it this compiled to `CDS Prep` and
+            `is run by email` as adjacent text nodes with nothing between them,
+            and rendered "CDS Prepis". Caught by the built-HTML scan, not by
+            reading the source — the JSX looks correct. */}
+        {SITE.name}{" "}
+        is run by email. One address, read by a person, with
+        everything you have written still in front of them — which is worth more
+        on a question about a specific question in a specific day&apos;s test
+        than a number that rings out. Nothing is routed anywhere else, and there
+        is no queue to escalate through.
+      </p>
 
       <h2>What to write about</h2>
       <p>
@@ -92,20 +71,6 @@ export default function ContactPage() {
         <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a> is acknowledged{" "}
         {REPLY_WINDOW} and we aim to close it within 15 working days.
       </p>
-
-      {process.env.NODE_ENV !== "production" &&
-        missingMerchantFields.length > 0 && (
-          /* Dev-only. A payment gateway will reject an application whose
-             contact page carries no postal address or phone number, and the
-             failure is silent — the page simply renders without them. This
-             says so where it will be seen, and never ships to a visitor. */
-          <p className="legal-note">
-            <strong>Dev note — not shown in production.</strong> These fields
-            are still unset in <code>src/lib/legal.ts</code> and a payment
-            gateway will ask for them:{" "}
-            {missingMerchantFields.join(", ")}.
-          </p>
-        )}
 
       <h2>Who we are not</h2>
       <p className="legal-note">
