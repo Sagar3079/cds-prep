@@ -2,28 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-
-/** Paise, so no float ever touches a price. Rendered by `rupees()`. */
-const PLANS = [
-  {
-    id: "weekly",
-    name: "Weekly",
-    paise: 4900,
-    per: "week",
-    blurb: "Unlimited random sets for seven days.",
-  },
-  {
-    id: "monthly",
-    name: "Monthly",
-    paise: 14900,
-    per: "month",
-    blurb: "Everything in weekly, at about half the weekly rate.",
-    best: true,
-  },
-] as const;
-
-const rupees = (paise: number) =>
-  `₹${(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+import Link from "next/link";
+/**
+ * Prices come from `legal.ts`, which is also what the pricing page renders.
+ * They used to be declared here as well; a price a customer sees in two places
+ * that disagree is a chargeback, so there is now exactly one array.
+ */
+import { PLANS, rupees } from "@/lib/legal";
 
 /**
  * "Take a random test" at the end of a review, and the plan sheet it opens.
@@ -241,6 +226,27 @@ export default function RandomTestUpsell() {
             >
               Payments aren&apos;t live yet — nothing is charged and no card is
               asked for. This just closes.
+            </p>
+            {/* The policies, at the point of purchase rather than only in the
+                footer. A buyer should not have to leave a checkout to find out
+                what the cancellation terms are — and a payment gateway checks
+                for exactly this on the page where money is asked for. */}
+            <p className="upsell-legal">
+              <Link href="/pricing" onClick={() => setOpen(false)}>
+                Full pricing
+              </Link>
+              <span aria-hidden="true">·</span>
+              <Link href="/terms" onClick={() => setOpen(false)}>
+                Terms
+              </Link>
+              <span aria-hidden="true">·</span>
+              <Link href="/refunds" onClick={() => setOpen(false)}>
+                Refunds
+              </Link>
+              <span aria-hidden="true">·</span>
+              <Link href="/privacy" onClick={() => setOpen(false)}>
+                Privacy
+              </Link>
             </p>
             <button
               type="button"

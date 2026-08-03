@@ -1082,6 +1082,144 @@ mark.target-word {
 }
 .plan-row:active { transform: scale(0.985); }
 
+/* Policy links inside the plan sheet. Deliberately quiet — they are the small
+   print, and must not compete with the button above them. */
+.upsell-legal {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.3rem 0.5rem;
+  margin-top: 0.6rem;
+  font-size: 0.6875rem;
+  color: var(--muted);
+}
+.upsell-legal a {
+  font-weight: 700;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.upsell-legal a:hover { color: var(--accent-ink); }
+
+/* ============================================================
+   POLICY PAGES + SITE FOOTER
+   ============================================================
+   These pages are long-form reading inside a phone-width column, which the
+   rest of the app never asks for. The rhythm is set on the elements rather
+   than with utilities per node: the copy is authored as plain JSX prose, and
+   a policy that grows a paragraph should not need a class added to it.
+
+   NOTE the unlayered-component trap that applies everywhere in this file —
+   these selectors beat any Tailwind utility on the same element. Don't try to
+   override `.legal-prose p` with `text-sm` on the paragraph; change it here. */
+.legal-prose {
+  /* Slightly tighter than the 1.125rem card default: the reading measure
+     matters more than the frame on a page that is only words. */
+  padding: 1.25rem 1.125rem;
+  color: var(--ink);
+  font-size: 0.9375rem;
+  line-height: 1.7;
+}
+.legal-prose > * + * { margin-top: 0.85rem; }
+.legal-prose h2 {
+  margin-top: 1.6rem;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.legal-prose > h2:first-child { margin-top: 0; }
+.legal-prose h3 {
+  margin-top: 1.15rem;
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+.legal-prose p { color: var(--muted); }
+.legal-prose strong { color: var(--ink); font-weight: 700; }
+.legal-prose ul,
+.legal-prose ol {
+  padding-left: 1.15rem;
+  color: var(--muted);
+}
+.legal-prose ul { list-style: disc; }
+.legal-prose ol { list-style: decimal; }
+.legal-prose li + li { margin-top: 0.4rem; }
+.legal-prose li::marker { color: var(--line); }
+.legal-prose ol li::marker { color: var(--muted); font-weight: 700; }
+
+/* A definition-style row: label on the left, value on the right, used for the
+   contact details and the plan facts a gateway reviewer scans for. */
+.legal-prose dl { display: grid; gap: 0.7rem; }
+.legal-prose dt {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.legal-prose dd { margin-top: 0.15rem; color: var(--ink); font-weight: 600; }
+.legal-prose code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8125em;
+  background: var(--surface-2);
+  border-radius: 0.35rem;
+  padding: 0.1em 0.35em;
+}
+
+.legal-link,
+.legal-prose a {
+  color: var(--accent-ink);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.legal-link:hover,
+.legal-prose a:hover { text-decoration-thickness: 2px; }
+
+/* A callout for the one thing on a page that must not be skimmed past —
+   "payments are not live", "we are not UPSC". Amber, not the accent: it is a
+   caveat, not a call to action. */
+.legal-note {
+  border-radius: 0.875rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 0.85rem 0.95rem;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.legal-note strong { color: var(--ink); }
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  margin-top: 0.5rem;
+  padding: 1.25rem 1rem 1.5rem;
+  text-align: center;
+}
+.site-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem 0.9rem;
+}
+.site-footer-links a {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+  transition: color 0.18s var(--ease);
+}
+.site-footer-links a:hover { color: var(--accent-ink); }
+.site-footer-meta {
+  margin-top: 0.7rem;
+  font-size: 0.6875rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.site-footer-meta a { color: var(--muted); text-decoration: underline; }
+.site-footer-meta a:hover { color: var(--accent-ink); }
+
 /* ============================================================
    KUROMI — the second mascot
    BEGIN Kuromi block. Everything from here to END is new and belongs to

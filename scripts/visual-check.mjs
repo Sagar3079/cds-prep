@@ -436,6 +436,24 @@ const LEADERBOARD_PROBE = () => {
   };
 };
 
+/**
+ * The policy pages a payment gateway requires. Listed here so they get the
+ * same per-route assertions everything else does — no sideways scroll, panel
+ * geometry intact — at all three widths. Long prose in a 360px column is
+ * exactly where an unbreakable string (an email address, a GSTIN) pushes the
+ * document wider than the viewport, and that failure is invisible on a
+ * desktop.
+ */
+const LEGAL_ROUTES = [
+  ["about", "/about"],
+  ["contact", "/contact"],
+  ["pricing", "/pricing"],
+  ["terms", "/terms"],
+  ["privacy", "/privacy"],
+  ["refunds", "/refunds"],
+  ["shipping", "/shipping"],
+];
+
 const OUT_ROUTES = [
   ["home", "/"],
   ["test", "/test"],
@@ -443,7 +461,33 @@ const OUT_ROUTES = [
   ["settings", "/settings"],
   ["history", "/history"],
   ["leaderboard", "/leaderboard"],
+  ...LEGAL_ROUTES,
 ];
+
+/**
+ * Every policy link must be reachable from wherever you are.
+ *
+ * This is the check that the footer did not quietly stop rendering: a gateway
+ * reviewer opens one page and looks for these links, and "the footer is in the
+ * layout" is an assumption, not an observation — it was one `pathname` guard
+ * away from disappearing everywhere.
+ */
+const FOOTER_PROBE = (expected) => {
+  const nav = document.querySelector('.site-footer nav[aria-label="Policies"]');
+  if (!nav) return null;
+  const hrefs = [...nav.querySelectorAll("a")].map((a) =>
+    new URL(a.getAttribute("href"), location.origin).pathname,
+  );
+  const box = document.querySelector(".site-footer").getBoundingClientRect();
+  const panel = document.querySelector(".app-panel").getBoundingClientRect();
+  return {
+    hrefs,
+    missing: expected.filter((h) => !hrefs.includes(h)),
+    // A link that renders outside the device frame is not a reachable link.
+    spillsRight: Math.round(box.right - panel.right),
+    spillsLeft: Math.round(panel.left - box.left),
+  };
+};
 
 const consoleErrors = [];
 const browser = await chromium.launch();
@@ -514,6 +558,26 @@ for (const vp of VIEWPORTS) {
     // No horizontal document scroll, on every route, at every width — the
     // generic backstop for anything spilling past the device frame sideways.
     check(`${vp.name} ${name}: page does not scroll sideways`, m.docScrollW <= m.viewW + 1, `${m.docScrollW} vs ${m.viewW}`);
+
+    // Everywhere except a run in progress, where the footer is deliberately
+    // hidden so nothing invites a tap away with the clock going.
+    if (name !== "test") {
+      const f = await page.evaluate(FOOTER_PROBE, LEGAL_ROUTES.map(([, p]) => p));
+      if (f) {
+        check(
+          `${vp.name} ${name}: every policy link is in the footer`,
+          f.missing.length === 0,
+          f.missing.length ? `missing ${f.missing.join(", ")}` : `${f.hrefs.length} links`,
+        );
+        check(
+          `${vp.name} ${name}: the footer stays inside the panel`,
+          f.spillsRight <= 1 && f.spillsLeft <= 1,
+          `${f.spillsLeft}px left, ${f.spillsRight}px right`,
+        );
+      } else {
+        check(`${vp.name} ${name}: the site footer rendered`, false, ".site-footer not found");
+      }
+    }
 
     if (name === "results") assertReview(await page.evaluate(REVIEW_PROBE), vp);
 

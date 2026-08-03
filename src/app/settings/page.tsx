@@ -337,12 +337,23 @@ export default function SettingsPage() {
           address rather than proof of who you are. Leaderboard entries are
           deleted two days after the day they belong to.
         </p>
-        <Link
-          href="/history"
-          className="text-[0.8125rem] font-bold text-accent-ink"
-        >
-          View your history →
-        </Link>
+        <div className="flex flex-wrap gap-x-4 gap-y-1">
+          <Link
+            href="/history"
+            className="text-[0.8125rem] font-bold text-accent-ink"
+          >
+            View your history →
+          </Link>
+          {/* The summary above is the honest short version; this is the page
+              that has to stay in step with the code. Linked from here because
+              "your data" is where somebody goes looking for it. */}
+          <Link
+            href="/privacy"
+            className="text-[0.8125rem] font-bold text-accent-ink"
+          >
+            Full privacy policy →
+          </Link>
+        </div>
       </section>
     </div>
   );

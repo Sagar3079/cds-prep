@@ -2,13 +2,18 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import PanelScroll from "@/components/PanelScroll";
+import SiteFooter from "@/components/SiteFooter";
 import StatusBar from "@/components/StatusBar";
 import TabBar from "@/components/TabBar";
+import { SITE } from "@/lib/legal";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
+  // Needed for `sitemap.ts`, `robots.ts` and any absolute URL Next generates.
+  // Without it those emit relative URLs, which a crawler treats as broken.
+  metadataBase: new URL(SITE.url),
   // "CDS Prep" — the repo's own name — rather than "CDS English Prep", which
   // stopped being true when General Knowledge became a second subject.
   title: "CDS Prep",
@@ -44,7 +49,14 @@ export default function RootLayout({
           <div className="shell app-panel">
             <StatusBar />
             <Navbar />
-            <PanelScroll>{children}</PanelScroll>
+            {/* The footer lives INSIDE the scroller, not beside it: the policy
+                links have to be reachable from every route (a payment gateway's
+                reviewer opens the home page and looks for them), and a fixed
+                strip would eat height from a panel that is already a phone. */}
+            <PanelScroll>
+              {children}
+              <SiteFooter />
+            </PanelScroll>
             <TabBar />
           </div>
         </div>

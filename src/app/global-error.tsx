@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { SUPPORT_EMAIL } from "@/lib/legal";
 import "./globals.css";
 
 /**
@@ -95,6 +96,15 @@ export default function GlobalError({
                 Back home
               </a>
             </div>
+            <p className="mt-4 text-xs text-muted">
+              Still stuck?{" "}
+              <a
+                className="font-bold text-accent-ink underline underline-offset-2"
+                href={`mailto:${SUPPORT_EMAIL}`}
+              >
+                {SUPPORT_EMAIL}
+              </a>
+            </p>
           </div>
         </div>
       </body>

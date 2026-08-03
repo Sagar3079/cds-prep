@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { SUBJECTS, SUBJECT_LABEL, SUBJECT_SHORT, toSubject } from "@/lib/subject";
 import { getSubjectPref } from "@/lib/storage";
 import type { Subject } from "@/types";
@@ -229,7 +230,22 @@ export default function LeaderboardPage() {
           </button>
           <p className="text-xs leading-relaxed text-muted">
             Your address isn&apos;t verified yet and is never shown in full. It
-            is stored so your row survives a reload.
+            is stored so your row survives a reload. Joining means you agree to
+            the{" "}
+            <Link
+              href="/terms"
+              className="font-bold text-accent-ink underline underline-offset-2"
+            >
+              terms
+            </Link>{" "}
+            and the{" "}
+            <Link
+              href="/privacy"
+              className="font-bold text-accent-ink underline underline-offset-2"
+            >
+              privacy policy
+            </Link>
+            .
           </p>
         </form>
       )}

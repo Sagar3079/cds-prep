@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { SUPPORT_EMAIL } from "@/lib/legal";
 
 /**
  * Route-level error boundary. Only the failing segment is replaced — Navbar,
@@ -79,6 +80,18 @@ export default function Error({
             Back home
           </Link>
         </div>
+        {/* A crash with no way to tell anyone is a dead end. The report above
+            goes to `/api/log` and carries no identity, so it cannot tell us
+            which screen YOU were on — this is how a person adds that. */}
+        <p className="text-xs text-muted">
+          Still stuck?{" "}
+          <a
+            className="font-bold text-accent-ink underline underline-offset-2"
+            href={`mailto:${SUPPORT_EMAIL}`}
+          >
+            {SUPPORT_EMAIL}
+          </a>
+        </p>
       </div>
     </div>
   );
