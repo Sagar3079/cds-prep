@@ -1,0 +1,46 @@
+# Ships main to the VPS behind prepcadet.in.
+#
+# The workflow does not build, test or copy anything. It opens one SSH
+# connection, and the key it uses is pinned to a forced command in the server's
+# authorized_keys — so this job CANNOT run an arbitrary command on the box even
+# if the secret leaks. It can trigger a deploy. That is all it can do.
+#
+# The build, the health check and the rollback all live in /opt/cds-prep/deploy.sh
+# on the server, where they can see whether the site actually came back up.
+name: Deploy to prepcadet.in
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # so a deploy can be re-run without an empty commit
+
+concurrency:
+  # Two deploys at once would fight over the same working tree and the same
+  # systemd unit. Never cancel one in flight — it may be mid-rollback.
+  group: vps-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Trigger deploy over SSH
+        env:
+          KEY: ${{ secrets.VPS_DEPLOY_KEY }}
+          HOST: ${{ secrets.VPS_HOST }}
+          USER: ${{ secrets.VPS_USER }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/deploy
+          chmod 600 ~/.ssh/deploy
+          # Trust on first use is acceptable here only because the key is
+          # command-restricted: the worst a spoofed host learns is that a
+          # deploy was requested.
+          ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          # The remote command is ignored — authorized_keys forces deploy.sh.
+          # Its exit code is the job's: a failed build or a failed health check
+          # rolls back on the server AND fails here, so the red tick is honest.
+          ssh -i ~/.ssh/deploy -o BatchMode=yes -o ConnectTimeout=30 \
+              "$USER@$HOST" deploy
