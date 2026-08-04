@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { SUBJECTS, SUBJECT_LABEL, SUBJECT_SHORT, toSubject } from "@/lib/subject";
 import { getSubjectPref } from "@/lib/storage";
+import { formatScore } from "@/components/ScoreRing";
 import type { Subject } from "@/types";
 
 interface Row {
@@ -302,8 +303,19 @@ export default function LeaderboardPage() {
               {r.name}
               {r.isYou && <span className="ml-1.5 text-accent-ink">you</span>}
             </span>
-            <span className="shrink-0 font-extrabold tabular-nums text-ink">
-              {r.score.toFixed(2)}
+            {/* Negative marking is real on this board, not just on the results
+                screen — a run with more wrong guesses than right answers nets
+                below zero, and it was rendering in the same plain ink as
+                everyone else's. `err-ink` is the same tone the results page
+                and the ring already use for a negative score, so a row that
+                went red here reads the same way it did when the run itself
+                finished. */}
+            <span
+              className={`shrink-0 font-extrabold tabular-nums ${
+                r.score < 0 ? "text-err-ink" : "text-ink"
+              }`}
+            >
+              {formatScore(r.score)}
             </span>
           </div>
         ))}

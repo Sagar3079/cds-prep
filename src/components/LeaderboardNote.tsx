@@ -42,7 +42,7 @@ export type SubmitOutcome =
   | { state: "not-counted"; reason: string }
   /** 401 — no session cookie. */
   | { state: "signed-out" }
-  /** 4xx the route explained, e.g. 422 for implausible timing. */
+  /** Any other 4xx the route explained in its own `error`/`reason` field. */
   | { state: "rejected"; reason: string }
   /** 429. */
   | { state: "throttled" }

@@ -9,13 +9,10 @@ import { boardKey, boardNameKey, istDay } from "../leaderboard/route";
 
 /** Two days, so a board outlives the IST day it belongs to and then goes. */
 const BOARD_TTL = 2 * 86400;
-/** Below this, nobody read ten questions. Ten seconds each is already brisk. */
-const MIN_SECONDS = 100;
 
 interface Body {
   /** Question id and the TEXT of the option chosen — see below. */
   answers?: { id?: unknown; chose?: unknown }[];
-  seconds?: unknown;
   /** Which board this run belongs to. Unrecognised or absent means english. */
   subject?: unknown;
 }
@@ -64,14 +61,6 @@ export async function POST(req: Request) {
   const submitted = Array.isArray(body.answers) ? body.answers : null;
   if (!submitted || submitted.length === 0 || submitted.length > 50) {
     return NextResponse.json({ error: "Nothing to score." }, { status: 400 });
-  }
-
-  const seconds = typeof body.seconds === "number" ? body.seconds : 0;
-  if (!Number.isFinite(seconds) || seconds < MIN_SECONDS || seconds > MARKING.durationSec + 60) {
-    return NextResponse.json(
-      { error: "That run's timing doesn't add up, so it isn't eligible for the board." },
-      { status: 422 },
-    );
   }
 
   const subject = toSubject(body.subject);
