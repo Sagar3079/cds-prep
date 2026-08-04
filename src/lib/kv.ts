@@ -57,4 +57,22 @@ export const kv = {
   zscore: (key: string, member: string) => cmd<string>("ZSCORE", key, member),
   zrevrank: (key: string, member: string) =>
     cmd<number>("ZREVRANK", key, member),
+  /**
+   * One page of a key scan: `[nextCursor, keys]`.
+   *
+   * Cursored on purpose — there is no `KEYS` here and there should not be, as
+   * it blocks the store for as long as it takes to walk every key. Callers
+   * must loop, and must bound their loop.
+   */
+  scan: async (cursor: string, match: string, count = 1000) => {
+    const r = await cmd<[string, string[]]>(
+      "SCAN",
+      cursor,
+      "MATCH",
+      match,
+      "COUNT",
+      count,
+    );
+    return r ?? ["0", [] as string[]];
+  },
 };

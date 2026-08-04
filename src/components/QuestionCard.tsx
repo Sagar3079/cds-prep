@@ -339,14 +339,19 @@ export default function QuestionCard({
   );
 
   // Never promise a highlight we did not render.
+  // Kept short deliberately. "Select the word nearest in meaning to the
+  // highlighted word" wrapped to two lines at 360px, and those two lines were
+  // enough to push the fourth option under the fold on a timed screen. The
+  // highlight already says which word; the instruction only has to say what to
+  // do with it.
   const prompt = isSynAnt
     ? targetRange
       ? isAntonym
-        ? "Select the word opposite in meaning to the highlighted word"
-        : "Select the word nearest in meaning to the highlighted word"
+        ? "Pick the opposite of the highlighted word"
+        : "Pick the closest meaning to the highlighted word"
       : isAntonym
-        ? "Select the option most nearly opposite in meaning"
-        : "Select the option closest in meaning"
+        ? "Pick the option most nearly opposite in meaning"
+        : "Pick the option closest in meaning"
     : isImprovement
       ? targetRange
         ? "Choose the best replacement for the highlighted part"

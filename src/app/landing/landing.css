@@ -1,0 +1,990 @@
+/* ============================================================
+   LANDING — its own world, scoped entirely under `.lp`.
+   ============================================================
+   Ads for this page run on MOBILE ONLY, so there is exactly ONE layout here
+   and it is the phone's. No `min-width` breakpoints, no fluid `vw` type: the
+   column is capped at 430px and every size is fixed, so a 1440px laptop gets
+   the same page a handset does, centred on the ground. What you approve in a
+   preview is byte-for-byte what a candidate receives.
+
+   Direction: deep navy ground with brass. Gold on navy is officer dress
+   uniform — braid, buttons, medals — which is the thing the reader is actually
+   working towards, and it gives a warm accent against a cool dark instead of
+   the cold blue-on-black every exam app already uses. The gold is spent only
+   on what you should touch.
+
+   Motion budget: transform and opacity. No filter transitions, no shadow
+   animation, nothing that repaints on a mid-range Android.
+   ============================================================ */
+
+.lp {
+  --bg: #060a16;
+  --bg-2: #0a1122;
+  --card: #101a31;
+  --card-2: #16223e;
+  --line: #22304f;
+  --line-2: #33456d;
+
+  --ink: #f3f6ff;
+  --muted: #98a6c8;
+  --dim: #6b7a9e;
+
+  /* The one loud colour. Brass. */
+  --gold: #ffb627;
+  --gold-hot: #ffc94d;
+  --gold-soft: rgba(255, 182, 39, 0.14);
+  --on-gold: #1c1102;
+
+  --ok: #2fe08a;
+  --ok-soft: rgba(47, 224, 138, 0.13);
+  --bad: #ff5c6b;
+  --bad-soft: rgba(255, 92, 107, 0.13);
+
+  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+  /* Slight overshoot, for confirmations ONLY — the answer landing, the mark
+     arriving. Never on a hover or a scroll reveal, where overshoot reads as
+     rubbery rather than alive. */
+  --pop: cubic-bezier(0.3, 1.5, 0.5, 1);
+  /* The phone column, at every viewport. Capped, not fluid. */
+  --col: min(430px, 100% - 2.25rem);
+
+  position: relative;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ambient light, fixed behind everything. Two soft pools rather than a
+   gradient wash, so the page has a light source instead of a tint. */
+.lp::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 34rem at 78% -6%, rgba(255, 182, 39, 0.11), transparent 62%),
+    radial-gradient(52rem 40rem at 8% 6%, rgba(52, 96, 200, 0.16), transparent 66%);
+}
+.lp > * { position: relative; z-index: 1; }
+
+.wrap { width: var(--col); margin-inline: auto; }
+
+/* ---- type ----
+   Display is a single heavy condensed face set tight and huge: this is a
+   poster, and a poster's headline is the artwork. Body is a rounder grotesk so
+   the reading copy stays warm next to it. Mono carries numbers only. */
+.lp h1,
+.lp h2,
+.lp .display {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 0.88;
+  letter-spacing: 0.005em;
+  text-wrap: balance;
+}
+.lp h3 {
+  font-family: var(--font-body), sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.mono { font-family: var(--font-mono), ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.lede {
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 44ch;
+  text-wrap: pretty;
+}
+
+/* ---- live countdown ---- */
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 100px;
+  border: 1px solid var(--line-2);
+  background: rgba(16, 26, 49, 0.7);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.live-dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 0 0 var(--ok-soft);
+  animation: ping 2s var(--ease) infinite;
+}
+@keyframes ping {
+  0% { box-shadow: 0 0 0 0 rgba(47, 224, 138, 0.5); }
+  70% { box-shadow: 0 0 0 0.5rem rgba(47, 224, 138, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(47, 224, 138, 0); }
+}
+.live-clock { color: var(--ink); font-family: var(--font-mono), monospace; font-variant-numeric: tabular-nums; }
+
+/* ---- buttons ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 3.25rem;
+  padding: 0.9rem 1.6rem;
+  border-radius: 0.8rem;
+  font-family: var(--font-body), sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  transition: transform 0.18s var(--ease), background-color 0.18s var(--ease),
+    box-shadow 0.24s var(--ease);
+}
+.btn--go {
+  background: var(--gold);
+  color: var(--on-gold);
+  box-shadow: 0 10px 30px -12px rgba(255, 182, 39, 0.55);
+}
+.btn--go:hover { background: var(--gold-hot); transform: translateY(-2px); }
+.btn--go:active { transform: translateY(0) scale(0.99); }
+.btn--ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line-2);
+}
+.btn--ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn--wide { width: 100%; }
+
+/* ---- nav ---- */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: var(--col);
+  margin-inline: auto;
+  padding: 1rem 0 0;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.75rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.brand i {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  background: var(--gold);
+  color: var(--on-gold);
+  font-style: normal;
+  font-size: 1rem;
+}
+
+/* ---- hero ---- */
+.hero { padding: 1.25rem 0 2.25rem; }
+/* Sized so the whole hero — headline, promise, button, reassurance — clears a
+   664px phone AND leaves the top of the question card showing. That last part
+   is the point: a visible card edge is what makes the next scroll happen, and
+   the card is where this page actually converts.
+   Line-height a touch looser than the display default; at 0.88 the descender
+   of one line of Anton caps sat on the next line's cap-height. */
+/* Fixed, not fluid. Every `vw` unit in this file was sizing type against the
+   WINDOW while the column is pinned at 430px — so on a 1440px laptop the
+   headline grew to 88px inside a 430px column and wrapped to four lines. With
+   one fixed-width layout the type is fixed too, and the page renders
+   identically at every width, which is the entire point. */
+.hero h1 {
+  margin: 0.7rem 0 0;
+  font-size: 2.3rem;
+  line-height: 0.94;
+}
+.hero h1 em { font-style: normal; color: var(--gold); }
+
+/* ---- headline, word by word ----
+   Each word arrives from behind the screen on its own beat. Ten words at 55ms
+   is under 600ms total, so the sentence still reads as one gesture rather than
+   a list being typed out. */
+.words .w {
+  display: inline-block;
+  /* The word gap has to be a MARGIN. `display: inline-block` collapses the
+     trailing whitespace inside the span, so "Ten minutes a day" rendered as
+     "TENMINUTESADAY" — the spaces were in the markup and thrown away by the
+     box model. */
+  margin-right: 0.16em;
+  opacity: 0;
+  transform: translate3d(0, 0.5em, -80px) rotateX(-30deg);
+  animation: wordIn 0.62s var(--ease) forwards;
+  animation-delay: calc(var(--i) * 55ms + 80ms);
+  transform-origin: 50% 100%;
+}
+@keyframes wordIn {
+  to { opacity: 1; transform: translate3d(0, 0, 0) rotateX(0deg); }
+}
+
+/* ---- the three objections ----
+   Free, no account, no install: the reasons a cold visitor does not tap. They
+   were a line of grey small print under the button; now they are the second
+   thing on the page after the headline, because they are what the headline is
+   competing against. */
+.claims {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.claim {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.65rem 0.5rem;
+  border-radius: 0.7rem;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  text-align: center;
+}
+.claim b {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 400;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--ink);
+}
+.claim span { font-size: 0.6875rem; line-height: 1.25; color: var(--muted); }
+/* The free one carries the accent — it is the single strongest thing on the
+   page, and the only claim worth spending colour on. */
+.claim--free {
+  border-color: var(--gold);
+  background: linear-gradient(165deg, rgba(255, 182, 39, 0.13), var(--bg-2) 70%);
+}
+.claim--free b { color: var(--gold); }
+.claim--free span { color: var(--gold-hot); }
+.hero .lede { margin: 1.1rem 0 0; }
+.hero-cta { margin-top: 1.4rem; display: grid; gap: 0.6rem; }
+.hero-note { margin: 0.9rem 0 0; font-size: 0.8125rem; color: var(--dim); }
+
+/* ---- the try-it card ----
+   The centre of the page. Deliberately the brightest surface on it. */
+.try {
+  margin-top: 1.4rem;
+  padding: 1.1rem 1rem 1rem;
+  border-radius: 1.15rem;
+  border: 1px solid var(--line-2);
+  background: linear-gradient(168deg, var(--card-2), var(--card));
+  box-shadow: 0 30px 70px -35px rgba(0, 0, 0, 0.95);
+}
+.try-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.try-tag {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  padding: 0.25rem 0.55rem;
+}
+.try-rule {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.6875rem;
+  color: var(--dim);
+}
+.try-rule b { color: var(--ok); font-weight: 500; }
+.try-rule b + i + b { color: var(--bad); }
+.try-rule i { font-style: normal; opacity: 0.5; margin: 0 0.15rem; }
+
+/* The task. Gold, because it is an instruction and the eye has to find it
+   before the sentence, not after the options. */
+.try-task {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.85rem 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.try-task span { font-size: 0.625rem; opacity: 0.8; }
+
+.try-stem {
+  margin: 0 0 1rem;
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  font-weight: 600;
+  color: var(--ink);
+}
+.try-stem mark {
+  background: var(--gold-soft);
+  color: var(--gold-hot);
+  border-bottom: 2px solid var(--gold);
+  border-radius: 0.2rem;
+  padding: 0.04em 0.18em;
+}
+
+.try-opts { display: grid; gap: 0.45rem; }
+.try-opt {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.65rem 0.75rem;
+  text-align: left;
+  border-radius: 0.7rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--muted);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.16s var(--ease), background-color 0.16s var(--ease),
+    transform 0.16s var(--ease), color 0.16s var(--ease);
+}
+.try-opt:hover:not(:disabled) { border-color: var(--line-2); color: var(--ink); }
+.try-opt:active:not(:disabled) { transform: scale(0.99); }
+.try-opt:disabled { cursor: default; }
+.try-key {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.4rem;
+  border: 1px solid var(--line-2);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.6875rem;
+  color: var(--dim);
+}
+.try-text { flex: 1 1 auto; min-width: 0; }
+.try-mark {
+  flex: none;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.try-mark--ok { color: var(--ok); }
+.try-mark--bad { color: var(--bad); }
+
+.try-opt.is-right {
+  border-color: rgba(47, 224, 138, 0.55);
+  background: var(--ok-soft);
+  color: var(--ink);
+}
+.try-opt.is-right .try-key { background: var(--ok); border-color: transparent; color: #04170d; }
+.try-opt.is-wrong {
+  border-color: rgba(255, 92, 107, 0.55);
+  background: var(--bad-soft);
+  color: var(--ink);
+}
+.try-opt.is-wrong .try-key { background: var(--bad); border-color: transparent; color: #1b0407; }
+.try-opt.is-dim { opacity: 0.4; }
+
+.try-out { margin-top: 0.85rem; }
+.try-hint { margin: 0; font-size: 0.8125rem; color: var(--dim); text-align: center; }
+.try-verdict { margin: 0 0 0.75rem; font-size: 0.9375rem; line-height: 1.55; color: var(--muted); }
+.try-verdict-ok { color: var(--ok); }
+.try-verdict-bad { color: var(--bad); }
+.try-cta { width: 100%; }
+/* The card grows when the verdict arrives; easing the height stops the page
+   from jumping under a thumb that has just tapped. */
+.try { transition: border-color 0.3s var(--ease); }
+.try--done { border-color: var(--line-2); }
+
+/* ---- sections ---- */
+.sec { padding: 3rem 0; }
+.sec + .sec { border-top: 1px solid var(--line); }
+.sec-head { margin-bottom: 1.5rem; }
+.sec-head h2 { margin: 0.7rem 0 0; font-size: 2.15rem; }
+.sec-head h2 em { font-style: normal; color: var(--gold); }
+.sec-head .lede { margin: 0.9rem 0 0; }
+
+/* ---- numbers band ---- */
+.figs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+.fig {
+  padding: 1.1rem 0.65rem;
+  border-radius: 0.9rem;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  text-align: center;
+}
+.fig-n {
+  display: block;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.85rem;
+  line-height: 1;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+.fig-l {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.6875rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+/* ---- feature rows ---- */
+.rows { display: grid; gap: 0.6rem; }
+/* Icon beside the text, not stacked above it. Stacked, each of these was most
+   of a phone screen for one sentence — three of them ran to two and a half
+   screens of scroll to say three things. */
+.row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 0.85rem;
+  padding: 1rem;
+  border-radius: 0.9rem;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+}
+.row-ico {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.6rem;
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+.row h3 { margin: 0 0 0.2rem; font-size: 0.9375rem; }
+.row p { margin: 0; font-size: 0.8125rem; line-height: 1.55; color: var(--muted); }
+
+/* ---- proof strip: a real streak + rank, as the app draws them ---- */
+.proof {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 1.25rem;
+}
+.proof-cell {
+  padding: 1rem;
+  border-radius: 0.9rem;
+  border: 1px solid var(--line);
+  background: var(--card);
+}
+.proof-k {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.proof-v {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.9rem;
+  line-height: 1;
+  color: var(--ink);
+}
+.proof-v small { font-family: var(--font-body), sans-serif; font-size: 0.75rem; font-weight: 600; color: var(--muted); }
+
+/* ---- pricing ---- */
+.plans { display: grid; gap: 0.6rem; grid-template-columns: repeat(2, 1fr); }
+.plan {
+  display: flex;
+  flex-direction: column;
+  padding: 1.15rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+}
+.plan--free {
+  grid-column: 1 / -1;
+  border-color: var(--gold);
+  background: linear-gradient(160deg, rgba(255, 182, 39, 0.1), var(--bg-2) 60%);
+}
+.plan-n { font-family: var(--font-display), sans-serif; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.plan-p {
+  margin: 0.55rem 0 0.15rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: 2.1rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.plan--free .plan-p { color: var(--gold); }
+.plan-sub { font-size: 0.75rem; color: var(--dim); }
+.plan ul { margin: 0.9rem 0 0; padding: 0; list-style: none; display: grid; gap: 0.4rem; }
+.plan li { display: flex; gap: 0.5rem; font-size: 0.8125rem; line-height: 1.5; color: var(--muted); }
+.plan li svg { flex: none; margin-top: 0.2rem; color: var(--ok); }
+.plan-foot { margin-top: auto; padding-top: 1.1rem; }
+.plan-link { font-size: 0.8125rem; font-weight: 700; color: var(--gold); min-height: 2.75rem; display: inline-flex; align-items: center; }
+
+/* ---- faq ---- */
+.faq { display: grid; gap: 0.5rem; }
+.faq details {
+  border: 1px solid var(--line);
+  border-radius: 0.85rem;
+  background: var(--bg-2);
+  overflow: hidden;
+}
+.faq summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3.25rem;
+  padding: 0.9rem 1.1rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: "+";
+  font-family: var(--font-mono), monospace;
+  font-size: 1.2rem;
+  color: var(--gold);
+  transition: transform 0.22s var(--ease);
+}
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq-a { padding: 0 1.1rem 1.1rem; font-size: 0.875rem; line-height: 1.65; color: var(--muted); }
+
+/* ---- closing ---- */
+.close { text-align: center; padding: 3.5rem 0 4rem; border-top: 1px solid var(--line); }
+.close h2 { font-size: 2.6rem; }
+.close h2 em { font-style: normal; color: var(--gold); }
+.close .lede { margin: 1rem auto 0; }
+.close .btn { margin-top: 1.5rem; }
+
+/* ---- footer ---- */
+.foot { border-top: 1px solid var(--line); padding: 1.75rem 0 7rem; font-size: 0.75rem; color: var(--dim); }
+.foot-nav { display: flex; flex-wrap: wrap; gap: 0 0.4rem; margin-bottom: 0.5rem; }
+.foot-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 0.5rem;
+  color: var(--muted);
+}
+.foot-nav a:hover { color: var(--gold); }
+.foot p { margin: 0.3rem 0 0; line-height: 1.6; }
+.foot a.mail { display: inline-block; padding: 0.6rem 0; color: var(--muted); }
+
+/* ---- sticky dock ----
+   The CTA that actually gets tapped: on a page this long the hero button is
+   off-screen for almost the whole session. */
+.dock {
+  position: fixed;
+  /* Centred and phone-width, not edge-to-edge. On a laptop a full-bleed bar
+     under a 430px column reads as a broken desktop layout; a bar the same
+     width as the column reads as the bottom of a phone, which is the whole
+     point. On a phone the two are identical anyway. */
+  left: 50%;
+  transform: translateX(-50%) translateY(115%);
+  width: min(430px, 100%);
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1.1rem calc(0.65rem + env(safe-area-inset-bottom));
+  background: rgba(6, 10, 22, 0.94);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--line-2);
+  border-bottom: 0;
+  border-radius: 1rem 1rem 0 0;
+  transition: transform 0.32s var(--ease);
+}
+.dock[data-shown="true"] { transform: translateX(-50%) translateY(0); }
+.dock-copy { flex: 1 1 auto; min-width: 0; font-size: 0.6875rem; line-height: 1.3; color: var(--muted); }
+.dock-copy b {
+  display: block;
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--ink);
+}
+.dock .btn { flex: none; min-height: 2.9rem; padding: 0.7rem 1.15rem; font-size: 0.9375rem; }
+
+/* ---- focus ---- */
+.lp a:focus-visible,
+.lp button:focus-visible,
+.lp summary:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 0.4rem;
+}
+
+/* ============================================================
+   MOTION — 3D, and only transform/opacity.
+   ============================================================
+   Nothing here animates a property that repaints. No filter, no box-shadow,
+   no width/height. That is what lets a real perspective scene run at 60fps on
+   a mid-range Android, which is the device this campaign is buying.
+
+   Every effect is off under `prefers-reduced-motion` and every element that
+   moves is fully visible without JS. ============================================================ */
+
+/* ---- entrance ----
+   Not a fade-up. Elements arrive from BEHIND the screen and rotate flat, so
+   the page reads as a stack of planes rather than a document. */
+.rise {
+  opacity: 0;
+  transform: perspective(900px) translate3d(0, 26px, -60px) rotateX(-9deg);
+  transition: opacity 0.75s var(--ease), transform 0.75s var(--ease);
+  transform-origin: 50% 100%;
+}
+.rise.is-in { opacity: 1; transform: perspective(900px) translate3d(0, 0, 0) rotateX(0deg); }
+
+/* ---- the hero deck ----
+   A real 3D scene: the face card sits in front of two ghosts at negative Z, so
+   they occlude correctly and the tilt is genuine rotation rather than two
+   layers sliding at different speeds. */
+/* The scene needs room around the card: a rotated plane is WIDER than its own
+   box, and `overflow-x: clip` on `.lp` was slicing the far edge and the chip
+   hung outside it. Inset the deck rather than widen the page. */
+.stage {
+  perspective: 1300px;
+  perspective-origin: 50% 42%;
+  position: relative;
+  padding: 0.5rem 1.1rem;
+  margin-inline: -0.35rem;
+}
+.deck {
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--rx, 4deg)) rotateY(var(--ry, -7deg)) translateZ(0);
+  transition: transform 0.6s var(--ease);
+  will-change: transform;
+}
+.deck[data-live="true"] { transition: none; }
+/* The ghosts. Purely structural — they say "there is a stack of these". */
+.deck-ghost {
+  position: absolute;
+  inset: 0;
+  border-radius: 1.15rem;
+  border: 1px solid var(--line);
+  background: linear-gradient(168deg, var(--card-2), var(--card));
+  pointer-events: none;
+}
+.deck-ghost--1 { transform: translate3d(0, -0.7rem, -70px) scale(0.975); opacity: 0.55; }
+.deck-ghost--2 { transform: translate3d(0, -1.4rem, -140px) scale(0.95); opacity: 0.28; }
+.deck > .try { transform: translateZ(0); }
+
+/* ---- the companions ----
+   Potter and Kuromi peer at the question over the card's top edge, exactly as
+   they do on every card inside the app — so the advert and the product share a
+   face, and a visitor who taps recognises where they have landed.
+
+   BEHIND the deck in Z so only their heads clear the card, and they bob on
+   opposite phases so the pair never moves as one object. */
+/* Anchored to the band the stage reserves above the card, NOT to the stage's
+   own top edge — at `top: -0.15rem` on a zero-height box they floated up out
+   of the scene entirely and landed on the call to action. */
+.cast {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5.6rem;
+  z-index: 0;
+  pointer-events: none;
+}
+.cast-one {
+  position: absolute;
+  /* Below the band's baseline, so the card's top edge cuts them at the chest
+     and only heads and hands clear it — the app's own perch, exactly. */
+  bottom: -1.1rem;
+  display: block;
+  transform-origin: 50% 100%;
+}
+.cast-one--l { left: 1.6rem; animation: bobA 4.2s ease-in-out infinite; }
+.cast-one--r { right: 1.6rem; animation: bobB 4.8s ease-in-out infinite; }
+@keyframes bobA {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-5px) rotate(1deg); }
+}
+@keyframes bobB {
+  0%, 100% { transform: translateY(-4px) rotate(2deg); }
+  50% { transform: translateY(1px) rotate(-1.5deg); }
+}
+/* ---- what they say ----
+   Small, opposite corners, and staggered in so the two never speak at once —
+   a pair of bubbles appearing together reads as a banner, one after the other
+   reads as a conversation. */
+.say {
+  position: absolute;
+  bottom: 78%;
+  width: max-content;
+  max-width: 8.5rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.6rem 0.6rem 0.6rem 0.15rem;
+  border: 1px solid var(--line-2);
+  background: rgba(16, 26, 49, 0.96);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ink);
+  opacity: 0;
+  transform: translateY(6px) scale(0.9);
+  animation: sayIn 0.5s var(--pop) forwards;
+  transform-origin: 0 100%;
+}
+.say--l { left: 60%; animation-delay: 1.5s; }
+.say--r {
+  right: 60%;
+  border-radius: 0.6rem 0.6rem 0.15rem 0.6rem;
+  transform-origin: 100% 100%;
+  color: var(--gold);
+  border-color: var(--gold);
+  animation-delay: 2.4s;
+}
+@keyframes sayIn {
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Room for the heads AND their bubbles above the card. */
+.stage { padding-top: 5.6rem; }
+.deck { z-index: 1; }
+
+/* Chips pinned in FRONT of the card — the depth cue that sells the scene,
+   because they are visibly nearer the viewer than the card face. */
+.chip3d {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--line-2);
+  background: rgba(10, 17, 34, 0.94);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 16px 34px -14px rgba(0, 0, 0, 0.95);
+}
+.chip3d--ok {
+  top: 16%;
+  right: 0.35rem;
+  color: var(--ok);
+  transform: translateZ(75px);
+  animation: floatA 5.5s ease-in-out infinite;
+}
+.chip3d--bad {
+  bottom: 34%;
+  left: 0.35rem;
+  color: var(--bad);
+  transform: translateZ(105px);
+  animation: floatB 6.5s ease-in-out infinite;
+}
+/* Once an answer is in, the chips have done their job — they were explaining
+   the marking to someone who had not felt it yet. The card also grows by the
+   height of the verdict at that moment, which walked the lower chip straight
+   over the text. Retire them. */
+.deck:has(.try--done) .chip3d {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s var(--ease);
+}
+@keyframes floatA {
+  0%, 100% { transform: translateZ(75px) translateY(0); }
+  50% { transform: translateZ(75px) translateY(-7px); }
+}
+@keyframes floatB {
+  0%, 100% { transform: translateZ(105px) translateY(0); }
+  50% { transform: translateZ(105px) translateY(6px); }
+}
+
+/* ---- option tap, in 3D ----
+   The chosen row comes toward you and the rest fall away. On a touch screen
+   this is the entire feedback loop, so it has to feel like something moved,
+   not like a colour changed. */
+.try-opt { transform-style: preserve-3d; will-change: transform; }
+.try-opt.is-right {
+  animation: popIn 0.5s var(--pop) both;
+  z-index: 2;
+}
+.try-opt.is-wrong { animation: nudge 0.42s var(--ease) both; }
+.try-opt.is-dim { transform: translateZ(-26px) scale(0.985); opacity: 0.35; }
+@keyframes popIn {
+  0% { transform: translateZ(0) scale(1); }
+  55% { transform: translateZ(34px) scale(1.035); }
+  100% { transform: translateZ(18px) scale(1); }
+}
+@keyframes nudge {
+  0%, 100% { transform: translateX(0); }
+  22% { transform: translateX(-6px); }
+  55% { transform: translateX(5px); }
+  80% { transform: translateX(-2px); }
+}
+/* The mark lands after the row moves, so the two read as cause and effect. */
+.try-mark { animation: markIn 0.42s var(--pop) 0.14s both; }
+@keyframes markIn {
+  0% { opacity: 0; transform: translateX(10px) scale(0.7); }
+  100% { opacity: 1; transform: none; }
+}
+.try-out .try-verdict,
+.try-out .try-cta { animation: riseIn 0.5s var(--ease) both; }
+.try-out .try-cta { animation-delay: 0.1s; }
+@keyframes riseIn {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* ---- CTA sheen ----
+   One slow pass of light across the button. Long gap between passes so it
+   reads as a material catching the light, not a banner ad blinking. */
+.btn--go { position: relative; overflow: hidden; }
+.btn--go::after {
+  content: "";
+  position: absolute;
+  top: -60%;
+  bottom: -60%;
+  width: 45%;
+  left: -60%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    rgba(255, 255, 255, 0.42),
+    transparent
+  );
+  transform: skewX(-18deg);
+  animation: sheen 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes sheen {
+  0%, 62% { left: -60%; }
+  92%, 100% { left: 130%; }
+}
+
+/* ---- feature rows turn in as they arrive ---- */
+.rows { perspective: 1000px; }
+.row {
+  transform-style: preserve-3d;
+  transition: transform 0.4s var(--ease), border-color 0.4s var(--ease);
+}
+.row.rise { transform: perspective(900px) translate3d(0, 22px, -70px) rotateY(-10deg); }
+.row.rise.is-in { transform: perspective(900px) translate3d(0, 0, 0) rotateY(0deg); }
+.row:hover { transform: translateZ(14px); border-color: var(--line-2); }
+
+/* ---- numbers flip up ---- */
+.figs { perspective: 900px; }
+.fig { transform-style: preserve-3d; }
+.fig.rise { transform: perspective(800px) rotateX(-22deg) translateZ(-40px); }
+.fig.rise.is-in { transform: perspective(800px) rotateX(0deg) translateZ(0); }
+
+/* ---- ambient light drift ---- */
+.lp::before { animation: drift 22s ease-in-out infinite alternate; }
+@keyframes drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(-2.5%, 1.5%, 0) scale(1.06); }
+}
+
+/* ---- the floor ----
+   A perspective grid receding to a horizon, fixed behind the content, so
+   scrolling moves the reader through a space rather than down a page. */
+.floor {
+  position: fixed;
+  left: 50%;
+  bottom: -26vh;
+  width: 320vw;
+  height: 80vh;
+  z-index: 0;
+  pointer-events: none;
+  transform: translateX(-50%) perspective(55vh) rotateX(74deg);
+  transform-origin: 50% 100%;
+  background-image:
+    linear-gradient(to right, var(--line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+  background-size: 5rem 5rem;
+  -webkit-mask-image: linear-gradient(to top, #000, transparent 74%);
+  mask-image: linear-gradient(to top, #000, transparent 74%);
+  opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .words .w, .say { opacity: 1; transform: none; animation: none; }
+  .cast-one--l, .cast-one--r { animation: none; }
+  .rise,
+  .row.rise,
+  .fig.rise { opacity: 1; transform: none; }
+  .deck { transform: none; }
+  .chip3d--ok, .chip3d--bad, .lp::before, .btn--go::after { animation: none; }
+  .btn--go::after { display: none; }
+  .try-opt.is-right, .try-opt.is-wrong, .try-mark,
+  .try-out .try-verdict, .try-out .try-cta { animation: none; }
+  .try-opt.is-dim { transform: none; }
+}
+
+/* ============================================================
+   ONE LAYOUT: THE PHONE. AT EVERY WIDTH.
+   ============================================================
+   There are deliberately NO `min-width` breakpoints in this file.
+
+   The ads for this page run on mobile only, so a desktop layout is a second
+   design to build, review and keep correct that no one in the campaign will
+   ever see — and every hour spent on it is an hour not spent on the layout
+   that gets the clicks. So the phone layout IS the layout. On a laptop the
+   column simply centres on the dark ground and the page looks like what it
+   is: something made for a handset.
+
+   The practical consequences are all upside: what you approve in a preview is
+   byte-for-byte what a candidate gets, the sticky dock is always the CTA, and
+   there is exactly one set of measurements to reason about.
+
+   If a desktop layout is ever wanted, it belongs in `min-width` blocks added
+   below this comment — not by widening the tokens above, which would quietly
+   change the phone. */
+.wrap,
+.nav {
+  /* A phone-width column, capped. 430px is the large-phone width the check
+     script exercises; past that the column stops growing and centres. */
+  max-width: 430px;
+}
+/* The dock is the CTA at every width now, because every width is a phone. */
+.foot { padding-bottom: 7rem; }
+
+/* ---- join line ----
+   Under the card's CTA. Quiet: it is reassurance, not a second call to
+   action, and it must never compete with the button above it. */
+.joinline {
+  margin: 0.7rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--muted);
+}
+.joinline b { color: var(--gold); font-weight: 800; }

@@ -54,7 +54,9 @@ export default async function TestPage({
     // pb-2, not pb-6: during a run the sticky Prev/Next/Submit bar sits at
     // `bottom: 0` and paints over whatever is beneath it, so full bottom
     // padding under that bar is dead scroll height the phone cannot spare.
-    <div className="px-4 pt-6 pb-2">
+    // `run-page` is the hook globals.css uses to trim this top padding at phone
+    // width — a class, not a utility, because the rule has to win against one.
+    <div className="run-page px-4 pt-6 pb-2">
       <TestClient questions={questions} mode={mode} subject={subject} />
     </div>
   );

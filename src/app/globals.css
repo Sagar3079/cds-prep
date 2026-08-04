@@ -452,11 +452,32 @@ body {
    and they were saying "REMAINING" beside a clock that is visibly counting
    down. */
 @media (max-width: 620px) {
+  /* The run's own top padding. `pt-6` is right for a screen you read and too
+     generous for one you are timed on — at 360px a two-line stem plus a
+     two-line instruction already pushed the fourth option under the fold, and
+     24px of air above a clock is the cheapest 12 of them to give back. */
+  .panel-body > main > .run-page { padding-top: 0.75rem; }
+  /* Same argument for the gaps between the run's three blocks and for the
+     action bar's own padding. Nothing is removed and no hit area shrinks —
+     the 44px minimum on every button is untouched; this is air.
+     Deliberately NOT touching the 80px reserved above the run header: that
+     reserve is what stops the scroller shearing the companion's head, which
+     was a real bug once and is not worth reintroducing for 80 pixels. */
+  .run-page .shell.space-y-4 > * + * { margin-top: 0.75rem; }
+  .run-page .sticky.bottom-0 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+
+  /* The companion stays; his commentary does not — DURING A RUN, on a phone
+     only. The bubble needs an 80px band held open above the clock, and on a
+     360px screen that band is what pushes the fourth option under the fold
+     while a clock is running. Chatter is not worth an answer you cannot see.
+     He keeps his moods and his perch, and he talks again on the review screen,
+     where nothing is timed. `TestClient` drops the band on the same query. */
+  .run-page .potter-thought { display: none; }
   .run-head {
     flex-direction: row;
     align-items: center;
     gap: 0.875rem;
-    padding: 0.75rem 0.9375rem;
+    padding: 0.625rem 0.9375rem;
   }
   .run-head .ring-wrap { width: 60px; height: 60px; margin-inline: 0; flex: none; }
   .run-head .ring-time { font-size: 1rem; letter-spacing: -0.02em; }

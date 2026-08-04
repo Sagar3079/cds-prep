@@ -33,6 +33,12 @@ import {
   type AttemptMode,
 } from "@/lib/storage";
 import { masteryKey, SUBJECT_LABEL } from "@/lib/subject";
+import {
+  onPotterVisibleChange,
+  onThoughtsChange,
+  potterVisible,
+  thoughtsOn,
+} from "@/lib/potterPrefs";
 import Link from "next/link";
 
 const PROGRESS_VERSION = 1;
@@ -205,6 +211,33 @@ export default function TestClient({
   const [lastPick, setLastPick] = useState<{ idx: number; at: number } | null>(
     null,
   );
+  /**
+   * Whether to hold open the band the companion's thought bubble needs.
+   *
+   * Starts true so the server HTML and the first client render agree — the
+   * preference lives in localStorage, which the server cannot read — and is
+   * corrected on mount. Reserving the band and then dropping it is the right
+   * way round: the alternative reflows the question DOWN a moment after paint.
+   */
+  const [coachRoom, setCoachRoom] = useState(true);
+  useEffect(() => {
+    // Narrow phones do not open the bubble during a run at all — see the
+    // `.run-page .potter-thought` rule in globals.css — so they must not
+    // reserve the band for it either. 620px matches that rule; keep them
+    // together or the band comes back with nothing in it.
+    const narrow = window.matchMedia("(max-width: 620px)");
+    const sync = () =>
+      setCoachRoom(potterVisible() && thoughtsOn() && !narrow.matches);
+    sync();
+    const a = onPotterVisibleChange(sync);
+    const b = onThoughtsChange(sync);
+    narrow.addEventListener("change", sync);
+    return () => {
+      a();
+      b();
+      narrow.removeEventListener("change", sync);
+    };
+  }, []);
 
   const questionRef = useRef<HTMLElement>(null);
   const submitRef = useRef<HTMLButtonElement>(null);
@@ -660,8 +693,18 @@ export default function TestClient({
 
           `mb`, not `mt` on the block below: the shell uses `space-y-4`, which
           sets margin-TOP on every later sibling, and two margin-top utilities
-          on one element is a specificity coin-toss. */}
-      <div className="mb-20 flex items-baseline justify-between gap-3 flex-wrap">
+          on one element is a specificity coin-toss.
+
+          Conditional, because the band is FOR the bubble. It was unconditional,
+          so turning the companion off in Settings still cost 80px of a 737px
+          phone — an eighth of the screen held open for something that had been
+          switched off, which on a 360px device is the difference between the
+          fourth option being on screen and under the fold. */}
+      <div
+        className={`flex items-baseline justify-between gap-3 flex-wrap ${
+          coachRoom ? "mb-20" : "mb-2"
+        }`}
+      >
         <h1 className="text-lg font-extrabold tracking-tight text-ink">
           {isRandom ? "Random Quiz" : "Today's Test"}
         </h1>

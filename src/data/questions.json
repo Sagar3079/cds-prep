@@ -27,7 +27,7 @@
       "if he will be arrested",
       "heisarrested ~",
       "if he was arrested |",
-      "No Improvement"
+      "No improvement"
     ],
     "answer": 2,
     "answerSource": "verified",
@@ -44,7 +44,7 @@
       "have been interested",
       "are being interesting",
       "have also interesting ~",
-      "No Improvement"
+      "No improvement"
     ],
     "answer": 0,
     "answerSource": "verified",
@@ -80,7 +80,7 @@
       "Prior to",
       "Previous to",
       "Prior as . |",
-      "No Improvement"
+      "No improvement"
     ],
     "answer": 0,
     "answerSource": "verified",
@@ -115,7 +115,7 @@
       "never did I wish",
       "nor did I wish",
       "did not I wish |",
-      "No Improvement"
+      "No improvement"
     ],
     "answer": 1,
     "answerSource": "verified",
@@ -612,7 +612,7 @@
       "cope by",
       "cope up with",
       "to be coped with",
-      "Noimprovement"
+      "No improvement"
     ],
     "answer": 3,
     "answerSource": "verified",
@@ -666,7 +666,7 @@
       "for",
       "after",
       "into",
-      "Noimprovement"
+      "No improvement"
     ],
     "answer": 0,
     "answerSource": "verified",
@@ -684,7 +684,7 @@
       "to",
       "by",
       "for",
-      "Noimprovement"
+      "No improvement"
     ],
     "answer": 1,
     "answerSource": "verified",
@@ -702,7 +702,7 @@
       "from",
       "with",
       "off",
-      "Noimprovement"
+      "No improvement"
     ],
     "answer": 1,
     "answerSource": "verified",
@@ -720,7 +720,7 @@
       "felt",
       "had become",
       "had felt",
-      "Noimprovement"
+      "No improvement"
     ],
     "answer": 3,
     "answerSource": "verified",
@@ -756,7 +756,7 @@
       "have been on touring",
       "is touring",
       "have toured",
-      "Noimprovement"
+      "No improvement"
     ],
     "answer": 1,
     "answerSource": "verified",
@@ -13682,7 +13682,7 @@
       "an interested",
       "a disinterested",
       "a uninterested",
-      "no improvement"
+      "No improvement"
     ],
     "answer": 1,
     "answerSource": "official-key",
