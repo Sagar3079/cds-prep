@@ -53,6 +53,16 @@ export function safeEqual(a: string, b: string): boolean {
   return x.length === y.length && timingSafeEqual(x, y);
 }
 
+/**
+ * How long a session lives, and — because the TTL is re-armed on every
+ * authenticated request below — how long somebody may be away before it lapses
+ * rather than how long it lasts in total. A candidate revising for CDS is back
+ * most days; the people this protects are the ones who stop for a term and
+ * come back, and being silently signed out is a bad way to be welcomed.
+ */
+export const SESSION_DAYS = 365;
+export const SESSION_TTL_SEC = SESSION_DAYS * 86400;
+
 /** The signed-in account, or null. Never throws — callers degrade to anonymous. */
 export async function currentAccount(): Promise<Account | null> {
   const jar = await cookies();
@@ -60,6 +70,19 @@ export async function currentAccount(): Promise<Account | null> {
   if (!token) return null;
   const id = await kv.get(sessionKey(token));
   if (!id) return null;
+
+  /**
+   * Slide the expiry forward. Without this the session dies a fixed period
+   * after SIGN-UP no matter how much the app is used — somebody practising
+   * daily is signed out mid-revision on an anniversary they have no way to
+   * see coming.
+   *
+   * Not awaited: it is a housekeeping write whose result nothing reads, and
+   * making every authenticated request wait on a second Redis round trip to
+   * refresh a year-long TTL is a poor trade. `kv` swallows its own failures,
+   * so there is no rejection to leak.
+   */
+  void kv.expire(sessionKey(token), SESSION_TTL_SEC);
   const raw = await kv.get(accountKey(id));
   if (!raw) return null;
   try {

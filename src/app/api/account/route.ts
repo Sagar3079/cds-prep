@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { randomBytes } from "node:crypto";
 import { kv, kvConfigured } from "@/lib/kv";
 import { rateLimit } from "@/lib/ratelimit";
@@ -12,10 +13,9 @@ import {
   newToken,
   normaliseEmail,
   sessionKey,
+  SESSION_TTL_SEC,
   type Account,
 } from "@/lib/account";
-
-const SESSION_DAYS = 180;
 
 /** Who am I? Used by the leaderboard to highlight your own row. */
 export async function GET(req: Request) {
@@ -24,12 +24,34 @@ export async function GET(req: Request) {
 
   const acct = await currentAccount();
   if (!acct) return NextResponse.json({ signedIn: false });
-  return NextResponse.json({
+
+  const res = NextResponse.json({
     signedIn: true,
     name: displayName(acct),
     hasUsername: Boolean(acct.username),
     emailVerified: acct.emailVerified,
   });
+
+  /**
+   * Re-stamp the cookie with a fresh year.
+   *
+   * `currentAccount()` already slid the server half; this is the browser half,
+   * and both have to move or the shorter one decides. A cookie's max-age is
+   * fixed when it is written, so without this the session would still expire a
+   * year after sign-up however recently it was used — the exact bug the server
+   * side just avoided.
+   */
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  if (token) {
+    res.cookies.set(SESSION_COOKIE, token, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: SESSION_TTL_SEC,
+    });
+  }
+  return res;
 }
 
 /**
@@ -111,7 +133,7 @@ export async function POST(req: Request) {
 
   const token = newToken();
   await kv.set(sessionKey(token), id);
-  await kv.expire(sessionKey(token), SESSION_DAYS * 86400);
+  await kv.expire(sessionKey(token), SESSION_TTL_SEC);
 
   const res = NextResponse.json({
     signedIn: true,
@@ -124,7 +146,7 @@ export async function POST(req: Request) {
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: SESSION_DAYS * 86400,
+    maxAge: SESSION_TTL_SEC,
   });
   return res;
 }
