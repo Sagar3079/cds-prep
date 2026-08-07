@@ -175,3 +175,33 @@ export function verifyPaymentSignature(o: {
   // `timingSafeEqual` throws rather than returning false when they differ.
   return a.length === b.length && timingSafeEqual(a, b);
 }
+
+/**
+ * The webhook secret. A DIFFERENT secret from `RAZORPAY_KEY_SECRET` — it is
+ * chosen when the webhook is created in the dashboard and is the only thing
+ * that distinguishes a real event from a POST anybody can send to a public URL.
+ */
+const WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET;
+
+export const webhookConfigured = Boolean(WEBHOOK_SECRET);
+
+/**
+ * Verify a webhook delivery.
+ *
+ * The digest is over the RAW request body, byte for byte. Parsing the JSON and
+ * re-serialising it changes key order and whitespace and the HMAC no longer
+ * matches, which is why the route reads `req.text()` and parses afterwards
+ * rather than the other way round.
+ */
+export function verifyWebhookSignature(
+  rawBody: string,
+  signature: string | null,
+): boolean {
+  if (!WEBHOOK_SECRET || !signature) return false;
+  const expected = createHmac("sha256", WEBHOOK_SECRET)
+    .update(rawBody)
+    .digest("hex");
+  const a = Buffer.from(expected, "utf8");
+  const b = Buffer.from(signature, "utf8");
+  return a.length === b.length && timingSafeEqual(a, b);
+}
