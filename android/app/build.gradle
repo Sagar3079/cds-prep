@@ -28,12 +28,17 @@ def hasReleaseSigning = releaseStoreFilePath != null && releaseStorePassword != 
 
 android {
     namespace "in.prepcadet.app"
-    compileSdk 35
+    // 36, not 35: androidx.browser 1.10.0 and core-ktx 1.17.0 both declare a
+    // minimum compileSdk of 36 in their AAR metadata, and AGP fails the build
+    // outright rather than warning. compileSdk only says which APIs may be
+    // compiled against — it is independent of minSdk 21, which is what
+    // actually decides the devices this installs on.
+    compileSdk 36
 
     defaultConfig {
         applicationId "in.prepcadet.app"
         minSdk 21
-        targetSdk 35
+        targetSdk 36
         versionCode 1
         versionName "1.0.0"
     }
