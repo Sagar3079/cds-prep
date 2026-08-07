@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import CheckoutButton from "@/components/CheckoutButton";
 import {
   BILLING_LIVE,
   LAST_UPDATED,
@@ -8,12 +9,22 @@ import {
   SUPPORT_EMAIL,
   rupees,
 } from "@/lib/legal";
+import { keyMode } from "@/lib/razorpay";
 
 export const metadata: Metadata = {
   title: "Pricing · CDS Prep",
   description:
     "What CDS Prep costs. Today's test is free. Weekly ₹49, monthly ₹149, in Indian Rupees, inclusive of taxes.",
 };
+
+/**
+ * Rendered per request rather than at build time, solely so that whether
+ * checkout appears is decided by the environment the server is running in.
+ * Prerendered, this page would freeze the answer at build — turn payments on
+ * afterwards and the buttons stay missing until someone rebuilds, with nothing
+ * failing to say why. It is a low-traffic page and the render is cheap.
+ */
+export const dynamic = "force-dynamic";
 
 const FREE_INCLUDES = [
   "One ten-question English set every day",
@@ -40,6 +51,18 @@ const PAID_ADDS = [
  * array the in-app plan sheet reads, so the two can never disagree.
  */
 export default function PricingPage() {
+  /**
+   * Whether a card can actually be taken, read from the gateway credentials
+   * rather than from `BILLING_LIVE`.
+   *
+   * The two are deliberately separate. `BILLING_LIVE` governs what every policy
+   * page *claims*, and with test keys installed the honest claim is still "not
+   * live" — no real money can move. `mode` governs whether the buttons render.
+   * Flipping `BILLING_LIVE` belongs in the commit that installs a `rzp_live_`
+   * key, not this one.
+   */
+  const mode = keyMode();
+
   return (
     <div className="space-y-4 px-4 py-6">
       <header>
@@ -52,11 +75,21 @@ export default function PricingPage() {
         </p>
       </header>
 
-      {!BILLING_LIVE && (
+      {mode === null && !BILLING_LIVE && (
         <p className="legal-note">
           <strong>Payments are not live yet.</strong> Nothing on this page can
           be bought today, and the app asks for no card or UPI details anywhere.
           The prices below are what plans will cost when billing opens.
+        </p>
+      )}
+
+      {mode === "test" && (
+        <p className="legal-note">
+          <strong>Checkout is in test mode.</strong> The buttons below open a
+          real payment window, but the gateway is running on test credentials —
+          no money moves and no real card is charged. Use Razorpay&apos;s test
+          card <span className="tabular-nums">4111 1111 1111 1111</span> with
+          any future expiry and any CVV.
         </p>
       )}
 
@@ -112,27 +145,39 @@ export default function PricingPage() {
           {PLANS.map((p) => (
             <div
               key={p.id}
-              className="flex items-center gap-3 rounded-2xl border-2 border-line bg-paper p-3.5"
+              className="rounded-2xl border-2 border-line bg-paper p-3.5"
             >
-              <span className="min-w-0 flex-1">
-                <span className="flex items-baseline gap-2 font-bold text-ink">
-                  {p.name}
-                  {"best" in p && p.best && (
-                    <span className="chip chip-blue uppercase">Best value</span>
-                  )}
+              <div className="flex items-center gap-3">
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-baseline gap-2 font-bold text-ink">
+                    {p.name}
+                    {"best" in p && p.best && (
+                      <span className="chip chip-blue uppercase">
+                        Best value
+                      </span>
+                    )}
+                  </span>
+                  <span className="mt-0.5 block text-[0.8125rem] text-muted">
+                    {p.blurb}
+                  </span>
                 </span>
-                <span className="mt-0.5 block text-[0.8125rem] text-muted">
-                  {p.blurb}
+                <span className="shrink-0 text-right">
+                  <span className="block text-lg font-extrabold tabular-nums text-ink">
+                    {rupees(p.paise)}
+                  </span>
+                  <span className="block text-xs text-muted">
+                    for {p.days} days
+                  </span>
                 </span>
-              </span>
-              <span className="shrink-0 text-right">
-                <span className="block text-lg font-extrabold tabular-nums text-ink">
-                  {rupees(p.paise)}
-                </span>
-                <span className="block text-xs text-muted">
-                  for {p.days} days
-                </span>
-              </span>
+              </div>
+              {mode && (
+                <CheckoutButton
+                  className="mt-3"
+                  planId={p.id}
+                  planName={p.name}
+                  label={`Pay ${rupees(p.paise)}`}
+                />
+              )}
             </div>
           ))}
         </div>

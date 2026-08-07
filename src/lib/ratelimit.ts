@@ -83,6 +83,28 @@ const WINDOWS = {
   leaderboard: { tokens: 120, window: "1 m" },
 
   /**
+   * Opening a checkout. 10 per hour.
+   *
+   * Every one of these is a live call to Razorpay's Orders API against our
+   * credentials, so an unthrottled caller can mint orders in our account for
+   * free. A real buyer creates one or two — an abandoned modal, then a retry.
+   * Ten leaves room for a genuinely indecisive afternoon and still caps what a
+   * script can do to the orders list.
+   */
+  "payment:order": { tokens: 10, window: "1 h" },
+
+  /**
+   * Verifying a payment. 60 per hour.
+   *
+   * Loose on purpose, and the one limit here that leans the other way. By the
+   * time this endpoint is called the money has already moved; a 429 at this
+   * point means a paid customer whose payment is not recorded, which is far
+   * worse than the abuse this would prevent. Forged calls cost one HMAC and
+   * fail the signature check anyway.
+   */
+  "payment:verify": { tokens: 60, window: "1 h" },
+
+  /**
    * Client error reports. 10 per minute.
    *
    * Each error boundary fires this once per mount via a `useEffect`, so a
@@ -105,6 +127,10 @@ const MESSAGES: Record<LimitedRoute, string> = {
     "You've sent a lot of results in a short time. Wait a little and try again.",
   explain: "Too many explanations at once. Give it a moment and they'll load.",
   leaderboard: "The board is being asked for too often. It'll be back shortly.",
+  "payment:order":
+    "That's a lot of checkout attempts in a short time. Give it a few minutes and try again.",
+  "payment:verify":
+    "Too many verification attempts just now. If you've been charged, email support and it will be sorted manually.",
   log: "Too many error reports just now. Give it a moment.",
 };
 
