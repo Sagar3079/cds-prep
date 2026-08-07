@@ -320,7 +320,7 @@ export function testLine(o: {
 
 const GOT_IT: Line[] = [
   { text: "clean. next.", mood: "cheer" },
-  { text: "yeah that was never in doubt", mood: "impressed" },
+  { text: "never in doubt", mood: "impressed" },
   { text: "locked in ✅", mood: "excited" },
   { text: "you knew that cold", mood: "impressed" },
   { text: "green. moving on.", mood: "cheer" },
@@ -333,7 +333,7 @@ const GOT_IT: Line[] = [
 
 const MISSED: Line[] = [
   { text: "close one. worth a reread.", mood: "thinking" },
-  { text: "this one's a trap, everyone eats it", mood: "wince" },
+  { text: "classic trap question", mood: "wince" },
   { text: "note it down, it repeats", mood: "thinking" },
   { text: "sneaky wording. flag it.", mood: "wince" },
   { text: "one to revisit tomorrow", mood: "thinking" },
@@ -341,42 +341,39 @@ const MISSED: Line[] = [
   { text: "the distractor did its job", mood: "wince" },
   { text: "learn it once, never again", mood: "cheer" },
   { text: "happens. reread the options.", mood: "idle" },
-  { text: "this pattern comes back, promise", mood: "thinking" },
+  { text: "this pattern repeats", mood: "thinking" },
 ];
 
 const SKIPPED: Line[] = [
-  { text: "left blank — costs you nothing", mood: "idle" },
+  { text: "blank costs nothing", mood: "idle" },
   { text: "smart skip tbh", mood: "impressed" },
   { text: "zero is better than minus", mood: "thinking" },
   { text: "blank scored 0. no damage.", mood: "idle" },
   { text: "you didn't gamble. good.", mood: "impressed" },
-  { text: "know it next time, that's all", mood: "cheer" },
-  { text: "safe call under negative marking", mood: "impressed" },
-  { text: "unanswered isn't wrong", mood: "idle" },
+  { text: "know it next time", mood: "cheer" },
+  { text: "safe under negative marking", mood: "impressed" },
+  { text: "blank isn't wrong", mood: "idle" },
   { text: "no penalty taken here", mood: "idle" },
-  { text: "worth learning for the retake", mood: "thinking" },
+  { text: "learn it for next time", mood: "thinking" },
 ];
 
-const UNTRUSTED: Line[] = [
-  { text: "careful — no official key on this one", mood: "wince" },
-  { text: "this answer isn't from UPSC, fyi", mood: "thinking" },
-  { text: "no published key backs this one", mood: "wince" },
-  { text: "hand-written answer. treat it soft.", mood: "thinking" },
-  { text: "unofficial. verify before memorising.", mood: "wince" },
-  { text: "not from the official key 👀", mood: "thinking" },
-  { text: "take this one with salt", mood: "wince" },
-  { text: "no upsc key here — double-check", mood: "thinking" },
-  { text: "pattern-based answer, not a key", mood: "thinking" },
-  { text: "trust this one less than the rest", mood: "wince" },
-];
-
+/**
+ * What he says beside a reviewed question.
+ *
+ * He used to have a tenth bank of lines for items with no official key —
+ * "trust this one less than the rest", "verify before memorising" — and it took
+ * priority over everything else. On 42% of the bank that meant the companion
+ * answered "did I get it right?" with a warning about the answer's paperwork.
+ * It undercut the answer on the one screen built for absorbing it, and it did
+ * so in the app's friendliest voice, which made it land harder. The bank's
+ * provenance is stated properly on the About page; it is not this character's
+ * job to relitigate it on every card.
+ */
 export function reviewLine(o: {
   index: number;
   correct: boolean;
   skipped: boolean;
-  official: boolean;
 }): Line {
-  if (!o.official) return pick(UNTRUSTED, o.index);
   if (o.skipped) return pick(SKIPPED, o.index);
   return o.correct ? pick(GOT_IT, o.index * 3) : pick(MISSED, o.index * 7 + 1);
 }

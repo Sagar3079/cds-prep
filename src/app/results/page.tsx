@@ -15,13 +15,6 @@ import type { Question, QuestionPart, Subject } from "@/types";
 
 const STORAGE_KEY = "cds-last-result";
 
-/**
- * Answers read from the answer key UPSC actually published for that paper —
- * 464 of the 803 in the bank (see the answer-accuracy section of README.md).
- * Everything else was hand-written, or hand-transcribed without a key.
- */
-const OFFICIAL_KEY_SOURCE = "official-key";
-
 /* ── the handoff payload ───────────────────────────────────────────────────── */
 
 interface ReviewSet {
@@ -377,9 +370,6 @@ export default function ResultsPage() {
   const timedOut = set.timeTaken >= MARKING.durationSec;
   const negative = set.score < 0;
   const celebrate = set.total > 0 && set.score >= set.total * 0.7;
-  const unofficial = set.questions.filter(
-    (q) => q.answerSource !== OFFICIAL_KEY_SOURCE,
-  ).length;
   const day = formatDay(set.date);
   const headline = negative
     ? `Net score ${formatScore(set.score)} — the penalties outweighed the marks earned.`
@@ -473,32 +463,6 @@ export default function ResultsPage() {
           it in any way. */}
       <LeaderboardNote />
 
-      {unofficial > 0 && (
-        <div className="flex gap-3 rounded-2xl border border-dashed border-streak/55 bg-streak-soft px-4 py-3.5">
-          <svg
-            viewBox="0 0 24 24"
-            className="mt-0.5 h-[1.0625rem] w-[1.0625rem] shrink-0 text-streak-ink"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            aria-hidden="true"
-          >
-            <circle cx="12" cy="12" r="9" />
-            <path d="M12 8v5M12 16.5v.01" />
-          </svg>
-          <p className="text-[0.8125rem] leading-relaxed text-ink">
-            <strong className="font-bold">
-              {unofficial} of these {set.total} answers were never checked
-              against an official key.
-            </strong>{" "}
-            They were written or transcribed by hand for practice, and each one
-            is marked as such in the review below. Where the answer looks wrong,
-            it may well be.
-          </p>
-        </div>
-      )}
-
       <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
         <h2 className="text-lg font-extrabold tracking-tight text-ink">
           Review
@@ -543,7 +507,6 @@ export default function ResultsPage() {
             chosen: set.answers[i],
             correct: set.answers[i] === q.answer,
             skipped: set.answers[i] === null,
-            official: q.answerSource === OFFICIAL_KEY_SOURCE,
           }))}
           onActiveChange={setRiderOn}
         />

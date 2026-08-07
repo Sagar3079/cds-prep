@@ -21,7 +21,6 @@ export interface RiderItem {
   chosen: number | null;
   correct: boolean;
   skipped: boolean;
-  official: boolean;
 }
 
 const clamp01 = (n: number) => (n < 0 ? 0 : n > 1 ? 1 : n);
@@ -157,6 +156,25 @@ const DIVE_SPEED = 600;
  * card above has to have let go of his bounding box, not just of his top edge.
  */
 const CLEAR = 3;
+/**
+ * How far he may sink below the edge he is sitting on before the bubble goes
+ * quiet, and over how many px it fades.
+ *
+ * The bubble's foot is planted `--potter-sink` above his own bottom, which puts
+ * it exactly on the card's top edge — but only while he is actually ON that
+ * edge. Held against the top of the panel by `lo` at the very bottom of the
+ * review, the card keeps scrolling up and he cannot follow: the edge rises past
+ * his perch line and the foot he planted on it is now standing in the question.
+ * `measure()` names this state; this is what stops it costing anything. The
+ * sweep caught 13px of bubble over the last card's text at exactly one scroll
+ * position, which is one more than a review screen may have.
+ *
+ * 2px of slack absorbs sub-pixel layout and the spring's own arrival overshoot;
+ * 8px to zero is under a frame of any real scroll, so it reads as him going
+ * quiet as he loses his seat rather than as a blink.
+ */
+const SINK_OK = 2;
+const SINK_FADE = 8;
 
 /**
  * The companion riding the review list — he flies down the answers on a broom
@@ -515,15 +533,24 @@ export default function PotterRider({
         host.dataset.phase = want;
       }
 
-      // He speaks where he has landed, and only there. Two things silence him:
-      // his own speed, so a flick-scroll does not smear a dozen lines down the
-      // list, and the crossing — a 200px bubble in front of the question is
-      // exactly the cost the reserved lane was removed to stop paying, so it
-      // goes well before he is over any text.
+      // He speaks where he has landed, and only there. Three things silence
+      // him, and the quietest wins: his own speed, so a flick-scroll does not
+      // smear a dozen lines down the list; the crossing — a 200px bubble in
+      // front of the question is exactly the cost the reserved lane was removed
+      // to stop paying, so it goes well before he is over any text; and losing
+      // the edge he is speaking from, which is the clamped state SINK_OK
+      // describes. Being below his target is the whole test: `lo` pins him
+      // while the card keeps travelling, so the sink IS the gap between where
+      // he is and the edge he is meant to be sitting on.
       if (sayRef.current) {
         const fade =
           1 - smoothstep(clamp01((Math.abs(vel.current) - 70) / 380));
-        const op = Math.min(fade, 1 - clamp01(k * 2));
+        const sunk = Math.max(0, y.current - target.current);
+        const op = Math.min(
+          fade,
+          1 - clamp01(k * 2),
+          1 - clamp01((sunk - SINK_OK) / SINK_FADE),
+        );
         sayRef.current.style.opacity = op.toFixed(3);
       }
 

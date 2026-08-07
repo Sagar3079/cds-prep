@@ -194,7 +194,7 @@ function explainPreposition(
     if (prep && prep === rightNorm) {
       const originalMatch = new RegExp(`\\b${tok}\\b`, "i").exec(stem);
       const original = originalMatch ? originalMatch[0] : tok;
-      return `"${original}" takes "${right}" — "${original} ${right}" is a fixed verb/adjective + preposition pairing in English, not something derivable from a rule. The wrong options swap in a preposition that sounds plausible but doesn't actually pair with "${original}".`;
+      return `"${original}" takes "${right}" — a fixed pairing.`;
     }
   }
 
@@ -266,7 +266,7 @@ function detectSentenceImprovement(
   if (niIndex === -1) return null;
 
   if (isNoImprovementOption(right)) {
-    return `The sentence is already correct as written. The three edits on offer each introduce a fresh problem — a tense that no longer fits, a preposition that doesn't belong, or a change that wasn't needed — rather than fixing anything real. When none of the edits fix a genuine fault, "No improvement" is the answer.`;
+    return `The sentence is already correct — each edit on offer introduces a new fault rather than fixing one.`;
   }
 
   const prepHit = explainPreposition(stem, options, right);
@@ -275,15 +275,15 @@ function detectSentenceImprovement(
   const edits = options.filter((o) => !isNoImprovementOption(o));
   const allSingleWord = edits.every((o) => !/\s/.test(o.trim()));
   if (allSingleWord) {
-    return `The fix here is "${right}" — a single-word swap, most likely a preposition, particle or wrong word the original sentence has in that spot. Read the original next to each of the three edits to see exactly what changes.`;
+    return `"${right}" is the correct form for that slot.`;
   }
   const hasVerbForm = edits.some((o) =>
     /\b(is|are|was|were|has|have|had|being|been|do|does|did)\b/i.test(o),
   );
   if (hasVerbForm) {
-    return `The fix here is "${right}" — this is a tense, voice or agreement correction. Read the original sentence and each edit aloud; the one that keeps the meaning but fixes the grammar is the answer.`;
+    return `"${right}" — the original gets the tense or agreement wrong.`;
   }
-  return `The fix here is "${right}". Compare it against the original wording and the other two edits for tense, agreement and preposition — the correct edit is the one that changes only what's actually wrong.`;
+  return `"${right}" is the correct version of that phrase.`;
 }
 
 /**
@@ -303,7 +303,7 @@ function detectOrdering(options: string[], right: string): string | null {
   if (hits < 3) return null;
   const letters = orderingLetters(right);
   if (!letters) return null;
-  return `The pieces slot in as ${letters.join(" → ")}. Find the opening piece first — usually the one that names its subject outright rather than with a pronoun — then follow the pronouns and connectors (this, therefore, however) to chain the rest in that order.`;
+  return `The order is ${letters.join(" → ")}.`;
 }
 
 function detectSpottingErrors(
@@ -312,7 +312,7 @@ function detectSpottingErrors(
 ): string | null {
   if (!options.some((o) => normWord(o) === "noerror")) return null;
   if (normWord(right) === "noerror") {
-    return `Every part of this sentence is grammatically fine as written — the three fragments on offer don't actually contain a fault. When nothing is wrong, "No error" is the answer.`;
+    return `No fault in any fragment — the sentence is correct as written.`;
   }
   const trimmed = right.trim();
   let category: string;
@@ -322,7 +322,7 @@ function detectSpottingErrors(
     )
   ) {
     category =
-      "a subject–verb agreement or tense problem — check what the actual subject of that fragment's clause is (plural-looking phrases before the verb, like fractions, percentages or \"a number of\", aren't always the real subject)";
+      "the verb doesn't agree with its real subject (a fraction or \"a number of\" takes the noun after \"of\", not the phrase before it)";
   } else if (isPrepWord(trimmed)) {
     category = "a wrong preposition";
   } else if (/^(a|an|the|some|any|each|every|no)\b/i.test(trimmed)) {
@@ -332,7 +332,7 @@ function detectSpottingErrors(
   } else {
     category = "a word-choice or agreement slip";
   }
-  return `The error sits in "${trimmed}" — ${category}. Check each fragment on its own rather than reading the sentence as a whole; that's how these traps get missed.`;
+  return `"${trimmed}" is the error — ${category}.`;
 }
 
 const GRAMMAR_TERMS = [
@@ -353,7 +353,7 @@ function detectPartsOfSpeech(
     return GRAMMAR_TERMS.some((t) => lo.includes(t));
   });
   if (hits.length < 3) return null;
-  return `The word or fragment in question functions as "${right}" here. Work out its job in the sentence first — what it modifies, or what it's standing in for — before matching that job to a label; the wrong options are usually real grammatical categories that just don't fit this particular word.`;
+  return `It functions as "${right}" in this sentence.`;
 }
 
 function detectActivePassive(stem: string, right: string): string | null {
@@ -365,14 +365,14 @@ function detectActivePassive(stem: string, right: string): string | null {
   if (passiveIdx === -1 && activeIdx === -1) return null;
   const targetPassive = passiveIdx > activeIdx;
   const rule = targetPassive
-    ? `Passive voice moves the original object into the subject slot and adds a form of "be" plus the past participle ("is/was/has been done") — match the tense of "be" to the tense of the original verb.`
-    : `Active voice puts the doer back into the subject slot and returns the verb to its plain tense — the "by ..." agent becomes the new subject.`;
-  return `The correctly converted sentence is "${right}". ${rule}`;
+    ? `the object becomes the subject, plus "be" + past participle`
+    : `the doer becomes the subject and the verb returns to its plain tense`;
+  return `"${right}" — ${rule}.`;
 }
 
 function detectDirectIndirect(topic: string, right: string): string | null {
   if (topic !== "direct indirect") return null;
-  return `The correctly reported version is "${right}". Reported speech shifts the tense one step back (is → was, will → would), swaps first/second-person pronouns for third-person ones, and drops the question mark and quotation marks — check those three changes separately rather than judging the sentence as a whole.`;
+  return `"${right}" — reported speech shifts the tense back one step and moves pronouns to third person.`;
 }
 
 function detectSentenceRelationship(
@@ -381,7 +381,7 @@ function detectSentenceRelationship(
 ): string | null {
   if (!/second (sentence|statement)/i.test(stem)) return null;
   const predicate = right.trim().replace(/^./, (c) => c.toLowerCase());
-  return `Read S1 and S2 as a pair: S2 ${predicate}. Test each option by asking whether the second statement restates, extends, opposes, or draws a conclusion from the first — that relationship is the whole question, not the topic the two sentences happen to share.`;
+  return `S2 ${predicate}.`;
 }
 
 function detectSentenceCombination(
@@ -389,7 +389,7 @@ function detectSentenceCombination(
   right: string,
 ): string | null {
   if (!/correct combination of the given/i.test(stem)) return null;
-  return `The correctly combined sentence is "${right}". Check that the connector you land on (because, although, as soon as, when, since, and so on) captures the actual logical relationship between the two original sentences, and that the tense stays consistent across the join.`;
+  return `"${right}" — its connector matches the actual relationship between the two sentences.`;
 }
 
 function detectPreposition(
@@ -407,7 +407,7 @@ function detectPreposition(
   const prepHit = explainPreposition(stem, options, right);
   const filled = fillBlank(stem, right);
   if (prepHit) {
-    return filled ? `${prepHit} Filled in: "${filled}"` : prepHit;
+    return filled ? `${prepHit} "${filled}"` : prepHit;
   }
   if (hasBlank) {
     const before = stem.split(/_{2,}/)[0]?.trim().split(/\s+/) ?? [];
@@ -417,9 +417,9 @@ function detectPreposition(
     const anchor = governingWord
       ? `The gap comes right after "${governingWord}", and "${right}" is what fits here`
       : `"${right}" is what fits in the gap here`;
-    return `${anchor}. Prepositions like this are fixed by usage rather than by a rule, so the safest approach is to learn the exact pairing rather than reason it out.${filled ? ` Filled in: "${filled}"` : ""}`;
+    return `${anchor}.${filled ? ` "${filled}"` : ""}`;
   }
-  return `The right preposition here is "${right}". These pairings are fixed by usage rather than derivable from a rule — the fastest way to lock them in is to collect them as you meet them.`;
+  return `"${right}" is the pairing that fits here.`;
 }
 
 function detectSynonymAntonym(
@@ -429,15 +429,15 @@ function detectSynonymAntonym(
 ): string | null {
   if (topic.includes("synonym")) {
     const core = target
-      ? `This tests the meaning of "${target}" — the closest match in sense is "${right}".`
-      : `This tests which option is closest in meaning to the highlighted word — the closest match in sense is "${right}".`;
-    return `${core} Synonym sets usually plant one option that means the opposite and one that's merely related in topic — match sense, not association.`;
+      ? `"${target}" here means "${right}".`
+      : `"${right}" is the closest in meaning.`;
+    return core;
   }
   if (topic.includes("antonym")) {
     const core = target
-      ? `This tests the opposite of "${target}" — the option that reverses its meaning is "${right}".`
-      : `This tests which option is the opposite of the highlighted word — the option that reverses its meaning is "${right}".`;
-    return `${core} Antonym sets usually have three options that mean roughly the same thing and only one that flips it — find the odd one out rather than the best-sounding match.`;
+      ? `The opposite of "${target}" is "${right}".`
+      : `"${right}" is the one that reverses the meaning.`;
+    return core;
   }
   return null;
 }
@@ -480,10 +480,9 @@ function detectIdiomPhrase(
   const isSingleWord = !/\s/.test(term);
 
   if (isSingleWord && !isIdiomTopic) {
-    return `"${term}" means "${right}" here. This is vocabulary rather than grammar — the meaning is learned, or inferred from context and word roots, not worked out from a rule. The wrong options are meanings of other words that get confused with "${term}".`;
+    return `"${term}" means "${right}".`;
   }
-  const kind = topic.includes("phrasal") ? "Phrasal verbs" : "Idioms and set phrases";
-  return `"${term}" means "${right}" here. ${kind} can't be worked out from their individual words — treat this one as vocabulary to memorise. The wrong options are usually meanings of a different, similarly-worded expression, not this one.`;
+  return `"${term}" means "${right}" — a set phrase, so the individual words don't give it away.`;
 }
 
 function detectOneWordSubstitution(
@@ -493,12 +492,12 @@ function detectOneWordSubstitution(
 ): string | null {
   if (!topic.includes("one word")) return null;
   const description = stem.trim().replace(/[:.]$/, "");
-  return `"${right}" is the single word for "${description}". These are pure vocabulary — spotting the Latin/Greek root ("-cide" = killing, "omni-" = all, "-phile"/"-phobe" = loving/fearing, and so on) is usually faster than memorising the whole word cold.`;
+  return `"${right}" is the single word for "${description}".`;
 }
 
 function detectSpelling(stem: string, topic: string, right: string): string | null {
   if (!topic.includes("spelling") && !/correct spelling/i.test(stem)) return null;
-  return `Only "${right}" is spelled correctly — the other three are common misspellings of the same word. Sound it out syllable by syllable against "${right}" to see exactly where each distractor goes wrong.`;
+  return `"${right}" is the correct spelling; the other three are common misspellings of it.`;
 }
 
 const CONFUSABLE_GLOSSARY: Record<string, string> = {
@@ -546,7 +545,7 @@ function detectHomophoneConfusable(
   const core = gloss
     ? `"${right}" is correct here — it means ${gloss}.`
     : `"${right}" is the word that matches the sentence's meaning here.`;
-  return `${core} The options look or sound alike, which is the entire trap — lock in the meaning of "${right}" specifically, not just its spelling.${filled ? ` Filled in: "${filled}"` : ""}`;
+  return `${core}${filled ? ` "${filled}"` : ""}`;
 }
 
 function detectClozeFillBlank(
@@ -560,11 +559,11 @@ function detectClozeFillBlank(
   if (!isTopic && !hasBlank) return null;
 
   if (/if\s+i\s*_{2,}\s*you\b/i.test(stem) && normWord(right) === "were") {
-    return `"were" is correct — the unreal/hypothetical conditional ("if I were you") always takes "were", even for "I", "he" or "she"; it's one of the few places English keeps a separate subjunctive form.`;
+    return `"were" — the unreal conditional ("if I were you") keeps the subjunctive, even after "I".`;
   }
 
   if (!hasBlank) {
-    return `The word that fits is "${right}". Read the whole sentence with each option in place — the one that keeps both the grammar and the sense intact is the answer.`;
+    return `"${right}" is the word that fits.`;
   }
   const filled = fillBlank(stem, right);
   const before = stem.split(/_{2,}/)[0]?.trim().split(/\s+/) ?? [];
@@ -591,10 +590,13 @@ function detectComprehension(
   right: string,
 ): string | null {
   if (topic !== "comprehension") return null;
-  if (passage) {
-    return `This is a passage-based question — the answer turns on a specific detail in the passage, not on the question sentence alone. Go back and re-read the section discussing "${right}" (or its paraphrase) before trusting your memory of it.`;
-  }
-  return `This is a comprehension question testing a specific word or detail from its passage. The passage text isn't reproduced here, so the safest habit is to re-read the relevant lines rather than rely on recall.`;
+  // The passage is printed directly above this on the card, so "go back and
+  // re-read it" is not an explanation — it is an instruction to do the thing
+  // they are already doing. Nothing true and specific can be said without
+  // reading the passage, so this says the least that is still useful.
+  return passage
+    ? `The passage supports "${right}".`
+    : `"${right}" is what the passage supports.`;
 }
 
 function commonPrefix(strs: string[]): string {
@@ -628,7 +630,7 @@ function commonSuffix(strs: string[]): string {
 function fallbackGeneric(stem: string, options: string[], right: string): string {
   const filled = fillBlank(stem, right);
   if (filled) {
-    return `The word or phrase that fits is "${right}". Filled in: "${filled}" — read it in full rather than judging the option on its own.`;
+    return `"${right}" fits: "${filled}"`;
   }
 
   const prefix = commonPrefix(options);
@@ -640,10 +642,10 @@ function fallbackGeneric(stem: string, options: string[], right: string): string
   // "-ed" or "-ing" is true but not actually informative.
   if (middle && (prefix.trim().length >= 3 || suffix.trim().length >= 3)) {
     const frame = [prefix.trim(), suffix.trim()].filter(Boolean).join(" … ");
-    return `All four options share "${frame}" — only "${middle}" actually changes between them, so that's the specific point this question is testing. The answer is "${right}".`;
+    return `All four share "${frame}" — only "${middle}" changes, so that is what is being tested.`;
   }
 
-  return `"${right}" is correct. This one doesn't match a pattern this offline check knows how to explain — compare it directly against the sentence's content and the other three options, and treat it as worth looking up rather than taking on faith.`;
+  return `"${right}" is correct.`;
 }
 
 /**
@@ -702,30 +704,17 @@ function explainQuestion(q: Question, right: string): string {
  * specific claim below is cross-checked against this question's own stored
  * answer before it's used.
  */
-function offline(q: Question, chosen: number | null): string {
-  const right = q.options[q.answer ?? 0];
-  const picked = chosen !== null ? q.options[chosen] : null;
-  const bits: string[] = [];
-
-  bits.push(explainQuestion(q, right));
-
-  if (chosen === null) {
-    bits.push(
-      "You left it blank, which scores 0 — the right call when you cannot rule out two options.",
-    );
-  } else if (chosen === q.answer) {
-    bits.push("You got it.");
-  } else if (picked) {
-    bits.push(`You chose "${picked}".`);
-  }
-
-  bits.push(
-    q.answerSource === "official-key"
-      ? "Backed by the answer key UPSC published for this paper."
-      : "This answer is not from an official key, so verify it before you memorise it.",
-  );
-
-  return bits.join(" ");
+function offline(q: Question): string {
+  // Just the reason. Nothing else.
+  //
+  // This used to append two more things and both were noise. The first
+  // restated what the learner had picked, which the review screen already
+  // shows them in red directly above this line. The second was a provenance
+  // footnote on every non-official item — it undermined the answer the learner
+  // had just been given, on the screen where they are trying to trust it, and
+  // it appeared on 42% of the bank. The bank's provenance is described once,
+  // properly, on the About page; it does not belong stapled to every answer.
+  return explainQuestion(q, q.options[q.answer ?? 0]);
 }
 
 export async function POST(req: Request) {
@@ -755,7 +744,7 @@ export async function POST(req: Request) {
 
   const key = process.env.SCALEMAX_API_KEY;
   if (!key) {
-    return NextResponse.json({ text: offline(q, chosen), source: "offline" });
+    return NextResponse.json({ text: offline(q), source: "offline" });
   }
 
   // The model is told the correct answer rather than asked for it. It explains;
@@ -768,18 +757,17 @@ export async function POST(req: Request) {
     chosen !== null
       ? `The student chose: ${"ABCD"[chosen]}) ${q.options[chosen]}`
       : "The student left it blank.",
-    q.answerSource === "official-key"
-      ? "This answer comes from the official UPSC key."
-      : "This answer is NOT from an official key — say so.",
     "",
-    "Explain WHY, in at most three short sentences. Give the actual reason:",
+    "Explain WHY, in ONE or TWO short sentences. Under 30 words total.",
     subjectOf(q) === "gk"
-      ? "the fact behind the answer, and what makes the closest wrong option wrong"
-      : "the meaning of the tested word, the grammar rule, or the idiom",
-    "— not a restatement of which option is correct, which they can already see.",
-    "If they chose wrong, name what made their option tempting.",
-    "Speak plainly to an Indian defence-exam candidate. No preamble, no",
-    "'the correct answer is'. Do not contradict the stated correct answer.",
+      ? "Give the fact behind the answer, and what makes the closest wrong option wrong."
+      : "Give the meaning of the tested word, the grammar rule, or the idiom.",
+    "If they chose wrong, say in a few words why theirs is wrong — that is the",
+    "part that teaches. Never restate which option is correct; they can see it.",
+    "No exam-strategy advice ('read each option carefully', 'learn these as",
+    "vocabulary') — it is the same for every question and therefore worthless.",
+    "No preamble, no 'the correct answer is'. Plain English for an Indian",
+    "defence-exam candidate. Do not contradict the stated correct answer.",
   ].join("\n");
 
   try {
@@ -801,16 +789,16 @@ export async function POST(req: Request) {
     );
 
     if (!res.ok) {
-      return NextResponse.json({ text: offline(q, chosen), source: "offline" });
+      return NextResponse.json({ text: offline(q), source: "offline" });
     }
     const data = await res.json();
     const text = data?.choices?.[0]?.message?.content;
     if (typeof text !== "string" || !text.trim()) {
-      return NextResponse.json({ text: offline(q, chosen), source: "offline" });
+      return NextResponse.json({ text: offline(q), source: "offline" });
     }
     return NextResponse.json({ text: text.trim(), source: "model" });
   } catch {
     // Never let an explanation failure break the review screen.
-    return NextResponse.json({ text: offline(q, chosen), source: "offline" });
+    return NextResponse.json({ text: offline(q), source: "offline" });
   }
 }
