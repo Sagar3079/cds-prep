@@ -14,6 +14,12 @@
         "value": "potterbounce",
         "createdAt": "2026-08-07T07:33:51.197Z",
         "reason": "Mascot idle bob; character motion is meant to read as buoyant"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "cubic-bezier(0.34, 1.4, 0.64, 1)",
+        "createdAt": "2026-08-07T07:36:55.196Z",
+        "reason": "The literal behind --spring; CLAUDE.md defines it as the confirmation-only easing, hovers use --ease"
       }
     ]
   }
