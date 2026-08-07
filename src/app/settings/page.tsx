@@ -319,6 +319,34 @@ export default function SettingsPage() {
         )}
       </section>
 
+      {/* Deliberately below practice and above "your data": somebody in
+          Settings is either changing how the app behaves or looking for
+          something about themselves, and the app download is neither — it is
+          a thing to notice on the way past, not the reason they came. */}
+      <section className="card space-y-2" aria-labelledby="app-heading">
+        <h2 id="app-heading" className="text-[0.9375rem] font-bold text-ink">
+          Get the Android app
+        </h2>
+        <p className="text-[0.8125rem] leading-relaxed text-muted">
+          The same practice, on your home screen, without the browser bars. It
+          signs you in from this browser, so there is nothing to set up again.
+        </p>
+        <p className="text-[0.8125rem] leading-relaxed text-muted">
+          Android will warn you about installing outside the Play Store —
+          that&apos;s expected for a direct download. Needs Android 6.0 or
+          newer.
+        </p>
+        <a
+          href="/download/android"
+          className="btn-primary mt-1 w-full"
+          // Not a Next <Link>: this is a redirect to a binary, and the client
+          // router would try to prefetch and transition to it as a page.
+          download
+        >
+          Download the app
+        </a>
+      </section>
+
       <section className="card space-y-2" aria-labelledby="data-heading">
         <h2 id="data-heading" className="text-[0.9375rem] font-bold text-ink">
           Your data
@@ -333,8 +361,9 @@ export default function SettingsPage() {
           on a server. Your email is never shown to anyone — the board shows a
           masked form like{" "}
           <span className="whitespace-nowrap">s••••@gmail.com</span> unless you
-          set a username. It is not verified yet, so treat it as an unconfirmed
-          address rather than proof of who you are. Leaderboard entries are
+          set a username. Buying a plan requires confirming that address with a
+          six-digit code; joining the board alone does not, so a board name is
+          a label rather than proof of who somebody is. Leaderboard entries are
           deleted two days after the day they belong to.
         </p>
         <div className="flex flex-wrap gap-x-4 gap-y-1">
