@@ -78,11 +78,20 @@ export const rupees = (paise: number) =>
  * payments the site cannot take is the kind of copy that gets an application
  * rejected for misrepresentation. Flip it in the same commit that wires up
  * the gateway, not before.
+ *
+ * Now true: the deployment runs `rzp_live_` credentials and real cards are
+ * charged. It is deliberately still a hand-set constant rather than something
+ * derived from the key, so that turning payments on stays a decision somebody
+ * made rather than a side effect of an environment variable landing on a box.
+ * The direction of the error matters if the two ever disagree: claiming
+ * payments are live while no key is set leaves a reader confused, and claiming
+ * they are not while real money moves is misrepresentation. This errs the safe
+ * way — the claim goes up first, the charging follows.
  */
-export const BILLING_LIVE: boolean = false;
+export const BILLING_LIVE: boolean = true;
 
 /** Shown on every policy page. Bump when the wording materially changes. */
-export const LAST_UPDATED = "3 August 2026";
+export const LAST_UPDATED = "7 August 2026";
 
 /**
  * The year in the footer's copyright line.

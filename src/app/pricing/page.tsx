@@ -83,6 +83,19 @@ export default function PricingPage() {
         </p>
       )}
 
+      {/* Billing is switched on but this server has no gateway credentials —
+          the window between the claim going up and the keys landing on the
+          box. Saying nothing here leaves someone who has just read the terms
+          staring at a price with no way to pay it and no idea why. */}
+      {mode === null && BILLING_LIVE && (
+        <p className="legal-note">
+          <strong>Checkout is briefly unavailable.</strong> The prices below are
+          correct and nothing has been charged. Email{" "}
+          <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a> if it is still
+          unavailable when you come back.
+        </p>
+      )}
+
       {mode === "test" && (
         <p className="legal-note">
           <strong>Checkout is in test mode.</strong> The buttons below open a
@@ -145,7 +158,11 @@ export default function PricingPage() {
           {PLANS.map((p) => (
             <div
               key={p.id}
-              className="rounded-2xl border-2 border-line bg-paper p-3.5"
+              // The plan sheet links straight to the row it chose, so someone
+              // sent here from the review lands on their plan rather than at
+              // the top of a page they have to re-read.
+              id={p.id}
+              className="scroll-mt-4 rounded-2xl border-2 border-line bg-paper p-3.5"
             >
               <div className="flex items-center gap-3">
                 <span className="min-w-0 flex-1">

@@ -13,11 +13,14 @@ import { PLANS, rupees } from "@/lib/legal";
 /**
  * "Take a random test" at the end of a review, and the plan sheet it opens.
  *
- * Billing is NOT wired up. "Get now" closes the sheet and leaves you where you
- * were, which is what was asked for — but it is also the only honest behaviour
- * available: taking a card and doing nothing with it would be worse than not
- * taking one. The sheet says so rather than implying a charge is about to
- * happen, so nobody comes away thinking they have subscribed.
+ * The sheet is where a plan is CHOSEN; /pricing is where it is paid for. That
+ * split is forced by the overlay: Razorpay's Checkout covers the whole
+ * viewport, and this sheet is portalled inside the device panel that is the
+ * app, so opening Checkout from in here would tear straight through it.
+ *
+ * It used to say payments were not live and simply close. That was true and is
+ * not any more — copy that tells a buyer nothing will be charged, on a site
+ * that charges, is worse than no copy at all.
  */
 export default function RandomTestUpsell() {
   const [open, setOpen] = useState(false);
@@ -213,20 +216,18 @@ export default function RandomTestUpsell() {
               })}
             </div>
 
-            <button
-              type="button"
+            {/* Goes to /pricing rather than opening Checkout in place. The
+                Razorpay modal is a full-viewport overlay and this sheet is
+                portalled INSIDE the device panel, so opening it from here
+                would break out of the phone the whole app lives in. The
+                pricing page owns checkout; this owns the choice. */}
+            <Link
+              href={`/pricing#${chosenPlan.id}`}
               className="btn-primary mt-4 w-full"
               onClick={() => setOpen(false)}
             >
               Get {chosenPlan.name} · {rupees(chosenPlan.paise)}
-            </button>
-            <p
-              className="mt-2 text-center text-xs text-muted"
-              aria-live="polite"
-            >
-              Payments aren&apos;t live yet — nothing is charged and no card is
-              asked for. This just closes.
-            </p>
+            </Link>
             {/* The policies, at the point of purchase rather than only in the
                 footer. A buyer should not have to leave a checkout to find out
                 what the cancellation terms are — and a payment gateway checks
