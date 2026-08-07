@@ -37,7 +37,11 @@ android {
 
     defaultConfig {
         applicationId "in.prepcadet.app"
-        minSdk 21
+        // 23, not 21: androidbrowserhelper 2.7.2 declares minSdk 23 and the
+        // manifest merger refuses anything lower. No real cost — a TWA needs a
+        // Chrome recent enough to host one, which rules out those devices
+        // regardless, and Android 6.0 shipped in 2015.
+        minSdk 23
         targetSdk 36
         versionCode 1
         versionName "1.0.0"
