@@ -1,0 +1,20 @@
+// pluginManagement/dependencyResolutionManagement centralize repos here so app/build.gradle
+// doesn't need its own repositories{} block — one place to add a mirror or artifactory later.
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "CDS Prep"
+include ":app"

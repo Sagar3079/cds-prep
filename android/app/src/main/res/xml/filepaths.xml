@@ -1,0 +1,6 @@
+<paths>
+    <!-- "twa_splash" is not arbitrary — it must match the private folder name
+         SplashImageTransferTask (inside androidbrowserhelper) writes the splash bitmap to
+         under getFilesDir(). Renaming this breaks the FileProvider handoff to the browser. -->
+    <files-path path="twa_splash/" name="twa_splash" />
+</paths>

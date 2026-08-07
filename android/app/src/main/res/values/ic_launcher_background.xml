@@ -1,0 +1,7 @@
+<resources>
+    <!-- Separate from colors.xml on purpose: this is the adaptive icon's background layer
+         color specifically, referenced by mipmap-anydpi-v26/ic_launcher.xml. Kept isolated so
+         it reads clearly in Android Studio's launcher-icon preview tooling, which looks for
+         this exact resource name by convention. -->
+    <color name="ic_launcher_background">#2F6BFF</color>
+</resources>

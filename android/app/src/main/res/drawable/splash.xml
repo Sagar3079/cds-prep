@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Same chevron mark as the launcher icon, but filled in brand blue instead of white — this
+    drawable sits on top of SPLASH_SCREEN_BACKGROUND_COLOR (white, see colors.xml), so it needs
+    its own contrasting fill rather than reusing ic_launcher_foreground.xml as-is.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#2F6BFF"
+        android:pathData="M54,32 L82,62 L70,62 L54,46 L38,62 L26,62 Z" />
+</vector>

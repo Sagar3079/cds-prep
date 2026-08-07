@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    A single upward chevron — deliberately simple so it still reads at 48dp launcher size and
+    survives every adaptive-icon mask shape (circle, squircle, rounded square) OEM launchers
+    apply. Path stays within x:[26,82] y:[32,62] on the 108x108 canvas, comfortably inside the
+    ~66dp safe zone centered at (54,54) that all mask shapes preserve.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,32 L82,62 L70,62 L54,46 L38,62 L26,62 Z" />
+</vector>

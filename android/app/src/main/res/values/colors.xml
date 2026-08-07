@@ -1,0 +1,9 @@
+<resources>
+    <!-- Brand accent — drives the status bar / nav bar so the chrome-less TWA still reads as
+         the site's own color the instant it opens, before any page paint happens. -->
+    <color name="colorPrimary">#2F6BFF</color>
+
+    <!-- Matches the site's light-mode paper color; the splash mark (drawable/splash.xml) is
+         drawn on top of this, so it must stay white for the mark's blue fill to have contrast. -->
+    <color name="splashBackground">#FFFFFF</color>
+</resources>

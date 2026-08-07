@@ -1,0 +1,17 @@
+# gradlew is executed by /bin/sh on the CI runner. With CRLF endings the
+# shebang line ends in \r and Linux fails it with "bad interpreter" — a
+# confusing failure a long way from its cause, on a machine none of us is
+# sitting at. This repo is developed on Windows, where git's autocrlf would
+# otherwise do exactly that.
+gradlew text eol=lf
+*.sh text eol=lf
+
+# The .bat is only ever run by cmd.exe, which wants CRLF.
+gradlew.bat text eol=crlf
+
+# Never let any filter near the wrapper jar. Its bytes are checked against
+# Gradle's published SHA-256 in CI, and a line-ending "fix" would break that
+# check in a way that looks like tampering.
+*.jar binary
+*.keystore binary
+*.jks binary

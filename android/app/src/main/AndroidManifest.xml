@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    No <application android:name> or custom Activity subclass is needed: LauncherActivity,
+    shipped inside androidbrowserhelper, reads all TWA behavior from the meta-data below via
+    PackageManager at runtime. That's the whole point of the library — this manifest IS the app.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.Translucent.NoTitleBar">
+
+        <!--
+            Digital Asset Links statement (see strings.xml) proving in.prepcadet.app is allowed
+            to open https://prepcadet.in without Chrome showing the URL bar. Chrome cross-checks
+            this against /.well-known/assetlinks.json served by the site itself; both directions
+            have to agree before the "trusted" (chromeless) mode activates.
+        -->
+        <meta-data
+            android:name="asset_statements"
+            android:resource="@string/asset_statements" />
+
+        <activity
+            android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
+            android:alwaysRetainTaskState="true"
+            android:label="@string/app_name"
+            android:exported="true">
+
+            <meta-data
+                android:name="android.support.customtabs.trusted.DEFAULT_URL"
+                android:value="https://prepcadet.in" />
+
+            <meta-data
+                android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR"
+                android:resource="@color/colorPrimary" />
+
+            <meta-data
+                android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR"
+                android:resource="@color/colorPrimary" />
+
+            <!--
+                Splash screen: LauncherActivity paints this drawable over
+                SPLASH_SCREEN_BACKGROUND_COLOR immediately on cold start (before Chrome/the
+                TWA provider is even warm), then hands the same bitmap to the browser via the
+                FileProvider below so the transition into the real page has no white flash.
+            -->
+            <meta-data
+                android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
+                android:resource="@drawable/splash" />
+
+            <meta-data
+                android:name="android.support.customtabs.trusted.SPLASH_SCREEN_BACKGROUND_COLOR"
+                android:resource="@color/splashBackground" />
+
+            <meta-data
+                android:name="android.support.customtabs.trusted.SPLASH_SCREEN_FADE_OUT_DURATION"
+                android:value="300" />
+
+            <meta-data
+                android:name="android.support.customtabs.trusted.FILE_PROVIDER_AUTHORITY"
+                android:value="${applicationId}.fileprovider" />
+
+            <!-- Launcher entry — without this the app has no home-screen icon to tap. -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!--
+                autoVerify="true" makes Android hit /.well-known/assetlinks.json on
+                prepcadet.in at install time (App Links auto-verification). Only once that
+                verification succeeds does Chrome treat this as a trusted, chrome-less origin
+                instead of falling back to a normal Custom Tab with a URL bar.
+            -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="prepcadet.in" />
+            </intent-filter>
+
+        </activity>
+
+        <!--
+            Ferries the splash bitmap from this app's private storage to the TWA provider
+            (Chrome) so it can render the same image during the handoff — Chrome can't read
+            our app's files directly, so this is the sanctioned hand-off channel. authorities
+            must exactly match FILE_PROVIDER_AUTHORITY above.
+        -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
+
+    </application>
+
+</manifest>

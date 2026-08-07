@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Flat (non-adaptive) fallback for API 21-25, where mipmap-anydpi-v26/ic_launcher.xml doesn't
+    qualify and Android falls back to this default-config resource instead. Same background
+    color + chevron mark as the adaptive icon, just pre-composited into one vector since there's
+    no background/foreground layering below API 26.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#2F6BFF"
+        android:pathData="M0,0 h108 v108 h-108 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,32 L82,62 L70,62 L54,46 L38,62 L26,62 Z" />
+</vector>

@@ -1,0 +1,6 @@
+// Top-level build file: only declares the AGP version for the :app module to consume.
+// Kept plugin-only (no `apply`) because AGP 8.x resolves plugin versions through the
+// `plugins {}` block declared here plus `pluginManagement` in settings.gradle.
+plugins {
+    id "com.android.application" version "8.13.2" apply false
+}

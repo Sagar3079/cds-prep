@@ -1,0 +1,89 @@
+plugins {
+    id "com.android.application"
+}
+
+// Reads a signing value from an env var first (how CI/CD injects secrets without
+// writing them to disk), falling back to a Gradle property (how a dev sets it in
+// ~/.gradle/gradle.properties or -P on the command line) so the same build script
+// works identically on a laptop and in a pipeline. Never hardcode credentials here.
+def signingProp = { String name ->
+    def fromEnv = System.getenv(name)
+    if (fromEnv != null && !fromEnv.isEmpty()) return fromEnv
+    def fromProp = project.findProperty(name)
+    if (fromProp != null && !fromProp.toString().isEmpty()) return fromProp.toString()
+    return null
+}
+
+def releaseStoreFilePath = signingProp("KEYSTORE_FILE")
+def releaseStorePassword = signingProp("KEYSTORE_PASSWORD")
+def releaseKeyAlias = signingProp("KEY_ALIAS")
+def releaseKeyPassword = signingProp("KEY_PASSWORD")
+
+// Only true when every credential is present AND the keystore file it points to
+// actually exists on disk — this is what lets `assembleRelease` run unsigned on a
+// bare CI checkout (no secrets configured yet) instead of failing the whole build.
+def hasReleaseSigning = releaseStoreFilePath != null && releaseStorePassword != null &&
+        releaseKeyAlias != null && releaseKeyPassword != null &&
+        file(releaseStoreFilePath).exists()
+
+android {
+    namespace "in.prepcadet.app"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "in.prepcadet.app"
+        minSdk 21
+        targetSdk 35
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            release {
+                storeFile file(releaseStoreFilePath)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            // Debug always signs with the auto-generated ~/.android/debug.keystore,
+            // so `assembleDebug` builds and installs with zero configuration on any
+            // machine, including a fresh CI runner with no secrets at all.
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+            // Left unset (i.e. unsigned) when the four KEYSTORE_*/KEY_* values aren't
+            // available, per requirement: CI can still produce a release build artifact
+            // (just an unsigned one) without secrets present; a later `apksigner` step,
+            // or a rerun with secrets set, produces the installable APK/AAB.
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        // TWA config lives entirely in AndroidManifest.xml meta-data; androidbrowserhelper's
+        // LauncherActivity reads it via PackageManager at runtime. No Compose/View Binding
+        // needed since this app has no UI of its own.
+        buildConfig = false
+    }
+}
+
+dependencies {
+    // LauncherActivity, the TWA fallback UI (no-browser-installed screen), splash screen
+    // handling, and asset-link verification helpers all live in this one artifact.
+    implementation "com.google.androidbrowserhelper:androidbrowserhelper:2.7.2"
+}

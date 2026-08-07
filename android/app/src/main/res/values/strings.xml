@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">CDS Prep</string>
+
+    <!--
+        Digital Asset Links statement, read by LauncherActivity and exposed to Chrome as the
+        "asset_statements" meta-data. The \" escapes are required here (not entities like &quot;)
+        because Android's string-resource parser treats a bare " as the start/end of a quoted
+        span; backslash-escaping is how you get a literal " into the parsed value instead.
+        This must byte-for-byte match the relation/target shape Chrome expects, and the target
+        site must match what prepcadet.in serves at /.well-known/assetlinks.json (the other half
+        of the two-way verification) or the app falls back to a normal, chrome-visible tab.
+    -->
+    <string name="asset_statements">
+        [{
+            \"relation\": [\"delegate_permission/common.handle_all_urls\"],
+            \"target\": {
+                \"namespace\": \"web\",
+                \"site\": \"https://prepcadet.in\"}
+        }]
+    </string>
+</resources>
