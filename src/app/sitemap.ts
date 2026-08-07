@@ -10,13 +10,32 @@ import { LEGAL_LINKS, SITE } from "@/lib/legal";
  * `/test` and `/results` are deliberately absent: they are per-session app
  * state, not documents anyone should land on cold from a search result.
  */
-export default function sitemap(): MetadataRoute.Sitemap {
-  const pages = ["/", "/history", "/leaderboard", "/settings"];
+/**
+ * Priority is a hint about RELATIVE importance within this site, not a score.
+ * The home page is where the product is; the board changes daily and is the
+ * only other page with a reason to be recrawled often; the policy pages exist
+ * to be findable and almost never change.
+ */
+const PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
+  { path: "/", changeFrequency: "daily", priority: 1 },
+  { path: "/leaderboard", changeFrequency: "daily", priority: 0.8 },
+  { path: "/history", changeFrequency: "weekly", priority: 0.5 },
+  { path: "/settings", changeFrequency: "monthly", priority: 0.4 },
+];
 
-  return [...pages, ...LEGAL_LINKS.map((l) => l.href)].map((path) => ({
+export default function sitemap(): MetadataRoute.Sitemap {
+  const lastModified = new Date();
+  return [
+    ...PAGES,
+    ...LEGAL_LINKS.map((l) => ({
+      path: l.href,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
+  ].map(({ path, changeFrequency, priority }) => ({
     url: `${SITE.url}${path === "/" ? "" : path}`,
-    lastModified: new Date(),
-    changeFrequency: path === "/" ? "daily" : "monthly",
-    priority: path === "/" ? 1 : 0.6,
+    lastModified,
+    changeFrequency,
+    priority,
   }));
 }

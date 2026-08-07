@@ -1,3 +1,22 @@
+import type { Metadata } from "next";
+
+/**
+ * The landing surface for every search that matters. The title leads with what
+ * a candidate types ("CDS practice") and what makes this different (free,
+ * daily, real papers) rather than with the brand, which nobody is searching
+ * for yet.
+ */
+export const metadata: Metadata = {
+  // Overrides the layout template deliberately: the home page should not read
+  // "CDS Prep · CDS Prep".
+  title: {
+    absolute: "CDS Prep — free daily CDS practice from past UPSC papers",
+  },
+  description:
+    "A free ten-question CDS test every day in English and General Knowledge, drawn from real UPSC previous-year papers and marked +1 / −0.25 on a ten-minute clock. No account needed.",
+  alternates: { canonical: "/" },
+};
+
 import HomeStats, {
   HomeDate,
   HomeSetChip,

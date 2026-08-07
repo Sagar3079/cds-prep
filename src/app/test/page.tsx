@@ -1,3 +1,15 @@
+import type { Metadata } from "next";
+
+/**
+ * A run in progress is per-session state, not a page anyone should land on
+ * from a search result — robots.ts disallows it too, and this is the half that
+ * still applies once a crawler has the URL from somewhere else.
+ */
+export const metadata: Metadata = {
+  title: "Your test",
+  robots: { index: false, follow: false },
+};
+
 import Link from "next/link";
 import TestClient from "@/components/TestClient";
 import { bankFor, isSubjectReady } from "@/lib/bank";
