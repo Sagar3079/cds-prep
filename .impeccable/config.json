@@ -1,0 +1,20 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "bounce-easing",
+        "value": "var(--spring)",
+        "createdAt": "2026-08-07T07:33:51.144Z",
+        "reason": "CLAUDE.md defines --spring as the confirmation-only easing (tick landing, badge filling, dialog arriving); hovers use --ease"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "potterbounce",
+        "createdAt": "2026-08-07T07:33:51.197Z",
+        "reason": "Mascot idle bob; character motion is meant to read as buoyant"
+      }
+    ]
+  }
+}
