@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { SUPPORT_EMAIL } from "@/lib/legal";
+import VerifyEmail from "./VerifyEmail";
 
 /**
  * Razorpay Standard Checkout, for one plan.
@@ -85,6 +87,13 @@ function loadCheckout(): Promise<void> {
 /** `idle` covers "not started" and "came back from a dismissed modal" alike. */
 type Phase = "idle" | "opening" | "verifying" | "paid";
 
+/**
+ * What the server said is missing before this person can buy. Both come from
+ * `/api/payments/order`, which is the only place the rule lives — the button
+ * does not decide who may pay, it reports what it was told.
+ */
+type Need = "sign-in" | "verify";
+
 export default function CheckoutButton({
   planId,
   planName,
@@ -98,6 +107,7 @@ export default function CheckoutButton({
 }) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [need, setNeed] = useState<Need | null>(null);
 
   /**
    * Everything below runs across an await and a third-party callback, so both
@@ -170,8 +180,16 @@ export default function CheckoutButton({
         currency?: string;
         keyId?: string;
         error?: string;
+        need?: string;
       };
       if (!res.ok || !data.orderId || !data.keyId) {
+        // 401/403 are not failures to apologise for — they are one more step,
+        // and the step is shown in place rather than described.
+        if (data.need === "sign-in" || data.need === "verify") {
+          setNeed(data.need);
+          set("idle");
+          return;
+        }
         set("idle", data.error ?? "Could not start checkout. Try again.");
         return;
       }
@@ -220,6 +238,37 @@ export default function CheckoutButton({
   }, [planId, planName, set, verify]);
 
   const busy = phase === "opening" || phase === "verifying";
+
+  if (need === "verify") {
+    return (
+      <div className={className}>
+        <VerifyEmail
+          onVerified={() => {
+            setNeed(null);
+            // Straight back into the checkout they were already trying to
+            // start — the interruption is over, so it should not need a
+            // second press to get past it.
+            void start();
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (need === "sign-in") {
+    return (
+      <div className={`rounded-xl bg-accent-soft px-3 py-3 text-left ${className}`}>
+        <p className="text-sm leading-relaxed text-accent-ink">
+          <strong>Sign in first.</strong> A plan is access for a person, and
+          right now there is nobody to give it to — signing in takes an email
+          and nothing else.
+        </p>
+        <Link href="/leaderboard" className="btn-primary mt-3 w-full">
+          Sign in
+        </Link>
+      </div>
+    );
+  }
 
   if (phase === "paid") {
     return (

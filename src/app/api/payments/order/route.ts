@@ -59,7 +59,33 @@ export async function POST(req: Request) {
     );
   }
 
+  /**
+   * Buying requires a signed-in, VERIFIED account, and this is where that is
+   * enforced rather than in the button.
+   *
+   * Not gatekeeping for its own sake: a plan is access granted to somebody, and
+   * an anonymous payment has no somebody to grant it to. The first live
+   * payment this app took landed with `accountId: null` and could not have
+   * unlocked anything for anyone — which is the bug this closes. Verification
+   * on top, because an unverified address is a claim, and a plan attached to a
+   * claim is claimable by whoever types that address next.
+   */
   const acct = await currentAccount();
+  if (!acct) {
+    return NextResponse.json(
+      { error: "Sign in before buying, so the plan has somewhere to go.", need: "sign-in" },
+      { status: 401 },
+    );
+  }
+  if (!acct.emailVerified) {
+    return NextResponse.json(
+      {
+        error: "Verify your email before buying — we'll send a six-digit code.",
+        need: "verify",
+      },
+      { status: 403 },
+    );
+  }
 
   const result = await createOrder({
     amountPaise: plan.paise,
@@ -67,10 +93,9 @@ export async function POST(req: Request) {
     receipt: newReceipt(plan.id),
     notes: {
       plan: plan.id,
-      // Present only when signed in — practice works without an account, and
-      // so does buying. This is what ties a payment to a person in the
-      // dashboard when there is a person to tie it to.
-      ...(acct ? { accountId: acct.id } : {}),
+      // Always present now that buying requires an account: this is what ties
+      // a payment to a person, in the Razorpay dashboard and in our own store.
+      accountId: acct.id,
     },
   });
 
@@ -94,7 +119,7 @@ export async function POST(req: Request) {
       planId: plan.id,
       paise: plan.paise,
       currency: result.order.currency,
-      accountId: acct?.id ?? null,
+      accountId: acct.id,
       createdAt: Date.now(),
     }),
   );

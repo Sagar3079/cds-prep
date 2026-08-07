@@ -198,6 +198,12 @@ export default function TestClient({
   const [deadline, setDeadline] = useState<number | null>(null);
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [started, setStarted] = useState(false);
+  /** Set when the server refuses a random run, cleared by navigating away. */
+  const [gate, setGate] = useState<{
+    reason: "signed-out" | "used-up";
+    message: string;
+  } | null>(null);
+  const [gateBusy, setGateBusy] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [resumed, setResumed] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -519,12 +525,54 @@ export default function TestClient({
     setFocusNonce((n) => n + 1);
   };
 
-  const start = () => {
+  const beginRun = () => {
     const now = Date.now();
     setStartedAt(now);
     setDeadline(now + MARKING.durationSec * 1000);
     setSeconds(MARKING.durationSec);
     setStarted(true);
+  };
+
+  /**
+   * Spend one of the day's free random tests, then begin.
+   *
+   * Only random runs ask: the daily test is free forever and must never depend
+   * on a server being reachable to start. The allowance is counted here, as the
+   * run BEGINS, rather than when the page rendered — opening a page and
+   * changing your mind should not cost anybody a test.
+   *
+   * A network failure starts the run anyway. The server has the real count and
+   * will refuse the next one; blocking a person from practising because our
+   * store was briefly unreachable is the worse of the two errors, and it is the
+   * same trade `kv.ts` and the throttles already make everywhere else.
+   */
+  const start = () => {
+    if (!isRandom) {
+      beginRun();
+      return;
+    }
+    setGateBusy(true);
+    void (async () => {
+      try {
+        const res = await fetch("/api/random/start", { method: "POST" });
+        if (!res.ok) {
+          const data = (await res.json().catch(() => ({}))) as {
+            reason?: string;
+            error?: string;
+          };
+          setGateBusy(false);
+          setGate({
+            reason: data.reason === "signed-out" ? "signed-out" : "used-up",
+            message: data.error ?? "You've used today's free random tests.",
+          });
+          return;
+        }
+      } catch {
+        // Unreachable — see the note above. Fall through and start.
+      }
+      setGateBusy(false);
+      beginRun();
+    })();
   };
 
   const requestSubmit = () => {
@@ -658,9 +706,32 @@ export default function TestClient({
               {alreadyDone.correct}/{alreadyDone.total} correct)
             </p>
           )}
+          {gate && (
+            <div className="mb-4 rounded-xl bg-accent-soft px-3 py-2.5 text-left">
+              <p className="text-sm leading-relaxed text-accent-ink">
+                {gate.message}
+              </p>
+              <p className="mt-2">
+                <Link
+                  href={gate.reason === "signed-out" ? "/leaderboard" : "/pricing"}
+                  className="text-sm font-bold text-accent-ink underline"
+                >
+                  {gate.reason === "signed-out"
+                    ? "Sign in — it takes an email and nothing else"
+                    : "See plans for unlimited random tests"}
+                </Link>
+              </p>
+            </div>
+          )}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <button type="button" className="btn-primary" onClick={start}>
-              Begin test
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={start}
+              disabled={gateBusy}
+              aria-busy={gateBusy}
+            >
+              {gateBusy ? "Checking…" : "Begin test"}
             </button>
             {isRandom && (
               <button

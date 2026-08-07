@@ -83,6 +83,37 @@ const WINDOWS = {
   leaderboard: { tokens: 120, window: "1 m" },
 
   /**
+   * Sending a verification code. 3 per hour.
+   *
+   * Every one of these costs an email, and an email sent to an address the
+   * requester does not own is a message somebody else did not ask for. Three an
+   * hour covers a code lost to spam plus one retype of the address, and caps
+   * what this endpoint can do to a stranger's inbox — and to the sending
+   * domain's reputation, which is the thing that stops the NEXT code arriving.
+   */
+  "verify:send": { tokens: 3, window: "1 h" },
+
+  /**
+   * Checking a code. 20 per hour.
+   *
+   * Not the real defence: the code itself allows five wrong guesses and is then
+   * destroyed, so guessing is bounded whatever this says. This exists to stop a
+   * script burning through codes fast enough to matter, and sits far above any
+   * human's typo rate.
+   */
+  "verify:check": { tokens: 20, window: "1 h" },
+
+  /**
+   * Starting a random test. 60 per hour.
+   *
+   * The allowance itself is the limit that matters — two a day, counted in
+   * Redis. This only stops a loop hammering the endpoint, and stays well clear
+   * of a plan holder practising hard: sixty an hour is a test every minute,
+   * with each one taking ten.
+   */
+  "random:start": { tokens: 60, window: "1 h" },
+
+  /**
    * Opening a checkout. 10 per hour.
    *
    * Every one of these is a live call to Razorpay's Orders API against our
@@ -127,6 +158,12 @@ const MESSAGES: Record<LimitedRoute, string> = {
     "You've sent a lot of results in a short time. Wait a little and try again.",
   explain: "Too many explanations at once. Give it a moment and they'll load.",
   leaderboard: "The board is being asked for too often. It'll be back shortly.",
+  "verify:send":
+    "We've sent a few codes already. Check your inbox and spam, then try again in a little while.",
+  "verify:check":
+    "Too many attempts. Wait a few minutes, then request a fresh code.",
+  "random:start":
+    "That's a lot of tests started at once. Give it a moment and try again.",
   "payment:order":
     "That's a lot of checkout attempts in a short time. Give it a few minutes and try again.",
   "payment:verify":

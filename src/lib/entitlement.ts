@@ -1,0 +1,166 @@
+import "server-only";
+import { kv } from "./kv";
+import { PLANS, type PlanId } from "./legal";
+import type { Account } from "./account";
+
+/**
+ * Who may take a random test, and how many they have left.
+ *
+ * Two separate things decide it, and they are deliberately not merged. A free
+ * allowance is a COUNT that resets every day; a plan is a DATE that either has
+ * or has not passed. Collapsing them into one "credits" number was the obvious
+ * first design and it is wrong: a plan holder who has used their two free runs
+ * would then be blocked, and a refund would have to unpick arithmetic instead
+ * of clearing one key.
+ *
+ * The daily test is untouched by all of this and stays free forever — this
+ * governs `?mode=random` only.
+ */
+
+/** Free random tests per account per day. Today's daily test is separate. */
+export const FREE_RANDOM_PER_DAY = 2;
+
+const usageKey = (accountId: string, day: string) => `rq:${accountId}:${day}`;
+const planKey = (accountId: string) => `entl:${accountId}`;
+
+/**
+ * The calendar day, in IST.
+ *
+ * `toISOString().slice(0,10)` is a bug here for the same reason `storage.ts`
+ * says so on the client: the server's clock is UTC, candidates are in India,
+ * and before 05:30 IST a UTC date rolls the allowance over half a day early.
+ * Fixed offset rather than a timezone database because India has no DST.
+ */
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+export function istDayKey(now = Date.now()): string {
+  return new Date(now + IST_OFFSET_MS).toISOString().slice(0, 10);
+}
+
+export interface Entitlement {
+  planId: PlanId;
+  /** Epoch ms. Access ends here. */
+  until: number;
+  orderId: string;
+}
+
+/** The live plan, or null. An expired record is treated as absent. */
+export async function activePlan(
+  accountId: string,
+): Promise<Entitlement | null> {
+  const raw = await kv.get(planKey(accountId));
+  if (!raw) return null;
+  try {
+    const e = JSON.parse(raw) as Entitlement;
+    return e.until > Date.now() ? e : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Record a paid plan.
+ *
+ * Extends from whatever is left rather than from today, so buying a second
+ * month while the first still has a week on it adds thirty days to the week
+ * instead of throwing it away. Somebody who pays twice must never end up with
+ * less than they paid for.
+ */
+export async function grantPlan(o: {
+  accountId: string;
+  planId: PlanId;
+  orderId: string;
+}): Promise<Entitlement> {
+  const plan = PLANS.find((p) => p.id === o.planId);
+  const days = plan?.days ?? 0;
+  const existing = await activePlan(o.accountId);
+  const from = existing ? existing.until : Date.now();
+  const record: Entitlement = {
+    planId: o.planId,
+    until: from + days * 86_400_000,
+    orderId: o.orderId,
+  };
+  await kv.set(planKey(o.accountId), JSON.stringify(record));
+  // TTL a week past expiry: the record is worth reading for a few days after
+  // it lapses (support asking "what did they buy?") and worth nothing forever.
+  await kv.expire(
+    planKey(o.accountId),
+    Math.ceil((record.until - Date.now()) / 1000) + 7 * 86_400,
+  );
+  return record;
+}
+
+export interface RandomAccess {
+  allowed: boolean;
+  /** Why not, when `allowed` is false. */
+  reason: "signed-out" | "used-up" | null;
+  used: number;
+  limit: number;
+  plan: Entitlement | null;
+}
+
+/**
+ * Read-only: what would happen if they started a random test now.
+ *
+ * Never consumes anything, because this is what the page render calls and a
+ * render is not a promise that a test will be taken — React may render twice, a
+ * prefetch may render it with nobody looking, and a person may open the page
+ * and change their mind. `consumeRandom` is the one that costs an allowance,
+ * and it is called when a run actually begins.
+ */
+export async function randomAccess(
+  acct: Account | null,
+): Promise<RandomAccess> {
+  const limit = FREE_RANDOM_PER_DAY;
+  if (!acct) {
+    return { allowed: false, reason: "signed-out", used: 0, limit, plan: null };
+  }
+  const plan = await activePlan(acct.id);
+  if (plan) {
+    return { allowed: true, reason: null, used: 0, limit, plan };
+  }
+  const raw = await kv.get(usageKey(acct.id, istDayKey()));
+  const used = Number(raw ?? 0) || 0;
+  return used < limit
+    ? { allowed: true, reason: null, used, limit, plan: null }
+    : { allowed: false, reason: "used-up", used, limit, plan: null };
+}
+
+export type ConsumeResult =
+  | { ok: true; used: number; limit: number; plan: Entitlement | null }
+  | { ok: false; reason: "signed-out" | "used-up" };
+
+/**
+ * Spend one free run, or none if a plan is active.
+ *
+ * INCR first, then compare — not read-then-write. Two tabs pressing Begin at
+ * the same moment both read `1`, both decide there is room, and both start:
+ * the check has to be the same atomic operation as the increment. Over the
+ * limit, the count is left where it is rather than decremented, because
+ * decrementing reintroduces exactly the race this avoids.
+ *
+ * `kv` fails open and returns null when Redis is unreachable, so `n` is null
+ * and this ALLOWS the run. That is the deliberate trade this codebase makes
+ * everywhere: a store outage must not stop somebody practising, and the cost is
+ * an uncounted free test during an outage.
+ */
+export async function consumeRandom(
+  acct: Account | null,
+): Promise<ConsumeResult> {
+  if (!acct) return { ok: false, reason: "signed-out" };
+
+  const plan = await activePlan(acct.id);
+  if (plan) return { ok: true, used: 0, limit: FREE_RANDOM_PER_DAY, plan };
+
+  const day = istDayKey();
+  const key = usageKey(acct.id, day);
+  const n = await kv.incr(key);
+  if (n === null) {
+    return { ok: true, used: 0, limit: FREE_RANDOM_PER_DAY, plan: null };
+  }
+  // Only on the first increment of the day, so a later one cannot push the
+  // reset further out and hand somebody a rolling window.
+  if (n === 1) await kv.expire(key, 2 * 86_400);
+
+  if (n > FREE_RANDOM_PER_DAY) return { ok: false, reason: "used-up" };
+  return { ok: true, used: n, limit: FREE_RANDOM_PER_DAY, plan: null };
+}

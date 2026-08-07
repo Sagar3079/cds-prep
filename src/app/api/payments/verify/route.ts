@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { currentAccount } from "@/lib/account";
 import { kv } from "@/lib/kv";
-import { PLANS } from "@/lib/legal";
+import { PLANS, type PlanId } from "@/lib/legal";
+import { grantPlan } from "@/lib/entitlement";
 import { rateLimit } from "@/lib/ratelimit";
 import {
   paidKey,
@@ -30,12 +31,9 @@ const str = (v: unknown): string | null =>
  * that makes the other two mean anything. A mismatch returns 400 and writes
  * nothing — a forged POST must not be able to mark an order paid.
  *
- * What this does NOT do, stated plainly: it records the payment, and it does
- * not grant anything. There is no paywall in this app yet, so there is nothing
- * to unlock; inventing an entitlement here that nothing reads would be a
- * second source of truth about what someone has bought. Whatever eventually
- * gates unlimited random tests reads `rzp:paid:*`, and it belongs in the
- * change that adds the gate.
+ * A verified payment records to `rzp:paid:<order_id>` and grants the plan. The
+ * webhook does exactly the same from Razorpay's side; whichever gets there
+ * first does both, and the loser does neither.
  */
 export async function POST(req: Request) {
   const limited = await rateLimit(req, "payment:verify");
@@ -115,7 +113,34 @@ export async function POST(req: Request) {
    * paid is not an error — the customer paid once and is asking again whether
    * it worked — so it still answers yes.
    */
-  await kv.setIfAbsent(paidKey(orderId), JSON.stringify(record));
+  const firstToRecord = await kv.setIfAbsent(
+    paidKey(orderId),
+    JSON.stringify(record),
+  );
+
+  /**
+   * The point of all of this: turn a payment into access.
+   *
+   * Gated on `firstToRecord`, and that is load-bearing rather than tidy.
+   * `grantPlan` extends from whatever is left on the account so that buying a
+   * second month early adds to the first instead of discarding it — which means
+   * calling it twice for ONE payment hands out sixty days for a thirty-day
+   * purchase. This route and the webhook both run for the same payment in the
+   * normal case, so the one that lost the race must not grant.
+   *
+   * Only when the order carried an account and a plan — the order route now
+   * requires both, but a payment made before that rule existed, or one whose
+   * pending record has expired, would have neither, and granting a plan to
+   * `null` is not a thing to attempt. Those are recorded and reconciled by
+   * hand, which is the honest failure.
+   */
+  if (firstToRecord && record.accountId && record.planId) {
+    await grantPlan({
+      accountId: record.accountId,
+      planId: record.planId as PlanId,
+      orderId,
+    });
+  }
 
   const plan = PLANS.find((p) => p.id === record.planId);
 

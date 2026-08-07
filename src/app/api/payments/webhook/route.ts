@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { kv } from "@/lib/kv";
+import { grantPlan } from "@/lib/entitlement";
+import type { PlanId } from "@/lib/legal";
 import {
   paidKey,
   pendingOrderKey,
@@ -118,6 +120,24 @@ export async function POST(req: Request) {
   };
 
   const won = await kv.setIfAbsent(paidKey(orderId), JSON.stringify(record));
+
+  /**
+   * The point of all of this: turn a payment into access.
+   *
+   * Only when the order carried an account and a plan — the order route now
+   * requires both, but a payment made before that rule existed, or one whose
+   * pending record has expired, would have neither, and granting a plan to
+   * `null` is not a thing to attempt. Those are recorded and reconciled by
+   * hand, which is the honest failure.
+   */
+  if (won && record.accountId && record.planId) {
+    await grantPlan({
+      accountId: record.accountId,
+      planId: record.planId as PlanId,
+      orderId,
+    });
+  }
+
 
   // 200 either way. `won: false` means the browser got there first, which is
   // the normal case and is not a failure — retrying it would change nothing.
