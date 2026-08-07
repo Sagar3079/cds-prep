@@ -9,7 +9,7 @@ import CheckoutButton from "./CheckoutButton";
  * They used to be declared here as well; a price a customer sees in two places
  * that disagree is a chargeback, so there is now exactly one array.
  */
-import { PLANS, rupees } from "@/lib/legal";
+import { FREE_RANDOM_PER_DAY, PLANS, rupees } from "@/lib/legal";
 
 /**
  * "Take a random test" at the end of a review, and the plan sheet it opens.
@@ -136,9 +136,10 @@ export default function RandomTestUpsell() {
               Unlimited random tests
             </h2>
             <p className="mt-1 text-[0.8125rem] leading-relaxed text-muted">
-              Today&apos;s test stays free, always. A plan adds random sets
-              drawn from the whole bank, weighted towards the topics you keep
-              getting wrong.
+              Today&apos;s test stays free, always, and so do{" "}
+              {FREE_RANDOM_PER_DAY} random tests a day. A plan lifts that limit
+              — unlimited sets from the whole bank, weighted towards the topics
+              you keep getting wrong.
             </p>
 
             {/* A real radio group, not two decorated divs. Arrow keys move

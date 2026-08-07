@@ -552,6 +552,11 @@ export default function TestClient({
       return;
     }
     setGateBusy(true);
+    // Clear last time's refusal before asking again: signing in or buying a
+    // plan in another tab is exactly how somebody gets past this, and leaving
+    // "Sign in to take random tests" on screen while we re-check reads as
+    // though the answer is already no.
+    setGate(null);
     void (async () => {
       try {
         const res = await fetch("/api/random/start", { method: "POST" });

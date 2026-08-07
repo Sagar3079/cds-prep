@@ -123,6 +123,12 @@ const FAQ = [
 ] as const;
 
 export const metadata: Metadata = {
+  /**
+   * Kept out of search, but still crawlable — see the note in robots.ts. It
+   * competes with the home page for identical queries, and two near-identical
+   * pages split the site's own signals between them.
+   */
+  robots: { index: false, follow: true },
   title: "CDS Prep — ten minutes a day, marked like the real paper",
   description:
     "Answer a real CDS previous-year question right now. Ten questions, ten minutes, marked +1 / −0.25 like the actual paper. Free daily test — no account, no card.",

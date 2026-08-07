@@ -1,6 +1,6 @@
 import "server-only";
 import { kv } from "./kv";
-import { PLANS, type PlanId } from "./legal";
+import { FREE_RANDOM_PER_DAY, PLANS, type PlanId } from "./legal";
 import type { Account } from "./account";
 
 /**
@@ -17,8 +17,7 @@ import type { Account } from "./account";
  * governs `?mode=random` only.
  */
 
-/** Free random tests per account per day. Today's daily test is separate. */
-export const FREE_RANDOM_PER_DAY = 2;
+export { FREE_RANDOM_PER_DAY };
 
 const usageKey = (accountId: string, day: string) => `rq:${accountId}:${day}`;
 const planKey = (accountId: string) => `entl:${accountId}`;

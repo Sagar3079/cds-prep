@@ -27,6 +27,16 @@ export default function VerifyEmail({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const send = async () => {
+    /**
+     * Where to go back to if this fails.
+     *
+     * "Send a new code" is pressed FROM the code entry screen, and the most
+     * likely failure is the 3-per-hour send limit — precisely the state
+     * somebody resending is in. Dropping them back to the start screen there
+     * destroys the input they were about to use, on a code that may well have
+     * arrived, and the only button left is one the throttle will also refuse.
+     */
+    const fallback = phase === "entering" ? "entering" : "idle";
     setPhase("sending");
     setError(null);
     try {
@@ -42,7 +52,7 @@ export default function VerifyEmail({
         return;
       }
       if (!res.ok) {
-        setPhase("idle");
+        setPhase(fallback);
         setError(data.error ?? "Couldn't send the code. Try again in a moment.");
         return;
       }
@@ -51,7 +61,7 @@ export default function VerifyEmail({
       // The field is the only thing to do next, so put the cursor in it.
       requestAnimationFrame(() => inputRef.current?.focus());
     } catch {
-      setPhase("idle");
+      setPhase(fallback);
       setError("Couldn't reach the server. Check your connection and try again.");
     }
   };

@@ -67,6 +67,18 @@ export const PLANS = [
 
 export type PlanId = (typeof PLANS)[number]["id"];
 
+/**
+ * Free random tests per account per day. Today's daily test is separate and is
+ * free without limit.
+ *
+ * Lives here rather than beside the code that enforces it because both the
+ * pricing page and the in-app plan sheet have to STATE it, and those are client
+ * components that cannot import `entitlement.ts` (it is server-only, it holds
+ * the store credentials). A number a customer is told that disagrees with the
+ * number enforced is the same class of problem as a price shown in two places.
+ */
+export const FREE_RANDOM_PER_DAY = 2;
+
 export const rupees = (paise: number) =>
   `₹${(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 

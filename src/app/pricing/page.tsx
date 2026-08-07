@@ -3,6 +3,7 @@ import Link from "next/link";
 import CheckoutButton from "@/components/CheckoutButton";
 import {
   BILLING_LIVE,
+  FREE_RANDOM_PER_DAY,
   LAST_UPDATED,
   PLANS,
   REFUND_ELIGIBILITY_DAYS,
@@ -29,6 +30,7 @@ export const dynamic = "force-dynamic";
 const FREE_INCLUDES = [
   "One ten-question English set every day",
   "One ten-question General Knowledge set every day",
+  `${FREE_RANDOM_PER_DAY} extra random tests a day, drawn from the whole bank`,
   "Real marking — +1, −0.25, 0 — on a ten-minute clock",
   "Full review with the answer and an explanation",
   "Streaks, accuracy, and per-topic history",
