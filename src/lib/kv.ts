@@ -48,6 +48,9 @@ export const kv = {
     return r === "OK";
   },
   expire: (key: string, sec: number) => cmd<number>("EXPIRE", key, sec),
+  del: (key: string) => cmd<number>("DEL", key),
+  /** Returns the value AFTER the increment, or null if the store is unreachable. */
+  incr: (key: string) => cmd<number>("INCR", key),
   zadd: (key: string, score: number, member: string) =>
     cmd<number>("ZADD", key, score, member),
   /** Highest first. */
