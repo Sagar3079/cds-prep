@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import CheckoutButton from "./CheckoutButton";
 /**
  * Prices come from `legal.ts`, which is also what the pricing page renders.
  * They used to be declared here as well; a price a customer sees in two places
@@ -13,14 +14,19 @@ import { PLANS, rupees } from "@/lib/legal";
 /**
  * "Take a random test" at the end of a review, and the plan sheet it opens.
  *
- * The sheet is where a plan is CHOSEN; /pricing is where it is paid for. That
- * split is forced by the overlay: Razorpay's Checkout covers the whole
- * viewport, and this sheet is portalled inside the device panel that is the
- * app, so opening Checkout from in here would tear straight through it.
+ * Choosing a plan and paying for it happen in the same sheet: pick, press, and
+ * Razorpay opens on top. There is no page in between, because a checkout that
+ * makes someone navigate first loses the ones who were already reaching for
+ * their card.
+ *
+ * The cost, accepted knowingly: Razorpay's Checkout is a full-viewport overlay
+ * and this sheet is portalled inside the device panel that is the app, so on a
+ * desktop the payment window covers the mock phone rather than sitting in it.
+ * On a phone — what this is built for — the overlay IS the screen.
  *
  * It used to say payments were not live and simply close. That was true and is
- * not any more — copy that tells a buyer nothing will be charged, on a site
- * that charges, is worse than no copy at all.
+ * not any more; copy telling a buyer nothing will be charged, on a site that
+ * charges, is worse than no copy at all.
  */
 export default function RandomTestUpsell() {
   const [open, setOpen] = useState(false);
@@ -216,18 +222,18 @@ export default function RandomTestUpsell() {
               })}
             </div>
 
-            {/* Goes to /pricing rather than opening Checkout in place. The
-                Razorpay modal is a full-viewport overlay and this sheet is
-                portalled INSIDE the device panel, so opening it from here
-                would break out of the phone the whole app lives in. The
-                pricing page owns checkout; this owns the choice. */}
-            <Link
-              href={`/pricing#${chosenPlan.id}`}
-              className="btn-primary mt-4 w-full"
-              onClick={() => setOpen(false)}
-            >
-              Get {chosenPlan.name} · {rupees(chosenPlan.paise)}
-            </Link>
+            {/* Checkout opens HERE, on the plan you just chose — no page in
+                between. Razorpay's modal is a full-viewport overlay, so it
+                floats above the device panel this sheet is portalled into
+                rather than inside it. On a phone, which is what this is for,
+                that is exactly right; on a desktop it covers the mock device
+                for as long as the payment takes. */}
+            <CheckoutButton
+              className="mt-4"
+              planId={chosenPlan.id}
+              planName={chosenPlan.name}
+              label={`Get ${chosenPlan.name} · ${rupees(chosenPlan.paise)}`}
+            />
             {/* The policies, at the point of purchase rather than only in the
                 footer. A buyer should not have to leave a checkout to find out
                 what the cancellation terms are — and a payment gateway checks
