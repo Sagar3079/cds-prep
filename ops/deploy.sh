@@ -60,6 +60,24 @@ fi
 PREV=$(git rev-parse HEAD)
 git fetch --quiet origin main || { echo "FETCH FAILED"; exit 1; }
 TARGET=$(git rev-parse origin/main)
+
+# Never discard work that exists only on this box.
+#
+# `git reset --hard origin/main` below is unconditional, so a commit made here
+# and not pushed is gone the next time anything lands on main — including a push
+# that has nothing to do with it. That is not hypothetical: the security fixes in
+# this tree were deployed straight from the VPS because the box has no GitHub
+# credentials, and until they are pushed, an unrelated deploy would silently
+# revert every one of them.
+#
+# Zero in the normal case, since a finished deploy leaves HEAD at origin/main.
+UNPUSHED=$(git rev-list --count origin/main..HEAD 2>/dev/null || echo 0)
+if [ "${UNPUSHED:-0}" -gt 0 ]; then
+  echo "REFUSING TO DEPLOY: $UNPUSHED commit(s) here are not on origin/main."
+  echo "Resetting would destroy them. Push them first:"
+  git log --oneline origin/main..HEAD | sed 's/^/    /'
+  exit 1
+fi
 if [ "$PREV" = "$TARGET" ]; then echo "already at origin/main, nothing to do"; exit 0; fi
 echo "current: $PREV"
 echo "target:  $TARGET"
