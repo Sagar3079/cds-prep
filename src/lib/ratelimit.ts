@@ -17,11 +17,13 @@ import { kvConfigured } from "./kv";
  * a timed test. Every failure path below returns `null` (allow), never a 429.
  *
  * What this does NOT do, stated plainly: an IP is not an identity. Behind
- * Indian mobile CGNAT a whole city can share one address, and off Vercel the
- * `x-forwarded-for` header is written by the caller. So these limits raise the
- * cost of casual abuse and cap accidental runaway clients. They are not an
- * authorization boundary, and the durable fix for `/api/account` is email
- * verification, not a smaller number here.
+ * Indian mobile CGNAT a whole city can share one address. So these limits raise
+ * the cost of casual abuse and cap accidental runaway clients. They are not an
+ * authorization boundary — the durable fix for `/api/account` was email
+ * verification, not a smaller number here, and that now gates it.
+ *
+ * Which header is trusted for "who is calling" is a security decision, not a
+ * detail: see `clientIp` at the bottom of this file.
  */
 
 /** Sliding window: 429s smoothly rather than at hard clock boundaries. */
@@ -214,20 +216,32 @@ const limiters: Record<LimitedRoute, Ratelimit> | null = kvConfigured
 /**
  * Best guess at who is calling.
  *
- * On Vercel the edge sets `x-forwarded-for` itself, so the leftmost entry is
- * the client address as the platform saw it. Anywhere without a trusted proxy
- * in front — `next dev`, a bare self-host — the header is whatever the caller
- * typed, and rotating it buys a fresh bucket per request. Treat the result as a
- * hint, never as proof of origin.
+ * **`x-real-ip` is preferred over `x-forwarded-for`, and the order matters.**
+ * This app runs behind the nginx config in `ops/nginx/prepcadet.in`, which sets
+ * `X-Real-IP $remote_addr` — the address of the TCP peer, which nginx observed
+ * rather than read, and which a caller therefore cannot choose. It also sets
+ * `X-Forwarded-For $proxy_add_x_forwarded_for`, and that directive *appends* to
+ * whatever `X-Forwarded-For` the client already sent. So a request arriving with
+ * a handwritten `X-Forwarded-For: 1.2.3.4` reaches the app as
+ * `1.2.3.4, <real address>`, and reading the leftmost entry — which is what this
+ * function used to do — returned the value the attacker picked. One header per
+ * request bought a fresh bucket, which defeated every limit in this file:
+ * unlimited sign-ups, unlimited Razorpay order creation, unlimited everything.
  *
- * Requests with no forwarding header at all share the "unknown" bucket. That is
- * deliberate: it is the only safe default, and it does not apply on Vercel.
+ * Falling back to the leftmost `x-forwarded-for` entry is kept for deployments
+ * where a platform edge sets that header itself and no `x-real-ip` exists. It is
+ * only reachable when the trusted header is absent, so it cannot be used to
+ * override it.
+ *
+ * Requests with no forwarding header at all share the "unknown" bucket — the
+ * only safe default, and not a case that arises behind the real proxy.
  */
 function clientIp(req: Request): string {
+  const real = req.headers.get("x-real-ip")?.trim();
+  if (real) return real;
   const forwarded = req.headers.get("x-forwarded-for");
   const first = forwarded?.split(",")[0]?.trim();
-  if (first) return first;
-  return req.headers.get("x-real-ip")?.trim() || "unknown";
+  return first || "unknown";
 }
 
 /**
