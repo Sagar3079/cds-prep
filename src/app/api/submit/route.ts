@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { bankById } from "@/lib/bank";
-import { MARKING } from "@/lib/daily";
+import { readJsonCapped } from "@/lib/body";
+import { PER_TEST, bankById, bankFor } from "@/lib/bank";
+import { MARKING, pickDailyQuestions } from "@/lib/daily";
 import { kv, kvConfigured } from "@/lib/kv";
 import { rateLimit } from "@/lib/ratelimit";
 import { currentAccount, displayName } from "@/lib/account";
@@ -26,12 +27,20 @@ interface Body {
  * That makes a forged score impossible: the only thing a caller can lie about
  * is which option it picked, which is just being wrong.
  *
- * What this does NOT fix, and it must be said plainly: `questions.json` is
- * still bundled into the browser with its `answer` field, so a determined user
- * can read today's key before answering and then submit a genuine 10/10. The
- * fix is to serve the day's questions without answers and hand them back only
- * after submission; until that lands, this board is honest about scores but not
- * proof against a cheat.
+ * Only ids from the day's actual set are scored. This matters more than it
+ * looks: `bankById` holds the WHOLE subject bank, so without this check a caller
+ * could post fifty ids of its own choosing and be scored on all of them — and
+ * since `questions.json` ships to the browser with its `answer` field intact,
+ * choosing fifty correct ones costs nothing. The ceiling that comment above
+ * accepted as the residual cheat ("a genuine 10/10") was not actually the
+ * ceiling the code enforced; a 50/10 was. The day's set is recomputed here from
+ * the same deterministic picker the client used, so the ceiling is now real.
+ *
+ * What this still does NOT fix, and it must be said plainly: the bank is in the
+ * browser, answers included, so a determined user can read today's key before
+ * answering and submit a genuine 10/10. The fix for that is to serve the day's
+ * questions without answers and hand them back only after submission; until
+ * that lands, this board is honest about scores but not proof against a cheat.
  *
  * One entry per account per day PER SUBJECT, first attempt only — a retake must
  * not let someone grind the same ten questions upward. The subject is part of
@@ -51,15 +60,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Sign in to join the leaderboard." }, { status: 401 });
   }
 
-  let body: Body;
-  try {
-    body = (await req.json()) as Body;
-  } catch {
-    return NextResponse.json({ error: "Expected JSON." }, { status: 400 });
+  const read = await readJsonCapped<Body>(req);
+  if (!read.ok) {
+    return NextResponse.json({ error: read.error }, { status: read.status });
   }
+  const body = read.value;
 
   const submitted = Array.isArray(body.answers) ? body.answers : null;
-  if (!submitted || submitted.length === 0 || submitted.length > 50) {
+  // A run is `PER_TEST` questions; the slack is for a client that ever sends a
+  // little more, not for a caller with something to gain. What actually bounds
+  // the score is the day's-set check below — this only bounds the parsing work.
+  if (!submitted || submitted.length === 0 || submitted.length > PER_TEST * 2) {
     return NextResponse.json({ error: "Nothing to score." }, { status: 400 });
   }
 
@@ -69,6 +80,49 @@ export async function POST(req: Request) {
   // unknown id.
   const byId = bankById(subject);
 
+  const day = istDay();
+
+  /**
+   * Which ten questions this run is allowed to be about.
+   *
+   * Recomputed here rather than trusted from the body, which is the whole point:
+   * `pickDailyQuestions` is deterministic per date, so the server can derive
+   * exactly what the client was shown without being told.
+   *
+   * Three candidate days are considered and **exactly one is used** — the one
+   * the submission actually matches. Unioning them would raise the ceiling to
+   * thirty questions, which is the thing this check exists to prevent; picking
+   * the best match keeps it at ten.
+   *
+   * Why three, when the board is keyed to one IST day:
+   *
+   * - The client builds its set from `todayKey()`, the visitor's LOCAL calendar
+   *   day. This route works in IST. Those disagree for anyone outside India —
+   *   behind IST (Europe, the Americas) the client is on yesterday's date, ahead
+   *   of it (Japan, Australia, NZ) it is already on tomorrow's.
+   * - Even inside IST, a ten-minute test begun at 23:55 is submitted after
+   *   midnight against the previous day's questions.
+   *
+   * Scoring any of those as zero would punish an honest candidate for where they
+   * are sitting or when they started. The board entry is still claimed against
+   * `day`, so first-attempt-per-IST-day is unchanged.
+   */
+  const idsFor = (d: string) =>
+    new Set(pickDailyQuestions(bankFor(subject), d, PER_TEST).map((q) => q.id));
+  const shifted = (days: number) =>
+    idsFor(istDay(new Date(Date.now() + days * 86400000)));
+
+  const submittedIds = submitted
+    .map((a) => (typeof a?.id === "string" ? a.id : null))
+    .filter((id): id is string => Boolean(id));
+  const hits = (set: Set<string>) =>
+    submittedIds.filter((id) => set.has(id)).length;
+
+  // Today first, so an exact tie can only ever resolve in its favour.
+  const allowed = [shifted(0), shifted(-1), shifted(1)].reduce((best, set) =>
+    hits(set) > hits(best) ? set : best,
+  );
+
   let correct = 0;
   let wrong = 0;
   let blank = 0;
@@ -76,9 +130,11 @@ export async function POST(req: Request) {
 
   for (const a of submitted) {
     if (typeof a?.id !== "string") continue;
+    // Not in the day's set, unknown, or already counted — all dropped rather
+    // than scored. A caller must not be able to pad a run with questions it
+    // was never asked, nor with the same easy one ten times.
+    if (!allowed.has(a.id)) continue;
     const q = byId.get(a.id);
-    // Unknown ids and repeats are dropped rather than scored — a caller must
-    // not be able to pad a run with the same easy question ten times.
     if (!q || seen.has(q.id) || typeof q.answer !== "number") continue;
     seen.add(q.id);
 
@@ -92,7 +148,6 @@ export async function POST(req: Request) {
   }
 
   const score = correct * MARKING.correct + wrong * MARKING.wrong;
-  const day = istDay();
 
   // First attempt of the day only, per subject. NX makes that a property of the
   // store rather than of the order requests happen to arrive in.
