@@ -237,12 +237,38 @@ project's real `typescript` dependency — `tsc`/`next build` are unaffected. Se
 script's header comment for the full story if `npm run lint` ever starts failing with
 "typescript-eslint does not support TS 7.0".
 
-Data pipeline (Python, needs the gitignored `pdfs/`):
+### Data pipeline — read this before running any of it
+
+**`src/data/questions.json` is the source of truth. Edit it directly.** The
+generate-from-scratch lineage does not reproduce it and never has.
+
+Four scripts REPLACE the bank rather than merging into it — `seed_questions.py`,
+`rebuild_bank.py`, `parse_ocr.py` and (despite its name) `merge_answered_ocr.py`.
+Between them they would discard the 464 answers joined against official UPSC keys
+and, in `rebuild_bank.py`'s case, every hand-written question deliberately. They
+used to do this silently and with no backup; `seed_questions.py` in particular was
+listed here as a routine "rebuild the bank" command, which is how a destructive
+script ends up being run by someone — or something — following the docs.
+
+They are now guarded. Each one routes its write through
+`scripts/_bank_guard.py`, which refuses to shrink the bank by more than 10%
+unless `--force` is passed, and takes a timestamped backup either way. They also
+resolve paths from `__file__` instead of `$HOME/cds-prep` — before that fix, on
+any checkout not at exactly `~/cds-prep` they wrote to a phantom directory and
+reported success, which is worse than failing.
+
+They are kept rather than deleted because their literals are the only provenance
+record for the 317 hand-written questions live in the bank.
 
 ```bash
-python scripts/ocr_and_parse.py     # OCR the source PDFs — slow
-python scripts/seed_questions.py    # rebuild src/data/questions.json
+python scripts/ocr_and_parse.py     # OCR the source PDFs — slow, writes no bank
 ```
+
+**Known gap:** the join that produced the 464 `official-key` answers exists in no
+script here. `parse_ocr.py` reads `answer_keys/keys.json` expecting a flat
+`{qnum: letter}` map, but that file is nested per paper, so the lookup silently
+resolves to nothing for every question. Mining a new paper against its official
+key means writing that join first.
 
 Repair passes over an existing bank. All take `--check` to report without writing,
 and all re-derive from the source paper rather than inferring from the text:

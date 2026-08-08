@@ -1,10 +1,21 @@
 #!/usr/bin/env python3
-"""Merge seed + OCR questions with answer map into questions.json"""
-import json, re, importlib.util, os
+"""Merge seed + OCR questions with answer map into questions.json
+
+⚠️  Despite the name this REPLACES the bank with `seed + OCR` only; it does not
+merge into what is already there. Anything not reachable from those two sources —
+including all 192 `pred-*` records — is dropped.
+
+Paths resolve from this file rather than `$HOME`, and the write goes through
+`guarded_write`. The `ANSWERS` map below is the provenance record for the 22
+questions labelled `verified`, which is why this file is kept.
+"""
+import json, re, importlib.util, subprocess, sys
 from pathlib import Path
 
-ROOT = Path.home() / "cds-prep"
-OUT = ROOT / "src/data/questions.json"
+from _bank_guard import bank_path, guarded_write, repo_root
+
+ROOT = repo_root()
+OUT = bank_path()
 
 # qid -> answer index 0-3
 ANSWERS = {
@@ -71,9 +82,18 @@ def load_ocr():
     return qs
 
 def main():
-    # start from seed
-    os.system(f"python3 {ROOT}/scripts/seed_questions.py")
-    base = json.loads(OUT.read_text())
+    # Start from seed.
+    #
+    # `sys.executable`, not a bare "python3": the interpreter running this script
+    # is the one that has its dependencies, and on Windows the command is
+    # "python" — the old hardcoded form failed there before doing anything.
+    #
+    # A non-zero exit is expected and fine. `seed_questions.py` now refuses to
+    # shrink the bank, so on a full checkout this call declines to do anything
+    # and the read below picks up the bank that is already there — which is the
+    # better starting point in any case.
+    subprocess.run([sys.executable, str(ROOT / "scripts" / "seed_questions.py")], check=False)
+    base = json.loads(OUT.read_text(encoding="utf-8"))
     by_id = {q["id"]: q for q in base}
 
     for q in load_ocr():
@@ -91,8 +111,12 @@ def main():
 
     final = sorted(by_id.values(), key=lambda q: (q["year"], q["session"], q.get("qnum") or 0, q["id"]))
     final = [q for q in final if q.get("answer") is not None]
-    OUT.write_text(json.dumps(final, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"Final bank: {len(final)} questions")
+    guarded_write(
+        final,
+        path=OUT,
+        force="--force" in sys.argv,
+        label="merge_answered_ocr.py",
+    )
 
 if __name__ == "__main__":
     main()

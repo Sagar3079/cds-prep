@@ -1,9 +1,25 @@
 #!/usr/bin/env python3
-"""Rebuild questions.json: keep authentic PYQs, drop easy seeds, add hard CDS-grade set."""
+"""Rebuild questions.json: keep authentic PYQs, drop easy seeds, add hard CDS-grade set.
+
+⚠️  THIS SCRIPT DELETES EVERY HAND-WRITTEN QUESTION, BY DESIGN.
+
+`load_authentic()` keeps only ids it recognises as mined from a real paper and
+drops every `seed-*` and `pred-*` record — 317 of the 803 currently shipped. It
+has, as far as the git history shows, never actually been run: its paths pointed
+at `$HOME/cds-prep`, so on this checkout it read an empty bank and "rebuilt" from
+nothing.
+
+Paths now resolve from this file, which makes it real. The write therefore goes
+through `guarded_write`, which refuses to discard that much of the bank unless
+`--force` says so.
+"""
 import json
+import sys
 from pathlib import Path
 
-OUT = Path.home() / "cds-prep" / "src" / "data" / "questions.json"
+from _bank_guard import bank_path, guarded_write
+
+OUT = bank_path()
 
 TOPIC_MAP = {
     "Fill In The Blank": "Fill in the Blanks",
@@ -499,7 +515,12 @@ def main():
         by_id.values(),
         key=lambda x: (x.get("year", 0), x.get("session", 0), x.get("qnum") or 0, x["id"]),
     )
-    OUT.write_text(json.dumps(final, indent=2, ensure_ascii=False), encoding="utf-8")
+    guarded_write(
+        final,
+        path=OUT,
+        force="--force" in sys.argv,
+        label="rebuild_bank.py (which drops every seed-* and pred-* record)",
+    )
     from collections import Counter
     print(f"Total: {len(final)}  (authentic PYQs kept: {len(authentic)})")
     print(Counter(q.get("topic") for q in final).most_common())

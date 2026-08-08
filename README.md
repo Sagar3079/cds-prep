@@ -121,23 +121,36 @@ Corrections are the most valuable contribution you can make — see *Contributin
 
 ## Data pipeline
 
-⚠️ **The pipeline does not currently reproduce the shipped `questions.json`, and running
-it will destroy data.** Known issues, all open:
+⚠️ **The pipeline still does not reproduce the shipped `questions.json`. Treat
+`src/data/questions.json` as the source of truth and edit it directly.**
 
-- `scripts/seed_questions.py` overwrites `questions.json` unconditionally, with no merge
-  and no backup. Running it alone drops the bank from 803 to 199 records.
-- `scripts/rebuild_bank.py` filters out every `seed-*` and `pred-*` id and would delete
-  every hand-written and newly-mined question. It has never been run.
-- `scripts/merge_answered_ocr.py` shells out to `python3` and reads files without an
-  explicit encoding, so it fails on Windows.
-- Every script resolves paths from `Path.home() / "cds-prep"` rather than from
-  `__file__`, so unless the repo sits at exactly `~/cds-prep` they silently write to a
-  phantom directory and report success.
-- `scripts/expand_bank.py` — the de-facto final step — is the only script not documented
-  here, and the shipped JSON has since been hand-edited away from what it generates.
+What was dangerous about that is now fixed, and it is worth being precise about
+which half:
 
-Fixing this is issue #1. Until then, treat `src/data/questions.json` as the source of
-truth and edit it directly.
+- **Guarded.** `seed_questions.py`, `rebuild_bank.py`, `parse_ocr.py` and
+  `merge_answered_ocr.py` all replace the bank rather than merging into it —
+  `seed_questions.py` emits 156 records against the shipped 803, and
+  `rebuild_bank.py` drops every `seed-*` and `pred-*` id by design. All four now
+  write through `scripts/_bank_guard.py`, which refuses a shrink of more than 10%
+  unless `--force` is given and takes a timestamped backup regardless.
+- **Paths fixed.** Every one of them resolved files from `Path.home() /
+  "cds-prep"`, so on any checkout not sitting at exactly `~/cds-prep` they read
+  nothing, wrote to a directory that did not exist, and printed success. They now
+  resolve from `__file__`.
+- **Portability fixed.** `merge_answered_ocr.py` shelled out to a hardcoded
+  `python3` and read a file without an explicit encoding; it uses
+  `sys.executable` and UTF-8 now.
+
+Still open:
+
+- **The official-key join is missing.** The 464 `official-key` answers were
+  produced by joining `answer_keys/keys.json` against question numbers, and no
+  script in this repo does that correctly — `parse_ocr.py` expects a flat
+  `{qnum: letter}` map where the file is nested per paper, so its lookup silently
+  returns nothing for every question. Mining the next paper means writing that
+  join first. This is the real blocker on the bank improving.
+- `scripts/expand_bank.py` — the de-facto final step — remains undocumented, and
+  the shipped JSON has been hand-edited away from what it generates.
 
 The source PDFs and their OCR transcriptions are **not** included in this repository
 (see *Exam content* below). `pdfs/_manifest.json` lists the expected filenames.

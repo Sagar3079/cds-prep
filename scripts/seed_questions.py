@@ -2,13 +2,32 @@
 """
 Curated CDS English PYQ-style questions with verified answers.
 Mixed from well-known public PYQ patterns + clean OCR merges.
+
+⚠️  THIS SCRIPT REPLACES THE QUESTION BANK. It does not merge into it.
+
+It emits roughly 150-200 records from the `SEED` literal below plus whatever an
+OCR merge finds. The shipped bank is 803. Running it used to overwrite
+`src/data/questions.json` outright, with no backup — and because its paths were
+resolved from `$HOME` rather than from this file, on any checkout not sitting at
+exactly `~/cds-prep` it wrote nothing at all and said it had succeeded.
+
+Both are fixed: paths come from `_bank_guard.repo_root()`, and the write goes
+through `guarded_write`, which refuses a destructive shrink unless `--force` is
+passed and takes a timestamped backup either way.
+
+The `SEED` literal is still the provenance record for 125 `seed-*` questions
+that are live in the bank, which is why this file is kept rather than deleted.
 """
 import json
+import sys
 from pathlib import Path
 
-OUT = Path.home() / "cds-prep" / "src" / "data" / "questions.json"
-OCR_OUT = Path.home() / "cds-prep" / "scripts" / "ocr_parsed.json"
-KEYS = Path.home() / "cds-prep" / "answer_keys" / "manual_keys.json"
+from _bank_guard import bank_path, guarded_write, repo_root
+
+ROOT = repo_root()
+OUT = bank_path()
+OCR_OUT = ROOT / "scripts" / "ocr_parsed.json"
+KEYS = ROOT / "answer_keys" / "manual_keys.json"
 
 # High-quality bank (options + correct index 0-3)
 SEED = [
@@ -209,12 +228,12 @@ def build():
     try:
         import importlib.util, re
         spec = importlib.util.spec_from_file_location(
-            "p", str(Path.home() / "cds-prep/scripts/parse_ocr.py")
+            "p", str(ROOT / "scripts" / "parse_ocr.py")
         )
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
-        keys = json.loads(KEYS.read_text()) if KEYS.exists() else {}
-        ocr_dir = Path.home() / "cds-prep/scripts/ocr_text"
+        keys = json.loads(KEYS.read_text(encoding="utf-8")) if KEYS.exists() else {}
+        ocr_dir = ROOT / "scripts" / "ocr_text"
         for f in sorted(ocr_dir.glob("CDS*-English.txt")):
             m = re.match(r"CDS(\d)-(\d{4})", f.stem)
             if not m:
@@ -240,9 +259,12 @@ def build():
 
     final = [q for q in by_id.values() if q.get("answer") is not None]
     final.sort(key=lambda q: (q["year"], q["session"], q.get("qnum") or 0, q["id"]))
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(final, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"Wrote {len(final)} answered questions -> {OUT}")
+    guarded_write(
+        final,
+        path=OUT,
+        force="--force" in sys.argv,
+        label="seed_questions.py",
+    )
     topics = {}
     for q in final:
         topics[q.get("topic") or "?"] = topics.get(q.get("topic") or "?", 0) + 1

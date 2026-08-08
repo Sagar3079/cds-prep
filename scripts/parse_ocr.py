@@ -1,12 +1,31 @@
 #!/usr/bin/env python3
-"""Parse OCR text files into clean questions.json with quality filters."""
+"""Parse OCR text files into clean questions.json with quality filters.
+
+⚠️  THIS SCRIPT REPLACES THE QUESTION BANK with only what it can parse out of
+`scripts/ocr_text/`. It is not a merge.
+
+It is also the script whose `keys.json` join no longer works: it expects a flat
+`{qnum: letter}` mapping, while `answer_keys/keys.json` is nested per paper
+(`{paper: {answers: {...}}}`). The lookup therefore silently resolves to None for
+every question, which is why nothing in the shipped bank carries the
+`coaching-key` tag this file stamps. The 464 `official-key` answers that ARE in
+the bank were produced by a join that exists nowhere in this repo — reconstruct
+it here before trusting this script to mine a new paper.
+
+Paths resolve from this file (they used to come from `$HOME`) and the write goes
+through `guarded_write`.
+"""
 import re
 import json
+import sys
 from pathlib import Path
 
-OCR_DIR = Path.home() / "cds-prep" / "scripts" / "ocr_text"
-OUT = Path.home() / "cds-prep" / "src" / "data" / "questions.json"
-KEYS = Path.home() / "cds-prep" / "answer_keys" / "keys.json"
+from _bank_guard import bank_path, guarded_write, repo_root
+
+ROOT = repo_root()
+OCR_DIR = ROOT / "scripts" / "ocr_text"
+OUT = bank_path()
+KEYS = ROOT / "answer_keys" / "keys.json"
 
 TOPIC_HEADERS = [
     "SYNONYMS", "ANTONYMS", "SPOTTING ERRORS", "SPOTTING THE ERRORS",
@@ -185,9 +204,12 @@ def main():
     # dedupe by id
     by_id = {q["id"]: q for q in all_q}
     all_q = sorted(by_id.values(), key=lambda q: (q["year"], q["session"], q["qnum"]))
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(all_q, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"TOTAL {len(all_q)} -> {OUT}")
+    guarded_write(
+        all_q,
+        path=OUT,
+        force="--force" in sys.argv,
+        label="parse_ocr.py",
+    )
     print(f"with answers: {sum(1 for q in all_q if q['answer'] is not None)}")
 
 
