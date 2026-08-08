@@ -25,14 +25,25 @@ and their build directory (`.next-a` / `.next-b`, via `NEXT_DIST_DIR`, wired up
 in `next.config.ts`).
 
 The old arrangement was a single instance that rebuilt `.next` in place and
-restarted. Two things were wrong with it, both visible in
-`/var/log/cds-prep.log`:
+restarted. What was actually wrong with it:
 
-- Rebuilding a directory out from under a running Next server left the process
-  holding a manifest that no longer matched the chunks on disk — the
-  **"Server Reference ID did not match"** errors.
-- Every deploy restarted the only instance, and a rollback restarted it again.
-  Downtime was the normal path, not the failure path.
+- **Every deploy restarted the only instance**, and a rollback restarted it
+  again. Downtime was the normal path, not the failure path.
+- **A failed deploy had already disturbed production** by the time it knew it
+  had failed, so recovery meant a second rebuild and a second restart.
+- Rebuilding a directory under a running server is genuinely unsound — the
+  process holds a manifest for chunks that are being replaced — even though, see
+  below, it is not what caused the errors it was blamed for.
+
+**A correction, because the wrong cause was written down first.** The
+"Server Reference ID did not match" entries in `/var/log/cds-prep.log` were
+attributed to the in-place rebuild. They are not that. The logged values are
+`"x"`, `"y"` and a bare SHA — malformed `Next-Action` headers from an outside
+scanner probing for the server-action endpoint, which Next rejects correctly.
+They appear against a steadily-running instance with no deploy nearby. Blue/green
+does not make them stop and was never going to; they are unactionable noise, and
+the only thing worth doing about them is not mistaking them for a deploy fault
+again.
 
 Now a deploy builds and starts the **idle** slot, health-checks it on its own
 port, and only then moves nginx. `nginx -s reload` is graceful: existing workers
