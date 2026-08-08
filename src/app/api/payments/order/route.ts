@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { readJsonCapped } from "@/lib/body";
 import { currentAccount } from "@/lib/account";
-import { kv } from "@/lib/kv";
+import { kv, kvConfigured } from "@/lib/kv";
 import { PLANS } from "@/lib/legal";
 import { rateLimit } from "@/lib/ratelimit";
 import {
@@ -38,12 +39,36 @@ export async function POST(req: Request) {
     );
   }
 
-  let body: { planId?: unknown };
-  try {
-    body = (await req.json()) as typeof body;
-  } catch {
-    return NextResponse.json({ error: "Expected JSON." }, { status: 400 });
+  /**
+   * No store, no checkout — even though Razorpay alone could take the money.
+   *
+   * Everything that makes a payment mean something lives in Redis: the pending
+   * order, the captured-payment record, and the entitlement itself. `kv` fails
+   * open, so with it unconfigured every one of those writes silently returns
+   * null while the charge goes through perfectly. The customer is billed, the
+   * plan is never granted, and there is no server-side trace to reconcile from
+   * — the worst of the three possible outcomes. Refusing to open the checkout at
+   * all is the only one that cannot take somebody's money for nothing.
+   *
+   * This catches the deployment being misconfigured, which is the case that
+   * lasts. A Redis that is configured but unreachable mid-payment is a different
+   * problem, and the webhook — which Razorpay retries — is what covers it.
+   */
+  if (!kvConfigured) {
+    return NextResponse.json(
+      {
+        error:
+          "Payments are briefly unavailable on this deployment. Nothing has been charged — please try again shortly.",
+      },
+      { status: 503 },
+    );
   }
+
+  const read = await readJsonCapped<{ planId?: unknown }>(req);
+  if (!read.ok) {
+    return NextResponse.json({ error: read.error }, { status: read.status });
+  }
+  const body = read.value;
 
   const plan = PLANS.find((p) => p.id === body.planId);
   if (!plan) {
