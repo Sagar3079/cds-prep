@@ -344,7 +344,7 @@ export default function ResultsPage() {
   if (state.status === "empty") {
     return (
       <div className="px-4 py-6">
-        <div className="card fade-up flex flex-col items-center gap-4 py-12 text-center">
+        <div className="card card-empty fade-up flex flex-col items-center gap-4 text-center">
           <p className="text-lg font-bold tracking-tight text-ink">
             No results yet
           </p>
@@ -375,10 +375,28 @@ export default function ResultsPage() {
     ? `Net score ${formatScore(set.score)} — the penalties outweighed the marks earned.`
     : `Scored ${formatScore(set.score)} out of ${set.total}.`;
 
-  // Where a "Retake" goes, and where the upsell's random set goes: back into the
-  // subject that was just reviewed, not silently into English.
-  const retakeHref =
-    set.subject === "english" ? "/test" : `/test?subject=${set.subject}`;
+  /**
+   * Where "Retake" goes: back into the same subject AND the same mode.
+   *
+   * The mode half was missing. `set.subject` was carried across but `set.mode`
+   * was not, so finishing a random GK set and pressing Retake started the daily
+   * GK test instead — a different set of questions, scored onto the leaderboard,
+   * from a button whose whole promise is "the same again".
+   */
+  const retakeHref = (() => {
+    const params = new URLSearchParams();
+    if (set.mode === "random") params.set("mode", "random");
+    if (set.subject !== "english") params.set("subject", set.subject);
+    const qs = params.toString();
+    return qs ? `/test?${qs}` : "/test";
+  })();
+
+  /** Where the upsell's "Take a random test" goes — same subject, random mode. */
+  const randomHref = (() => {
+    const params = new URLSearchParams({ mode: "random" });
+    if (set.subject !== "english") params.set("subject", set.subject);
+    return `/test?${params.toString()}`;
+  })();
 
   const meta = [
     SUBJECT_LABEL[set.subject],
@@ -542,7 +560,7 @@ export default function ResultsPage() {
         </ol>
       </div>
 
-      <RandomTestUpsell />
+      <RandomTestUpsell href={randomHref} />
 
       <div className="flex justify-center pt-1">
         <Link href="/" className="btn-ghost">

@@ -622,7 +622,7 @@ export default function TestClient({
   if (!ready) {
     return (
       <div className="shell">
-        <div className="card text-center py-16 text-muted">Loading…</div>
+        <div className="card card-empty text-center text-muted">Loading…</div>
       </div>
     );
   }
@@ -630,7 +630,7 @@ export default function TestClient({
   if (finalScore) {
     return (
       <div className="shell">
-        <div className="card text-center py-10 fade-up">
+        <div className="card card-empty text-center fade-up">
           <h1 className="text-2xl font-extrabold tracking-tight text-ink mb-1">
             Test submitted
           </h1>
@@ -671,7 +671,7 @@ export default function TestClient({
   if (quiz.length === 0) {
     return (
       <div className="shell">
-        <div className="card text-center py-16">
+        <div className="card card-empty text-center">
           <p className="text-ink font-semibold mb-3">No questions loaded yet</p>
           <Link href="/" className="btn-ghost">
             Back home
@@ -684,7 +684,7 @@ export default function TestClient({
   if (!started) {
     return (
       <div className="shell">
-        <div className="card text-center py-10 fade-up">
+        <div className="card card-empty text-center fade-up">
           <h1 className="text-2xl font-extrabold tracking-tight text-ink mb-2">
             {isRandom ? "Random Quiz" : "Today's Test"}
           </h1>

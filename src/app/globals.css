@@ -312,6 +312,23 @@ body {
   padding: 1.125rem;
 }
 
+/**
+ * The empty / loading / nothing-here-yet state: the same card, breathing.
+ *
+ * This exists because `.card` above is UNLAYERED while Tailwind's utilities sit
+ * in `@layer utilities`, and unlayered CSS wins whatever the specificity. Eight
+ * places had written `class="card … py-12"` (or py-10, or py-16) and every one
+ * of them was silently rendering at `.card`'s own 1.125rem. The three different
+ * values were never three different spacings — they were all 18px. So naming the
+ * pattern here loses no distinction that was ever on screen, and unlike a
+ * utility it actually applies.
+ *
+ * Declared after `.card` and equally unlayered, so this one does win.
+ */
+.card-empty {
+  padding-block: 3rem;
+}
+
 .btn-primary,
 .btn-ghost {
   display: inline-flex;

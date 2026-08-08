@@ -39,7 +39,7 @@ export default function Error({
 
   return (
     <div className="flex-1 px-4 py-6">
-      <div className="card fade-up flex flex-col items-center gap-4 py-12 text-center">
+      <div className="card card-empty fade-up flex flex-col items-center gap-4 text-center">
         <div
           aria-hidden="true"
           className="grid h-14 w-14 place-items-center rounded-full bg-err-soft text-err-ink"

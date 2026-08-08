@@ -12,12 +12,25 @@ import CheckoutButton from "./CheckoutButton";
 import { FREE_RANDOM_PER_DAY, PLANS, rupees } from "@/lib/legal";
 
 /**
- * "Take a random test" at the end of a review, and the plan sheet it opens.
+ * "Take a random test" at the end of a review, and the plan sheet behind it.
  *
- * Choosing a plan and paying for it happen in the same sheet: pick, press, and
- * Razorpay opens on top. There is no page in between, because a checkout that
- * makes someone navigate first loses the ones who were already reaching for
- * their card.
+ * **The button starts a test. It does not open the plan sheet.** It used to do
+ * the opposite — a button reading "Take a random test" that unconditionally
+ * opened a payment sheet, on every results screen, whether or not the reader
+ * still had free random tests left that day. Since random practice is free
+ * {FREE_RANDOM_PER_DAY} times a day, that told people a free feature was paid
+ * and asked them to buy something they already had. `aae74a2` fixed exactly this
+ * wording elsewhere on the site; the fix never reached this component.
+ *
+ * The quota check stays where it already lives: `TestClient` calls
+ * `/api/random/start` when a random run begins and shows its own gate if the
+ * allowance is gone. That is the one place that knows the answer, so this
+ * component does not try to guess it — it navigates, and lets the gate speak.
+ *
+ * Plans are still one press away, in the quieter link below the button. Choosing
+ * a plan and paying happen in the same sheet: pick, press, and Razorpay opens on
+ * top. There is no page in between, because a checkout that makes someone
+ * navigate first loses the ones who were already reaching for their card.
  *
  * The cost, accepted knowingly: Razorpay's Checkout is a full-viewport overlay
  * and this sheet is portalled inside the device panel that is the app, so on a
@@ -28,7 +41,7 @@ import { FREE_RANDOM_PER_DAY, PLANS, rupees } from "@/lib/legal";
  * not any more; copy telling a buyer nothing will be charged, on a site that
  * charges, is worse than no copy at all.
  */
-export default function RandomTestUpsell() {
+export default function RandomTestUpsell({ href }: { href: string }) {
   const [open, setOpen] = useState(false);
   /** Which plan is chosen. Monthly is the default because it is the better
       deal, not because it is the only one that could be picked — the previous
@@ -97,14 +110,21 @@ export default function RandomTestUpsell() {
 
   return (
     <>
-      <div className="flex justify-center pt-1">
+      <div className="flex flex-col items-center gap-2 pt-1">
+        {/* Goes straight into a random set. TestClient asks
+            /api/random/start whether the allowance is gone and shows its own
+            gate if it is — which is the only honest place for that answer,
+            since it is the only one that knows it. */}
+        <Link href={href} className="btn-primary">
+          Take a random test
+        </Link>
         <button
           ref={openerRef}
           type="button"
-          className="btn-primary"
+          className="text-[0.8125rem] font-semibold text-muted underline underline-offset-2 hover:text-ink"
           onClick={() => setOpen(true)}
         >
-          Take a random test
+          {FREE_RANDOM_PER_DAY} free a day — see plans for unlimited
         </button>
       </div>
 

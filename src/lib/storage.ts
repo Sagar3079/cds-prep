@@ -146,26 +146,57 @@ export function getAttempts(): Attempt[] {
  *     throws, so a failed persist must not abort the submit flow.
  */
 export function saveAttempt(attempt: Attempt): boolean {
-  const all = getAttempts();
   const mode = modeOf(attempt);
   const subject = subjectOfAttempt(attempt);
   const day = dayOf(attempt.date);
-  // Scoped by subject too: today's first GK run is attempt 1 of GK, not
-  // attempt 2 of a day that already has an English run in it.
-  const prior = all.filter(
-    (a) =>
-      dayOf(a.date) === day &&
-      modeOf(a) === mode &&
-      subjectOfAttempt(a) === subject
-  ).length;
-  all.push({
-    ...attempt,
-    mode,
-    subject,
-    attemptNo: prior + 1,
-    savedAt: Date.now(),
-  });
-  return writeJSON(KEYS.attempts, all);
+
+  /**
+   * Read, append, write — then check the row is still there, and start over if
+   * it is not.
+   *
+   * "Append-only" is a property of this function, not of `localStorage`, which
+   * has no compare-and-swap and no atomic append: every write here replaces the
+   * whole array. Two tabs that read the same array before either writes will
+   * each write their own copy of it, and the second one lands on top — silently
+   * destroying the first tab's attempt, which is exactly what append-only exists
+   * to prevent. It is not a hypothetical: opening the test in a second tab is a
+   * thing browsers do on their own with session restore.
+   *
+   * The read is therefore taken as late as possible, and the write is verified.
+   * A lost row means somebody else wrote between our read and our write, so the
+   * retry re-reads — now seeing their row — and appends after it. Both survive.
+   * Three attempts, then give up and report failure rather than spin.
+   */
+  for (let attemptNo = 0; attemptNo < 3; attemptNo++) {
+    const all = getAttempts();
+    // Scoped by subject too: today's first GK run is attempt 1 of GK, not
+    // attempt 2 of a day that already has an English run in it.
+    const prior = all.filter(
+      (a) =>
+        dayOf(a.date) === day &&
+        modeOf(a) === mode &&
+        subjectOfAttempt(a) === subject
+    ).length;
+    const savedAt = Date.now();
+    all.push({
+      ...attempt,
+      mode,
+      subject,
+      attemptNo: prior + 1,
+      savedAt,
+    });
+    if (!writeJSON(KEYS.attempts, all)) return false;
+
+    const landed = getAttempts().some(
+      (a) =>
+        a.savedAt === savedAt &&
+        dayOf(a.date) === day &&
+        modeOf(a) === mode &&
+        subjectOfAttempt(a) === subject
+    );
+    if (landed) return true;
+  }
+  return false;
 }
 
 /** All attempts for a calendar day, oldest first. */

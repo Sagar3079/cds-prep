@@ -34,7 +34,7 @@ export default async function TestPage({
     return (
       <div className="px-4 py-6">
         <div className="shell">
-          <div className="card fade-up flex flex-col items-center gap-4 py-12 text-center">
+          <div className="card card-empty fade-up flex flex-col items-center gap-4 text-center">
             {/* One expression, not `{expr} text`: where a text child is the
                 last thing in an element, the JSX transform trims the space that
                 separated it from the expression and the heading renders as

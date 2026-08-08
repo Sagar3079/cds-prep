@@ -151,7 +151,7 @@ export default function HistoryPage() {
           </div>
         </>
       ) : attempts.length === 0 ? (
-        <div className="card fade-up flex flex-col items-center gap-4 py-12 text-center">
+        <div className="card card-empty fade-up flex flex-col items-center gap-4 text-center">
           <p className="text-lg font-bold tracking-tight text-ink">
             No tests taken yet
           </p>
