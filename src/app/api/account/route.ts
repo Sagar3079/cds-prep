@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
+import { readJsonCapped } from "@/lib/body";
 import { cookies } from "next/headers";
 import { randomBytes } from "node:crypto";
 import { kv, kvConfigured } from "@/lib/kv";
+import { mailConfigured, sendVerificationCode } from "@/lib/mail";
+import { OTP_TTL_MINUTES, issueCode } from "@/lib/otp";
 import { rateLimit } from "@/lib/ratelimit";
 import {
   SESSION_COOKIE,
@@ -10,6 +13,7 @@ import {
   displayName,
   emailKey,
   isEmail,
+  maskEmail,
   newToken,
   normaliseEmail,
   sessionKey,
@@ -55,16 +59,32 @@ export async function GET(req: Request) {
 }
 
 /**
- * Sign up, or sign back in on the same address.
+ * Sign up on a new address, or begin signing back in on one that already exists.
  *
- * There is no password and email ownership is NOT proven — verification is a
- * later step, as asked. That has a consequence worth being explicit about:
- * anyone can claim any address, so the account is only as trustworthy as the
- * cookie it hands back, and the leaderboard must treat a name as a label rather
- * than an identity. It is deliberately not possible to sign in as an existing
- * account from a new device this way — a fresh POST for an address that already
- * exists returns the same account only because there is nothing yet to protect;
- * once verification lands, this endpoint must require it.
+ * The rule this endpoint now enforces, and the reason it changed: **claiming an
+ * address that already has an account never mints a session here.** It used to.
+ * The comment that stood in this place said "once verification lands, this
+ * endpoint must require it" — verification landed with the six-digit codes and
+ * this endpoint was not updated, which left a full account takeover open for
+ * anyone who could type a stranger's email. Because the account record was
+ * spread into the response (`{...prev}`), the forged session inherited the
+ * victim's verified status and, with it, their paid entitlement.
+ *
+ * So there are two paths:
+ *
+ * - **No account on that address** — created, and a session is handed back as
+ *   before. There is genuinely nothing to protect yet: the address is unproven,
+ *   the account holds nothing, and the leaderboard treats a name as a label
+ *   rather than as an identity.
+ * - **An account already exists** — a code goes to the address and the caller
+ *   gets `needsCode`, not a cookie. `POST /api/account/claim` trades that code
+ *   for the session. The one exception is a caller who already holds a valid
+ *   session for that same account, who is not claiming anything and is usually
+ *   just editing a username.
+ *
+ * Known and accepted: the two paths are distinguishable, so this reveals whether
+ * an address is registered. That is the same signal every sign-in form gives and
+ * it is a far smaller problem than the one it replaces.
  */
 export async function POST(req: Request) {
   // Before parsing: a malformed body is as good a way to spam sign-ups as a
@@ -79,12 +99,11 @@ export async function POST(req: Request) {
     );
   }
 
-  let body: { email?: unknown; username?: unknown };
-  try {
-    body = (await req.json()) as typeof body;
-  } catch {
-    return NextResponse.json({ error: "Expected JSON." }, { status: 400 });
+  const read = await readJsonCapped<{ email?: unknown; username?: unknown }>(req);
+  if (!read.ok) {
+    return NextResponse.json({ error: read.error }, { status: read.status });
   }
+  const body = read.value;
 
   if (!isEmail(body.email)) {
     return NextResponse.json(
@@ -116,6 +135,54 @@ export async function POST(req: Request) {
   }
 
   const existingRaw = await kv.get(accountKey(id));
+
+  /**
+   * The takeover gate. An existing account is only handed straight back to a
+   * caller who is already signed in as it; anyone else has to prove the address
+   * is theirs first, whatever they typed in the form.
+   */
+  if (existingRaw) {
+    const me = await currentAccount();
+    if (me?.id !== id) {
+      if (!mailConfigured) {
+        return NextResponse.json(
+          {
+            error:
+              "That address already has an account, and signing back in needs an emailed code — which isn't configured on this deployment.",
+          },
+          { status: 503 },
+        );
+      }
+
+      // Two throttles, deliberately. `account:create` above caps how often this
+      // endpoint may be poked at all; this one caps how often it may put mail in
+      // somebody else's inbox, and it is the tighter of the two. Without it this
+      // path would be a looser way to do exactly what `verify:send` exists to
+      // limit.
+      const mailLimited = await rateLimit(req, "verify:send");
+      if (mailLimited) return mailLimited;
+
+      const code = await issueCode(id);
+      const sent = await sendVerificationCode(email, code, OTP_TTL_MINUTES);
+      if (!sent.ok) {
+        return NextResponse.json(
+          {
+            error:
+              "We couldn't send the code just now. Try again in a moment, or email support.",
+          },
+          { status: 502 },
+        );
+      }
+
+      return NextResponse.json({
+        signedIn: false,
+        needsCode: true,
+        to: maskEmail(email),
+        expiresInMinutes: OTP_TTL_MINUTES,
+      });
+    }
+  }
+
   let acct: Account;
   if (existingRaw) {
     const prev = JSON.parse(existingRaw) as Account;

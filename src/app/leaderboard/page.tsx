@@ -40,6 +40,13 @@ export default function LeaderboardPage() {
   const [me, setMe] = useState<{ signedIn: boolean; name?: string } | null>(null);
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
+  /**
+   * Set once the server has mailed a code to an address that already has an
+   * account. Holds the masked form to show back, and switching it on is what
+   * swaps the join form for the code entry below.
+   */
+  const [sentTo, setSentTo] = useState<string | null>(null);
+  const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const alive = useRef(true);
@@ -119,11 +126,51 @@ export default function LeaderboardPage() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ email, username }),
       });
+      const data = (await res.json()) as {
+        error?: string;
+        name?: string;
+        needsCode?: boolean;
+        to?: string;
+      };
+      if (!res.ok) {
+        setError(data.error ?? "That didn't work. Try again.");
+        return;
+      }
+      /**
+       * The address already has an account, so the server sent it a code
+       * instead of a cookie. Nothing is signed in until that code comes back —
+       * see the takeover note in `api/account/route.ts`.
+       */
+      if (data.needsCode) {
+        setSentTo(data.to ?? email);
+        return;
+      }
+      setMe({ signedIn: true, name: data.name });
+      void load();
+    } catch {
+      setError("Couldn't reach the server.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const claim = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/account/claim", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email, code }),
+      });
       const data = (await res.json()) as { error?: string; name?: string };
       if (!res.ok) {
         setError(data.error ?? "That didn't work. Try again.");
         return;
       }
+      setSentTo(null);
+      setCode("");
       setMe({ signedIn: true, name: data.name });
       void load();
     } catch {
@@ -188,7 +235,7 @@ export default function LeaderboardPage() {
         })}
       </div>
 
-      {me && !me.signedIn && (
+      {me && !me.signedIn && !sentTo && (
         <form onSubmit={signUp} className="card space-y-3">
           <div>
             <h2 className="text-[0.9375rem] font-bold text-ink">
@@ -248,6 +295,53 @@ export default function LeaderboardPage() {
             </Link>
             .
           </p>
+        </form>
+      )}
+
+      {me && !me.signedIn && sentTo && (
+        <form onSubmit={claim} className="card space-y-3">
+          <div>
+            <h2 className="text-[0.9375rem] font-bold text-ink">
+              You&apos;ve been here before
+            </h2>
+            <p className="mt-0.5 text-[0.8125rem] leading-relaxed text-muted">
+              That address already has an account, so we sent a six-digit code
+              to <span className="whitespace-nowrap font-semibold">{sentTo}</span>.
+              Enter it to sign back in.
+            </p>
+          </div>
+          <label className="block text-[0.8125rem] font-semibold text-ink">
+            Code
+            <input
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              required
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              maxLength={7}
+              className="mt-1 w-full rounded-xl border border-line bg-paper px-3 py-2 text-center text-[1.25rem] font-bold tracking-[0.3em] text-ink"
+              placeholder="000000"
+            />
+          </label>
+          {error && (
+            <p role="alert" className="text-[0.8125rem] font-semibold text-err-ink">
+              {error}
+            </p>
+          )}
+          <button type="submit" className="btn-primary w-full" disabled={busy}>
+            {busy ? "Checking…" : "Sign in"}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setSentTo(null);
+              setCode("");
+              setError(null);
+            }}
+            className="w-full text-[0.8125rem] font-semibold text-muted underline underline-offset-2 hover:text-ink"
+          >
+            Use a different address
+          </button>
         </form>
       )}
 

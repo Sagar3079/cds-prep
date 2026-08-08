@@ -1,6 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
-import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { kv } from "./kv";
 
 export const SESSION_COOKIE = "cds_sid";
@@ -35,6 +35,18 @@ export function isEmail(s: unknown): s is string {
   return typeof s === "string" && s.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s);
 }
 
+/**
+ * An address with its local part blanked out — enough to spot a typo or
+ * recognise your own inbox, not enough to hand the whole address to whoever is
+ * holding the cookie. Shared by every path that has to name an address back to
+ * a caller who has not yet proved they own it.
+ */
+export function maskEmail(email: string): string {
+  return email.replace(/^(.)(.*)(@.*)$/, (_, first, mid: string, domain) =>
+    `${first}${"•".repeat(Math.min(6, Math.max(3, mid.length)))}${domain}`,
+  );
+}
+
 export const normaliseEmail = (e: string) => e.trim().toLowerCase();
 
 /** Emails are keyed by hash so the index cannot be enumerated back to addresses. */
@@ -46,12 +58,6 @@ export const sessionKey = (token: string) =>
   `sess:${createHash("sha256").update(token).digest("hex")}`;
 
 export const newToken = () => randomBytes(32).toString("base64url");
-
-export function safeEqual(a: string, b: string): boolean {
-  const x = Buffer.from(a);
-  const y = Buffer.from(b);
-  return x.length === y.length && timingSafeEqual(x, y);
-}
 
 /**
  * How long a session lives, and — because the TTL is re-armed on every

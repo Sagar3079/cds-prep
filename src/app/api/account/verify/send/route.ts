@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { currentAccount } from "@/lib/account";
+import { currentAccount, maskEmail } from "@/lib/account";
 import { kvConfigured } from "@/lib/kv";
 import { mailConfigured, sendVerificationCode } from "@/lib/mail";
 import { OTP_TTL_MINUTES, issueCode } from "@/lib/otp";
@@ -52,9 +52,7 @@ export async function POST(req: Request) {
     sent: true,
     // The address, masked. Enough to spot a typo, not enough to hand the whole
     // address to whoever is holding the cookie.
-    to: acct.email.replace(/^(.)(.*)(@.*)$/, (_, a, mid, dom) =>
-      `${a}${"•".repeat(Math.min(6, Math.max(3, mid.length)))}${dom}`,
-    ),
+    to: maskEmail(acct.email),
     expiresInMinutes: OTP_TTL_MINUTES,
   });
 }
