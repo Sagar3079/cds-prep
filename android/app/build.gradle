@@ -43,8 +43,33 @@ android {
         // regardless, and Android 6.0 shipped in 2015.
         minSdk 23
         targetSdk 36
-        versionCode 1
-        versionName "1.0.0"
+
+        /**
+         * versionCode is derived, not hand-maintained.
+         *
+         * Play refuses an upload whose versionCode is not strictly greater than
+         * the last one, and a number edited by hand is the kind of thing that
+         * gets forgotten precisely when a release is urgent. CI passes
+         * `-PversionCode=$(git rev-list --count HEAD)`: the commit count only
+         * ever goes up, and unlike a CI run number it is a property of the
+         * repository, so the same commit produces the same code on any machine
+         * and the sequence survives the workflow being recreated.
+         *
+         * The literal below is the local-build fallback. It is deliberately low
+         * so that a laptop build can never be mistaken for a shippable one.
+         */
+        versionCode(
+            project.hasProperty("versionCode")
+                ? project.property("versionCode").toString().toInteger()
+                : 1
+        )
+        // Overridable the same way, so the release workflow can prove the tag
+        // it was given and the APK it produced agree.
+        versionName(
+            project.hasProperty("versionName")
+                ? project.property("versionName").toString()
+                : "1.0.0"
+        )
     }
 
     signingConfigs {

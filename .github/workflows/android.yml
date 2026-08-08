@@ -18,16 +18,31 @@ on:
     paths:
       - "android/**"
       - ".github/workflows/android.yml"
+    # A `v*` tag is the release trigger. Pushing one builds the signed APK AND
+    # publishes it as a GitHub Release — see the `release` job at the bottom.
+    #
+    # Tag-triggered rather than fired on every android/** commit, because a
+    # release is a decision. What this closes is the gap where the only public
+    # download was a Release created by hand once: CI produced an artifact that
+    # expires and needs a GitHub login, the site linked to a release nobody
+    # automated, and nothing anywhere noticed if the two drifted apart.
+    tags:
+      - "v*"
   workflow_dispatch:
 
+# `contents: write` is needed to create a Release. It is scoped to this
+# workflow, and only the release job below actually uses it.
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   # A newer push makes an in-flight build of the same ref moot; cancel it
   # instead of burning runner minutes on an APK nothing will download.
+  #
+  # Never cancel a tag build: that one is publishing a release, and killing it
+  # half way can leave a Release created with no APK attached to it.
   group: android-build-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/v') }}
 
 jobs:
   build:
@@ -36,6 +51,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Full history: versionCode is the commit count, and the default
+          # shallow clone would make that 1 on every single build.
+          fetch-depth: 0
+
+      # versionCode from the commit count, versionName from the tag when there
+      # is one. Both are passed to Gradle rather than edited into build.gradle,
+      # so the file in git never has to be kept in step with a release.
+      - name: Derive version
+        run: |
+          set -euo pipefail
+          CODE="$(git rev-list --count HEAD)"
+          echo "version_code=$CODE" >> "$GITHUB_ENV"
+
+          if [ "${GITHUB_REF_TYPE:-}" = "tag" ]; then
+            # v1.2.3 -> 1.2.3
+            NAME="${GITHUB_REF_NAME#v}"
+          else
+            NAME="0.0.0-dev+${CODE}"
+          fi
+          echo "version_name=$NAME" >> "$GITHUB_ENV"
+          echo "Building versionCode=$CODE versionName=$NAME"
 
       # The wrapper jar is a BINARY committed to a public repo, and a tampered
       # one runs arbitrary code with the build's privileges before any of our
@@ -93,6 +130,17 @@ jobs:
             echo "signed=false" >> "$GITHUB_ENV"
           fi
 
+      # A tag means a public download. An unsigned debug APK cannot be one:
+      # it is signed with the throwaway debug key, so it will not verify
+      # against the Digital Asset Links fingerprint and will not upgrade over
+      # an installed release. Better to fail the release loudly here than to
+      # publish something that installs and then misbehaves.
+      - name: Refuse to release without signing material
+        if: github.ref_type == 'tag' && env.signed != 'true'
+        run: |
+          echo "::error::Tag ${{ github.ref_name }} cannot be released: the ANDROID_KEYSTORE_* secrets are not configured, so only a debug APK can be built."
+          exit 1
+
       - name: Assemble release APK (signed)
         if: env.signed == 'true'
         working-directory: android
@@ -100,12 +148,18 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: ./gradlew assembleRelease --no-daemon --stacktrace
+        run: |
+          ./gradlew assembleRelease --no-daemon --stacktrace \
+            -PversionCode=${{ env.version_code }} \
+            -PversionName=${{ env.version_name }}
 
       - name: Assemble debug APK (signing secrets not configured yet)
         if: env.signed != 'true'
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        run: |
+          ./gradlew assembleDebug --no-daemon --stacktrace \
+            -PversionCode=${{ env.version_code }} \
+            -PversionName=${{ env.version_name }}
 
       - name: Record which variant this run built
         run: |
@@ -124,3 +178,50 @@ jobs:
           name: prepcadet-${{ env.apk_variant }}-run${{ github.run_number }}
           path: android/app/build/outputs/apk/**/*.apk
           if-no-files-found: error
+
+      # ── release ──────────────────────────────────────────────────────────
+      #
+      # Only on a tag. The asset MUST be named cds-prep.apk: prepcadet.in
+      # /download/android redirects to
+      # releases/latest/download/cds-prep.apk, and that URL is resolved by
+      # asset name. Rename it here and the site keeps working; rename it
+      # anywhere else and the download 404s with nothing to say so.
+      # See src/app/download/android/route.ts.
+      - name: Stage the release asset
+        if: github.ref_type == 'tag'
+        run: |
+          set -euo pipefail
+          APK="$(find android/app/build/outputs/apk -name '*.apk' | head -n1)"
+          if [ -z "$APK" ]; then
+            echo "::error::No APK produced."; exit 1
+          fi
+          mkdir -p release
+          cp "$APK" release/cds-prep.apk
+          echo "Staged $APK as cds-prep.apk"
+          sha256sum release/cds-prep.apk | tee release/cds-prep.apk.sha256
+
+      - name: Publish GitHub Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/cds-prep.apk
+            release/cds-prep.apk.sha256
+          # Not a prerelease and not a draft: `releases/latest` — which is what
+          # the site links to — skips both, so either one would publish a
+          # release the download button cannot see.
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          body: |
+            PrepCadet Android (Trusted Web Activity over prepcadet.in)
+
+            - versionName `${{ env.version_name }}`
+            - versionCode `${{ env.version_code }}`
+
+            Install: <https://prepcadet.in/download/android>
+
+            Verify the download:
+            ```
+            sha256sum -c cds-prep.apk.sha256
+            ```
