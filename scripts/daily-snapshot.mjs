@@ -51,13 +51,33 @@ function snapshot() {
   return { bank: questions.length, start: START, days: DAYS, count: COUNT, sets: out };
 }
 
+const GOLDEN = new URL("./daily-golden.json", import.meta.url);
+
 /**
- * The standing demonstration of WHY General Knowledge is a separate bank.
+ * The standing demonstration of WHY General Knowledge is a separate bank — and,
+ * since it is cited in CLAUDE.md as the proof of that invariant, a check that
+ * can actually fail.
  *
- * Reads the GK draft directly (never written to) and shows three things in one
- * run: English alone, English while a populated GK bank exists alongside it, and
- * English with GK appended into the same array — which is the change that looks
- * harmless and silently moves every user.
+ * It could not, before. The "separate banks" half compared
+ * `ids(questions, date)` against a `base` computed by calling
+ * `ids(questions, date)` — the same expression, same arguments, one line apart.
+ * It was true by construction on every date, `separateDrift` was structurally
+ * incapable of being anything but 0, and `--proof` therefore exited 0 whatever
+ * had happened to the bank. The invariant CLAUDE.md believed was under guard was
+ * not being watched at all.
+ *
+ * So the real half now compares today's English ids against
+ * `scripts/daily-golden.json`, a committed record of what those thirty dates
+ * returned when the bank was known good. That is a genuine assertion: reorder
+ * the bank, append a question to the wrong file, or change the shuffle, and it
+ * fails with the dates that moved.
+ *
+ * The contrast half is unchanged and was always real: merging GK into the
+ * English array moves every date, which is the mistake the two-file layout
+ * exists to prevent.
+ *
+ * Regenerate the golden file ONLY when a daily-set change is intended:
+ *   node scripts/daily-snapshot.mjs --bless
  */
 async function proof() {
   const gk = JSON.parse(
@@ -67,31 +87,59 @@ async function proof() {
     pickDailyQuestions(bank, date, COUNT).map((q) => q.id).join(",");
 
   const days = dates(START, DAYS);
-  let separateDrift = 0;
-  let mergedDrift = 0;
   const merged = [...questions, ...gk];
+
+  let golden = null;
+  try {
+    golden = JSON.parse(readFileSync(GOLDEN, "utf8"));
+  } catch {
+    console.error(
+      `No ${GOLDEN.pathname} to compare against.\n` +
+        "Create it with:  node scripts/daily-snapshot.mjs --bless",
+    );
+    process.exit(2);
+  }
+
+  const drifted = [];
+  let mergedDrift = 0;
 
   for (const date of days) {
     const base = ids(questions, date);
-    // How the app actually does it: two banks, picked independently.
-    if (ids(questions, date) !== base) separateDrift++;
+    // What the app does: English picked from its own bank, GK nowhere near it.
+    // Compared against the committed record rather than against itself.
+    if ((golden.sets[date] ?? []).join(",") !== base) {
+      drifted.push({ date, expected: (golden.sets[date] ?? []).join(","), got: base });
+    }
     // The mistake: one pool.
-    if (ids(merged, date).split(",").join(",") !== base) mergedDrift++;
+    if (ids(merged, date) !== base) mergedDrift++;
   }
 
   const gkSample = pickDailyQuestions(gk, days[0], COUNT).map((q) => q.id);
 
-  console.log(`english bank: ${questions.length}`);
+  console.log(`english bank: ${questions.length} (golden recorded ${golden.bank})`);
   console.log(`gk draft bank: ${gk.length}`);
   console.log(`dates compared: ${days.length}`);
   console.log(
-    `SEPARATE banks (what this app does): ${separateDrift}/${days.length} dates changed`,
+    `SEPARATE banks (what this app does): ${drifted.length}/${days.length} dates changed vs golden`,
   );
   console.log(
     `MERGED into one pool (the bug this avoids): ${mergedDrift}/${days.length} dates changed`,
   );
   console.log(`gk set for ${days[0]}: ${gkSample.join(", ")}`);
-  process.exit(separateDrift === 0 ? 0 : 1);
+
+  for (const d of drifted.slice(0, 5)) {
+    console.log(`  ${d.date}\n    expected ${d.expected}\n    got      ${d.got}`);
+  }
+
+  if (mergedDrift === 0) {
+    // Not a pass. Either the GK draft is empty or the picker stopped depending
+    // on bank order — and if merging changes nothing, this proof proves nothing.
+    console.error(
+      "\nCONTRAST FAILED: merging GK changed no dates, so this run demonstrates nothing.",
+    );
+    process.exit(1);
+  }
+  process.exit(drifted.length === 0 ? 0 : 1);
 }
 
 const args = process.argv.slice(2);
@@ -99,6 +147,15 @@ const diffAt = args.indexOf("--diff");
 
 if (args.includes("--proof")) {
   await proof();
+} else if (args.includes("--bless")) {
+  // Records the current daily sets as the expected ones. A deliberate act: it is
+  // how an INTENDED change to the bank is accepted, and running it to make a
+  // failing --proof go away discards the only guard on the invariant.
+  const snap = snapshot();
+  writeFileSync(GOLDEN, JSON.stringify(snap, null, 2) + "\n");
+  console.log(
+    `blessed ${GOLDEN.pathname} — ${snap.days} dates, bank ${snap.bank}`,
+  );
 } else if (diffAt === -1) {
   const snap = snapshot();
   const target = args[0];
