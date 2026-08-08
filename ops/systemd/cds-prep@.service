@@ -44,6 +44,11 @@ ExecStart=/opt/cds-prep/ops/slot-start.sh %i
 
 Restart=always
 RestartSec=5
+# slot-start.sh exits 64 on a bad slot letter and 65 when the slot has no build
+# yet. Neither is a crash and neither will fix itself, so restarting is just an
+# infinite loop writing the same line to the log. Stop instead and leave the
+# failure visible in `systemctl status`.
+RestartPreventExitStatus=64 65
 StandardOutput=append:/var/log/cds-prep.log
 StandardError=append:/var/log/cds-prep.log
 

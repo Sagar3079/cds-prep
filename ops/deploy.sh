@@ -157,6 +157,13 @@ fi
 echo "$NEXTSLOT" > "$STATE"
 rm -f "$UPSTREAM.bak"
 
+# Exactly the live slot is enabled, so a reboot brings back the one that was
+# serving and does not try to start the other. The idle slot's build directory
+# stays on disk for rollback, but a slot with no build at all would fail at
+# boot — which is why the unit refuses to restart on that specific exit code.
+systemctl enable "cds-prep@$NEXTSLOT" >/dev/null 2>&1
+systemctl disable "cds-prep@$LIVE" >/dev/null 2>&1
+
 # The old slot stops only now, with no traffic left on it. Keeping its build
 # directory is deliberate: it is the previous version, ready to be switched back
 # to in one sed + reload without rebuilding anything.
