@@ -1,0 +1,63 @@
+# CDS Prep. Proxies to the live blue/green slot — 127.0.0.1:3100 or :3101, and
+# NEVER 3000, which belongs to ai-freelance-platform on this host.
+#
+# The upstream is defined in /etc/nginx/conf.d/cds-prep-upstream.conf (an
+# `upstream` block has to sit at http level, not inside a server block), and
+# ops/deploy.sh rewrites that file and reloads nginx to move traffic between
+# slots. See ops/README.md.
+server {
+    server_name prepcadet.in www.prepcadet.in;
+    client_max_body_size 2m;
+
+    location / {
+        proxy_pass http://cds_prep;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        # The app rate-limits per IP. Without these every visitor would look
+        # like 127.0.0.1 and one person's burst would throttle everyone.
+        #
+        # X-Real-IP is the one the app TRUSTS, and this line is what makes it
+        # trustworthy: $remote_addr is the peer address nginx observed, which a
+        # caller cannot set. Note that the X-Forwarded-For line below *appends*
+        # to whatever the client sent, so its leftmost entry is attacker-chosen
+        # — src/lib/ratelimit.ts reads X-Real-IP first for exactly that reason.
+        # Do not reorder these without reading clientIp() there.
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 60s;
+    }
+
+    listen [::]:443 ssl ipv6only=on; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/prepcadet.in/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/prepcadet.in/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+
+server {
+    if ($host = www.prepcadet.in) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    if ($host = prepcadet.in) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    listen [::]:80;
+    server_name prepcadet.in www.prepcadet.in;
+    return 404; # managed by Certbot
+
+
+
+
+}

@@ -1,0 +1,51 @@
+# One half of the blue/green pair. Instantiated as cds-prep@a and cds-prep@b.
+#
+# Two units rather than one, because a deploy has to be able to build and start
+# the NEW version while the OLD one is still answering requests. They share the
+# checkout at /opt/cds-prep and differ in exactly two things: the port they
+# listen on and the build directory they serve from.
+#
+#   cds-prep@a  ->  127.0.0.1:3100  ->  .next-a
+#   cds-prep@b  ->  127.0.0.1:3101  ->  .next-b
+#
+# nginx points at whichever one is live via ops/nginx/cds-prep-upstream.conf,
+# which ops/deploy.sh rewrites and reloads. Only one of the two is normally
+# running; the other is started only during a deploy and stopped once traffic
+# has moved.
+#
+# Both are enabled so a reboot brings back whichever was live. That is safe:
+# the loser was stopped at the end of the last deploy and stays stopped.
+#
+# Install:
+#   install -m 644 ops/systemd/cds-prep@.service /etc/systemd/system/
+#   systemctl daemon-reload
+#   systemctl enable --now cds-prep@a
+
+[Unit]
+Description=CDS Prep (Next.js) slot %i — prepcadet.in
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/cds-prep
+
+Environment=NODE_ENV=production
+Environment=HOSTNAME=127.0.0.1
+# Slot a listens on 3100, slot b on 3101. 3000 belongs to
+# ai-freelance-platform on this host and must not be used.
+Environment="PORT=%i"
+Environment="NEXT_DIST_DIR=.next-%i"
+EnvironmentFile=/opt/cds-prep/.env.production.local
+
+# The port has to be a number, not the slot letter, so it is mapped here.
+# systemd has no conditionals, so the mapping lives in a tiny wrapper.
+ExecStart=/opt/cds-prep/ops/slot-start.sh %i
+
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/cds-prep.log
+StandardError=append:/var/log/cds-prep.log
+
+[Install]
+WantedBy=multi-user.target

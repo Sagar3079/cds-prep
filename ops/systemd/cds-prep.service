@@ -1,0 +1,21 @@
+[Unit]
+Description=CDS Prep (Next.js) — prepcadet.in
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/cds-prep
+# 3100, not 3000: ai-freelance-platform already owns 3000 on this host.
+Environment=NODE_ENV=production
+Environment=PORT=3100
+Environment=HOSTNAME=127.0.0.1
+EnvironmentFile=/opt/cds-prep/.env.production.local
+ExecStart=/usr/bin/npm run start
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/cds-prep.log
+StandardError=append:/var/log/cds-prep.log
+
+[Install]
+WantedBy=multi-user.target

@@ -5,6 +5,10 @@ node_modules/
 
 # next.js
 .next/
+# The blue/green slot builds (.next-a / .next-b) and the file recording which
+# slot is currently live. See ops/README.md.
+.next-*/
+/.deploy-slot
 out/
 build/
 next-env.d.ts
@@ -34,6 +38,16 @@ answer_keys/*.pdf
 scripts/ocr_text/
 # Same again for the General Knowledge papers. Regenerate with scripts/gk_ocr.py.
 scripts/ocr_gk_text/
+
+# The OPERATIONAL copy of the deploy script, at the path the SSH forced command
+# invokes. The canonical, reviewable copy is committed at ops/deploy.sh.
+#
+# This one stays untracked on purpose, and it is a correctness requirement rather
+# than a preference: deploy.sh runs `git reset --hard`, and bash reads a script
+# incrementally while executing it. Tracking the running copy would let a deploy
+# that changes deploy.sh rewrite the file underneath the shell running it, which
+# then resumes at a byte offset pointing into different code. See ops/README.md.
+/deploy.sh
 
 # logs & local artifacts
 scripts/ocr_log.txt
