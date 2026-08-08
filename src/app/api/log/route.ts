@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readJsonCapped } from "@/lib/body";
 import { kv, kvConfigured } from "@/lib/kv";
 import { rateLimit } from "@/lib/ratelimit";
 
@@ -52,17 +53,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false }, { status: 200 });
   }
 
-  const contentLength = Number(req.headers.get("content-length") ?? 0);
-  if (contentLength > MAX_BODY_BYTES) {
-    return NextResponse.json({ error: "Report too large." }, { status: 413 });
+  // Counted as it arrives, not taken from Content-Length. The header is absent
+  // under chunked transfer-encoding, and the old `?? 0` read that absence as
+  // "empty body" and waved an unbounded one through to the parser.
+  const read = await readJsonCapped<Body>(req, MAX_BODY_BYTES);
+  if (!read.ok) {
+    return NextResponse.json({ error: read.error }, { status: read.status });
   }
-
-  let body: Body;
-  try {
-    body = (await req.json()) as Body;
-  } catch {
-    return NextResponse.json({ error: "Expected JSON." }, { status: 400 });
-  }
+  const body = read.value;
 
   const record = {
     message: clip(body.message, MAX_FIELD) ?? "(no message)",

@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
+import { readTextCapped } from "@/lib/body";
 import { kv } from "@/lib/kv";
 import { grantPlan } from "@/lib/entitlement";
 import type { PlanId } from "@/lib/legal";
+
+/** A payment.captured event is a couple of KB. This is generous, not tight. */
+const MAX_WEBHOOK_BYTES = 64_000;
 import {
   paidKey,
   pendingOrderKey,
@@ -57,9 +61,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Webhook not configured." }, { status: 503 });
   }
 
-  // The RAW body. The digest is over these exact bytes, so it must be read as
-  // text and parsed afterwards — `req.json()` re-serialises and the HMAC fails.
-  const raw = await req.text();
+  /**
+   * The RAW body. The digest is over these exact bytes, so it must be read as
+   * text and parsed afterwards — `req.json()` re-serialises and the HMAC fails.
+   *
+   * Capped, because this route is the one place that both accepts an unbounded
+   * public POST and deliberately declines to rate limit itself. The signature
+   * check is cheap, but it cannot run until the body is in memory, so without a
+   * ceiling anyone who knows the URL can make this process buffer whatever they
+   * like. A Razorpay event is a couple of KB; 64 is generous.
+   */
+  const read = await readTextCapped(req, MAX_WEBHOOK_BYTES);
+  if (!read.ok) {
+    return NextResponse.json({ error: read.error }, { status: read.status });
+  }
+  const raw = read.value;
 
   if (!verifyWebhookSignature(raw, req.headers.get("x-razorpay-signature"))) {
     console.error("[razorpay] webhook signature mismatch");

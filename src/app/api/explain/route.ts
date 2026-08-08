@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readJsonCapped } from "@/lib/body";
 import { bankFor } from "@/lib/bank";
 import { rateLimit } from "@/lib/ratelimit";
 import { subjectOf } from "@/lib/subject";
@@ -722,12 +723,11 @@ export async function POST(req: Request) {
   const limited = await rateLimit(req, "explain");
   if (limited) return limited;
 
-  let body: Body;
-  try {
-    body = (await req.json()) as Body;
-  } catch {
-    return NextResponse.json({ error: "Expected JSON." }, { status: 400 });
+  const read = await readJsonCapped<Body>(req);
+  if (!read.ok) {
+    return NextResponse.json({ error: read.error }, { status: read.status });
   }
+  const body = read.value;
 
   const id = typeof body.id === "string" ? body.id : null;
   const q = id ? BY_ID.get(id) : undefined;

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readJsonCapped } from "@/lib/body";
 import { currentAccount } from "@/lib/account";
 import { kv } from "@/lib/kv";
 import { PLANS, type PlanId } from "@/lib/legal";
@@ -46,16 +47,15 @@ export async function POST(req: Request) {
     );
   }
 
-  let body: {
+  const read = await readJsonCapped<{
     razorpay_order_id?: unknown;
     razorpay_payment_id?: unknown;
     razorpay_signature?: unknown;
-  };
-  try {
-    body = (await req.json()) as typeof body;
-  } catch {
-    return NextResponse.json({ error: "Expected JSON." }, { status: 400 });
+  }>(req);
+  if (!read.ok) {
+    return NextResponse.json({ error: read.error }, { status: read.status });
   }
+  const body = read.value;
 
   const orderId = str(body.razorpay_order_id);
   const paymentId = str(body.razorpay_payment_id);

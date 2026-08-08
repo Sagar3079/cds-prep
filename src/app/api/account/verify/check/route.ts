@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readJsonCapped } from "@/lib/body";
 import { accountKey, currentAccount, type Account } from "@/lib/account";
 import { kv, kvConfigured } from "@/lib/kv";
 import { OTP_MAX_ATTEMPTS, checkCode } from "@/lib/otp";
@@ -28,12 +29,11 @@ export async function POST(req: Request) {
   }
   if (acct.emailVerified) return NextResponse.json({ verified: true });
 
-  let body: { code?: unknown };
-  try {
-    body = (await req.json()) as typeof body;
-  } catch {
-    return NextResponse.json({ error: "Expected JSON." }, { status: 400 });
+  const read = await readJsonCapped<{ code?: unknown }>(req);
+  if (!read.ok) {
+    return NextResponse.json({ error: read.error }, { status: read.status });
   }
+  const body = read.value;
 
   // Normalised before checking: people paste codes with spaces in them, and
   // rejecting "123 456" as wrong burns one of five attempts on a formatting
