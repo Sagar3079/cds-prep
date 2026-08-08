@@ -21,7 +21,56 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # The gate that was missing.
+  #
+  # Every command below already existed and was already good; none of them ran
+  # anywhere before a push reached production, so the VPS was the first machine
+  # that ever tried to build a commit. `deploy.sh` rolls a bad build back
+  # correctly, but rolling back is a worse outcome than not shipping — and a
+  # rollback still costs a restart on a live site.
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # 22 rather than 20: scripts/daily-snapshot.mjs imports
+          # src/lib/daily.ts directly and relies on Node's type stripping,
+          # which landed in 22.18.
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      # The daily set must not move. Appending one question to the English bank
+      # reshuffles every window and silently hands every existing user a
+      # different test — no type breaks and no test fails when that happens, so
+      # this is the only thing watching for it.
+      - name: Daily-set determinism
+        run: node scripts/daily-snapshot.mjs --proof
+
+      # Marketing copy checked against the real bank, so the landing page cannot
+      # claim a question count the data does not support.
+      - name: Landing facts
+        run: npm run landing:facts
+
+      # `npm run visual` is deliberately NOT here: it drives Playwright against
+      # a running dev server and is the one check in this repo that needs a
+      # browser and a warm app. Run it locally when touching a viewport-
+      # dependent layout, as CLAUDE.md says.
+
   deploy:
+    # Nothing reaches the VPS until the above is green.
+    needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
