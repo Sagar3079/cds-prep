@@ -20,9 +20,6 @@ import type { Question } from "@/types";
 
 const KEY = "cds-topic-mastery";
 
-/** Ignore anything above this — a fat-fingered tap is not evidence of weakness. */
-const MIN_SECONDS_FOR_SIGNAL = 0;
-
 export interface TopicStat {
   /** Questions served in this topic */
   seen: number;
@@ -173,7 +170,9 @@ export function topicWeights(topics: string[], mastery: Mastery): TopicWeight[] 
 
     return {
       topic,
-      weight: Math.max(0.35, weight),
+      // No floor: `weight` is 1 + a non-negative term, so it cannot fall below
+      // 1. The `Math.max(0.35, …)` that used to sit here could never fire.
+      weight,
       accuracy: acc,
       seen: stat.seen,
       reason,
@@ -190,4 +189,4 @@ export function weakestTopics(mastery: Mastery, limit = 3): TopicWeight[] {
     .slice(0, limit);
 }
 
-export { MIN_SECONDS_FOR_SIGNAL, CONFIDENCE_FLOOR };
+export { CONFIDENCE_FLOOR };
