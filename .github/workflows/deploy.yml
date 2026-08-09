@@ -42,14 +42,25 @@ jobs:
           cache: npm
       - run: npm ci
 
+      # Build FIRST, and the order is load-bearing rather than stylistic.
+      #
+      # Next generates the global route types — `LayoutProps`, `PageProps` — into
+      # .next/types during the build, and tsconfig.json includes them. On a clean
+      # checkout they do not exist yet, so `tsc --noEmit` before a build fails
+      # with four "Cannot find name 'LayoutProps'" errors in the route layouts.
+      #
+      # Nobody had seen that, because typecheck had never run anywhere without a
+      # .next already sitting there from earlier work. The first CI run this
+      # workflow ever performed found it immediately. CLAUDE.md's own completion
+      # checklist already puts build ahead of typecheck; this now matches.
+      - name: Build
+        run: npm run build
+
       - name: Typecheck
         run: npm run typecheck
 
       - name: Lint
         run: npm run lint
-
-      - name: Build
-        run: npm run build
 
       # The daily set must not move. Appending one question to the English bank
       # reshuffles every window and silently hands every existing user a
