@@ -500,13 +500,78 @@ body {
   .run-head .ring-time { font-size: 1rem; letter-spacing: -0.02em; }
   .run-head .ring-lab { display: none; }
   .run-head__meta { align-items: flex-start; gap: 0.5rem; min-width: 0; flex: 1; }
-  .run-head__meta > [role="group"] { justify-content: flex-start; gap: 11px; }
+  /* 13px, not 11px, and the number is a hit-target guarantee rather than a
+     rhythm choice. `.progress-dot::after` is `inset: -0.4rem`, i.e. a 23.78px
+     touch area; at an 11px gap the dots sit on a 22px pitch, so adjacent
+     targets OVERLAP by 1.78px. Measured with real touch at 390px: tapping 10px
+     right of dot 5's centre lands on question 6. TestClient's own comment on
+     the 13px it sets promises exactly this and the phone override was quietly
+     voiding it on the only widths it matters for. */
+  .run-head__meta > [role="group"] { justify-content: flex-start; gap: 13px; }
   .run-head__count { font-size: 0.75rem; text-align: left; }
   /* 62px per option × 4 is most of what is left. Trimming the vertical padding
      buys the four of them 32px without touching the 44px minimum hit height. */
   .option-btn { padding: 0.7rem 0.875rem; }
   /* Duplicated by the run header a few pixels above it. Review keeps its copy. */
   .q-index--during-test { display: none; }
+
+  /* During a run the perch has only ~20px of air above the run-head card, and
+     `.panel-body > main` shears his head off at the scrollport's top edge —
+     13.2px of it, identically at 360/390/414/667, and you cannot scroll up to
+     reveal it because this is already scrollTop 0. Sit him lower on the ledge;
+     what he loses at the bottom is behind the card, which paints over him. */
+  .run-page .potter-perch {
+    bottom: calc(100% - var(--potter-h) * var(--potter-below, 0.47) - 22px);
+  }
+}
+
+/* A short phone cannot fit a question and four options on the run screen.
+   Measured at 390x667 (iPhone SE / 8, still very common): the scrollport is
+   596px and the content is 673px, so the last option sits behind the action
+   bar on 7 of 10 questions and you have to scroll away from the question to
+   see the option you are picking — on a clock. Nothing shorter than 800px was
+   ever rendered before, which is why this went unseen.
+
+   This reclaims 48px: the title row, and 4px from each of the three gaps. It
+   does NOT make every question fit — one of the ten is 337px over and nothing
+   short of a redesign fixes that — it brings question 1 inside the suite's
+   tolerance and takes ~48px off all ten.
+
+   The title is hidden from sight, not from the accessibility tree: it is the
+   page's only <h1>, and the run-head card right below it already says
+   "Question 1 of 10" to a sighted reader. */
+@media (max-height: 720px) {
+  .run-page [data-run-title] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .run-page .shell.space-y-4 > * + * { margin-top: 0.5rem; }
+  /* 12px of padding either side of the action bar becomes 8px. Unlayered, so
+     it beats the `pt-3 pb-3` utilities on the element — the same collision
+     that bites elsewhere in this file, useful here. The 44px hit height of the
+     buttons inside is untouched. */
+  .run-page .sticky.bottom-0 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+  /* 18px of card padding becomes 14px, top and bottom. `:not(.card-empty)`
+     because the pre-run and loading states deliberately breathe, and they are
+     not what is short of room. Beats `.card` on specificity; both unlayered. */
+  .run-page .card:not(.card-empty) { padding-block: 0.875rem; }
+}
+
+/* Ten dots will not satisfy WCAG 2.5.8 on 360px of glass — that needs two rows
+   or fewer dots, which is a design decision. What this does fix is the MIS-TAP:
+   at 12px gap the pitch is 23px and the hit area is trimmed to 23px, so
+   neighbours stop overlapping. 13px is kept above 380px, where the group still
+   fits on one row; at 360px it would wrap to a second row, which is the whole
+   thing the compact run header exists to prevent. */
+@media (max-width: 380px) {
+  .run-head__meta > [role="group"] { gap: 12px; }
+  .progress-dot::after { inset: -0.375rem; }
 }
 /* Fill the wrapper rather than the 150px the markup asks for, so resizing
    `.ring-wrap` actually resizes the ring. Without this the phone layout kept
@@ -1032,6 +1097,31 @@ mark.target-word {
   touch-action: none;
   transition: transform 0.32s var(--ease);
 }
+
+/* Only the FIGURE is grabbable — not his thought bubble.
+   `.potter-rider` takes no pointer events on purpose, so a 200px bubble cannot
+   swallow a tap meant for the card underneath. `.potter-drag` turns them back
+   on for the whole subtree, which silently re-armed the bubble — and paired
+   with `touch-action: none` above, it swallowed SCROLLS too. Measured on a
+   390px screen: the grabbable strip was 220px wide, 56% of the column, most of
+   it an invisible bubble sitting at `opacity: 0`. A thumb scrolling the review
+   landed on it, the list did not move, and he slid up the screen instead. */
+.potter-drag .potter-rider__say {
+  pointer-events: none;
+}
+
+@media (max-width: 620px) {
+  /* On a phone a vertical swipe is a scroll first and a drag second. He rides
+     the right-hand third of the review — exactly where a right thumb goes — so
+     `touch-action: none` there costs the reader roughly one swipe in ten, and
+     each swallowed one shoves him further up. `pan-y` gives the browser the
+     vertical axis back; he stays draggable horizontally. Paired with the
+     `pointercancel` branch in usePotterDrag, which throws away the few pixels
+     of slop the drag records before the browser wins the axis fight. */
+  .potter-drag {
+    touch-action: pan-y;
+  }
+}
 .potter-drag--active {
   cursor: grabbing;
   /* No transition while dragging — he must track the finger exactly, and a
@@ -1240,12 +1330,20 @@ mark.target-word {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.35rem 0.9rem;
+  /* Row gap 0.75rem, not 0.35rem. These are seven 18px-tall links that wrap
+     onto two rows on a phone, and at 5.6px apart a thumb cannot reliably pick
+     one — they are also the links a payment-gateway reviewer taps. The
+     `padding-block` below grows the target without moving the text. */
+  gap: 0.75rem 0.9rem;
 }
 .site-footer-links a {
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--muted);
+  /* Target height 18px -> 30px. Not the full 44px: these rules are unlayered
+     so nothing can trim them per-screen, and 44px each would add ~60px to the
+     bottom of every route. This is the compromise, stated rather than hidden. */
+  padding-block: 0.35rem;
   transition: color 0.18s var(--ease);
 }
 .site-footer-links a:hover { color: var(--accent-ink); }

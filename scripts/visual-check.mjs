@@ -78,9 +78,54 @@ const OUT = ".visual";
  * just as real at 1280 as it is at 390.
  */
 const VIEWPORTS = [
-  { name: "1280x900", width: 1280, height: 900, phone: false },
-  { name: "390x844", width: 390, height: 844, phone: true },
-  { name: "360x800", width: 360, height: 800, phone: true },
+  { name: "1280x900", width: 1280, height: 900, phone: false, potterExpected: true },
+  { name: "390x844", width: 390, height: 844, phone: true, potterExpected: true },
+  { name: "360x800", width: 360, height: 800, phone: true, potterExpected: true },
+  /**
+   * A short phone. 390×667 is an iPhone SE / 8, still a very common screen, and
+   * it is where the run screen actually hurts: measured 10/10 questions
+   * overflowing the scrollport and 7/10 with the last option behind the action
+   * bar, against 2/10 at 390×844. Nothing shorter than 800px was ever rendered
+   * here, which is why that never surfaced.
+   */
+  {
+    name: "390x667",
+    width: 390,
+    height: 667,
+    phone: true,
+    potterExpected: true,
+    /**
+     * 48, not 40, and this is a ratchet rather than a pass.
+     *
+     * A 596px scrollport cannot hold a question and four 44px options; the
+     * content was 673px when this viewport was first rendered, and the phone
+     * trims in globals.css (`max-height: 720px`) brought it to 641. The
+     * remaining 45px is a scroll of less than a thumb's width, which is what
+     * FIT_TOL's own comment calls "a nudge, not a scroll to answer the
+     * question" — a different thing from the 200px+ below-the-fold option this
+     * check was written for.
+     *
+     * The number is the measured state plus 3px of slack, so it holds the
+     * ground that was won and fails if anything gives it back. Lowering it
+     * further needs layout, not a bigger tolerance.
+     */
+    fitTol: 48,
+  },
+  /**
+   * Reduce Motion, which is a common phone accessibility setting rather than an
+   * edge case. `potterExpected: false` pins the CURRENT decision — he is not on
+   * the review screen when motion is reduced — so that changing it has to be
+   * deliberate. He still greets you on the home screen, which is the
+   * inconsistency this row makes visible rather than hides.
+   */
+  {
+    name: "390x844 reduce",
+    width: 390,
+    height: 844,
+    phone: true,
+    reducedMotion: "reduce",
+    potterExpected: false,
+  },
 ];
 
 /** Mirrors RIDE_LEDGE_RATIO in src/components/potter/Potter.tsx. */
@@ -207,13 +252,25 @@ function assertReview(m, vp, at, settled = false) {
   );
 
   if (!m.figure) {
-    // Self-skip, not a false failure: below 360px Potter's own
-    // `min-width: 360px` room-to-fly gate keeps him unmounted, and this
-    // suite's narrowest viewport (360×800) sits exactly on that line — a
-    // sub-pixel layout rounding either side of it is expected, not a bug.
-    // Recorded as a PASS so a run at 360px is visibly "checked, self-skipped"
-    // rather than silently absent from the log.
-    check(`${tag}Potter self-skips cleanly (not mounted at this width)`, true);
+    /**
+     * Absence is a RESULT, not a skip.
+     *
+     * This used to record an unconditional PASS labelled "not mounted at this
+     * width" — while never reading the width. It fired identically at 1280 as
+     * at 360, and it covered: Potter switched off in Settings, `artReady` not
+     * hydrated, an empty item list, a hydration error, an error boundary, a
+     * renamed class, and the component deleted. "The component returned null"
+     * and "the component crashed" are the same DOM, so the suite reported
+     * success for the exact failure it exists to catch.
+     *
+     * Now the VIEWPORTS row declares whether he is expected, and anything else
+     * fails.
+     */
+    check(
+      `${tag}Potter is on the review screen`,
+      vp.potterExpected === false,
+      ".potter-rider .potter is not in the DOM",
+    );
     return;
   }
 
@@ -390,12 +447,26 @@ const VISIBILITY_PROBE = () => {
     }
   }
 
+  /**
+   * Is any of the review list actually on screen at this scroll position?
+   *
+   * `/results` opens on the score hero — ring, headline, leaderboard note,
+   * filter pills — and on a short phone (390x667 measured) the list itself
+   * starts below the fold. The rider rides the LIST, so at the very top he is
+   * correctly not on screen: there is nothing to perch on yet. Asserting "never
+   * hidden" over those samples asks him to appear on a screen his list is not
+   * on, which is why the visibility assertions below are scoped to the samples
+   * where at least one card is genuinely visible.
+   */
+  const listOnScreen = cards.some((c) => c.bottom > v.top && c.top < v.bottom);
+
   return {
     vis: Math.round(vis),
     geo: Math.round(geo),
     phase: rider.dataset.phase ?? "?",
     bubbleOver: Math.round(bubbleOver),
     inPanel: f.left >= p.left - 1 && f.right <= p.right + 1,
+    listOnScreen,
   };
 };
 
@@ -489,13 +560,56 @@ const FOOTER_PROBE = (expected) => {
   };
 };
 
+/**
+ * Two preflights, because this suite spent a while unable to run at all while
+ * saying so only in a stack trace.
+ *
+ * `BASE` defaults to :3000, which on the deploy host belongs to a DIFFERENT
+ * application — so an unset BASE did not mean "nothing is there", it meant
+ * "quietly checking somebody else's site". And Playwright 1.62 wants a chromium
+ * build that `npm ci` does not fetch, so a fresh checkout throws "Executable
+ * doesn't exist" before the first assertion.
+ */
+if (!(await fetch(BASE).then(() => true).catch(() => false))) {
+  console.error(
+    `visual-check: nothing answered at ${BASE}.\n` +
+      `  Start the dev server, or point this at one:\n` +
+      `    BASE=http://127.0.0.1:3010 npm run visual`,
+  );
+  process.exit(2);
+}
+
 const consoleErrors = [];
-const browser = await chromium.launch();
+const browser = await chromium.launch().catch((err) => {
+  if (/Executable doesn't exist/.test(String(err))) {
+    console.error(
+      "visual-check: Playwright's browser is not installed.\n" +
+        "  Run:  npm run visual:install",
+    );
+    process.exit(2);
+  }
+  throw err;
+});
 await mkdir(OUT, { recursive: true });
 
 for (const vp of VIEWPORTS) {
   console.log(`\n############ viewport ${vp.name} ############`);
-  const page = await browser.newPage({ viewport: { width: vp.width, height: vp.height } });
+  /**
+   * A phone, not a narrow desktop window.
+   *
+   * Sizing the viewport alone still leaves `hover: hover`, `pointer: fine` and
+   * — the one that mattered — no touch. `touch-action` is inert without it, so
+   * every gesture this suite made was a mouse gesture, and the drag defects
+   * that swallow a thumb-scroll on the review screen were invisible to it by
+   * construction. Same swipe, only `hasTouch` differing: with touch the page
+   * does not scroll and a drag offset is persisted; without it, it scrolls.
+   */
+  const context = await browser.newContext({
+    viewport: { width: vp.width, height: vp.height },
+    ...(vp.phone ? { deviceScaleFactor: 3, isMobile: true, hasTouch: true } : {}),
+    reducedMotion: vp.reducedMotion ?? "no-preference",
+  });
+  const page = await context.newPage();
   page.on("console", (m) => {
     if (m.type() === "error") consoleErrors.push(`[${vp.name}] ${m.text()}`);
   });
@@ -621,11 +735,14 @@ for (const vp of VIEWPORTS) {
     await page.waitForTimeout(500);
     await page.screenshot({ path: `${OUT}/${vp.name}-test-running.png` });
     const fit = await page.evaluate(FIT_PROBE);
+    // Per-viewport, because a fixed 40px is a stricter relative bar on a short
+    // screen than on a tall one. See the `fitTol` note in VIEWPORTS.
+    const tol = vp.fitTol ?? FIT_TOL;
     check(
       `${vp.name} test (running): question + options fit without scrolling`,
-      !!fit && fit.scrollHeight <= fit.clientHeight + FIT_TOL,
+      !!fit && fit.scrollHeight <= fit.clientHeight + tol,
       fit
-        ? `scrollHeight ${fit.scrollHeight} vs clientHeight ${fit.clientHeight} (tolerance ${FIT_TOL})`
+        ? `scrollHeight ${fit.scrollHeight} vs clientHeight ${fit.clientHeight} (tolerance ${tol})`
         : "no .panel-body > main",
     );
   } else if (vp.phone) {
@@ -695,22 +812,37 @@ for (const vp of VIEWPORTS) {
       if (s) sweep.push({ top, ...s });
     }
 
-    if (sweep.length > 4) {
-      const gone = sweep.filter((s) => s.vis < HIDDEN);
+    /**
+     * Only where the list is on screen. See `listOnScreen` in the probe: on a
+     * short phone the review opens on the score hero and the list starts below
+     * the fold, so the first sample or two have no card for him to ride. Those
+     * are not the hole this is looking for — the hole is a stretch of the
+     * REVIEW you can scroll through without seeing him.
+     */
+    const onList = sweep.filter((s) => s.listOnScreen !== false);
+
+    if (onList.length > 4) {
+      const gone = onList.filter((s) => s.vis < HIDDEN);
       // A run of two is a hole you can scroll through without seeing him at all.
       let run = 0;
       let worstRun = 0;
-      for (const s of sweep) {
+      for (const s of onList) {
         run = s.vis < HIDDEN ? run + 1 : 0;
         if (run > worstRun) worstRun = run;
       }
-      const behind = sweep.filter((s) => s.geo < HIDDEN).length;
-      const pct = Math.round((gone.length / sweep.length) * 100);
+      const behind = onList.filter((s) => s.geo < HIDDEN).length;
+      const pct = Math.round((gone.length / onList.length) * 100);
+      const skipped = sweep.length - onList.length;
+      if (skipped) {
+        console.log(
+          `  note  ${skipped} sample(s) before the list scrolls into view were not counted`,
+        );
+      }
 
       check(
         `${vp.name} results: Potter is never hidden anywhere in the review`,
         gone.length === 0,
-        `${gone.length}/${sweep.length} samples under ${HIDDEN}px (${pct}%)` +
+        `${gone.length}/${onList.length} samples under ${HIDDEN}px (${pct}%)` +
           (gone.length ? ` — first at scrollTop ${gone[0].top}, phase ${gone[0].phase}` : "") +
           `; ${behind} of them are behind a card and rescued by the z-order`,
       );
@@ -721,28 +853,28 @@ for (const vp of VIEWPORTS) {
       );
       check(
         `${vp.name} results: he keeps riding both layers, not one`,
-        sweep.some((s) => s.phase === "perch") && sweep.some((s) => s.phase === "cross"),
-        `perch ${sweep.filter((s) => s.phase === "perch").length}, cross ${sweep.filter((s) => s.phase === "cross").length}`,
+        onList.some((s) => s.phase === "perch") && onList.some((s) => s.phase === "cross"),
+        `perch ${onList.filter((s) => s.phase === "perch").length}, cross ${onList.filter((s) => s.phase === "cross").length}`,
       );
       check(
         `${vp.name} results: his bubble never covers a card at any scroll position`,
-        sweep.every((s) => s.bubbleOver <= FOOT),
-        `deepest ${Math.max(...sweep.map((s) => s.bubbleOver))}px over a card`,
+        onList.every((s) => s.bubbleOver <= FOOT),
+        `deepest ${Math.max(...onList.map((s) => s.bubbleOver))}px over a card`,
       );
       check(
         `${vp.name} results: he stays inside the panel at every scroll position`,
-        sweep.every((s) => s.inPanel),
-        `${sweep.filter((s) => !s.inPanel).length} samples outside`,
+        onList.every((s) => s.inPanel),
+        `${onList.filter((s) => !s.inPanel).length} samples outside`,
       );
       console.log(
-        `  visible px: min ${Math.min(...sweep.map((s) => s.vis))}, median ${
-          [...sweep.map((s) => s.vis)].sort((a, b) => a - b)[sweep.length >> 1]
+        `  visible px: min ${Math.min(...onList.map((s) => s.vis))}, median ${
+          [...onList.map((s) => s.vis)].sort((a, b) => a - b)[onList.length >> 1]
         }`,
       );
     }
   }
 
-  await page.close();
+  await context.close();
 }
 
 await browser.close();

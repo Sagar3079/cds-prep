@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "visual": "node scripts/visual-check.mjs",
+    "visual:install": "playwright install chromium",
     "landing": "node scripts/landing-check.mjs",
     "landing:facts": "node scripts/landing-facts.mjs",
     "postinstall": "node scripts/link-lint-typescript.mjs || echo \"lint TS shim skipped (lint-only; build unaffected)\""

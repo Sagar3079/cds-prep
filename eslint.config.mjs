@@ -37,6 +37,12 @@ const eslintConfig = defineConfig([
     // eslint-config-next's own defaults (core-web-vitals.js / typescript.js
     // both set these — repeated explicitly since we also add to the list).
     ".next/**",
+    // The blue/green slot builds. `.next/**` above does NOT cover these — the
+    // glob is literal — so once ops/deploy.sh started building into .next-a and
+    // .next-b, `npm run lint` began linting 210 files of generated output and
+    // reported 391 errors that were not in this repo's source at all. Any
+    // NEXT_DIST_DIR the deploy uses belongs here.
+    ".next-*/**",
     "out/**",
     "build/**",
     "next-env.d.ts",

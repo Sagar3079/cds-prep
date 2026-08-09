@@ -776,7 +776,12 @@ export default function TestClient({
           phone — an eighth of the screen held open for something that had been
           switched off, which on a 360px device is the difference between the
           fourth option being on screen and under the fold. */}
+      {/* `data-run-title` so the short-phone rule in globals.css can reclaim
+          this row by name. Selecting it positionally (`> div:first-of-type`)
+          also matched the PRE-run screen's card and hid the "Begin test"
+          button — the visual suite caught it immediately. */}
       <div
+        data-run-title
         className={`flex items-baseline justify-between gap-3 flex-wrap ${
           coachRoom ? "mb-20" : "mb-2"
         }`}
@@ -784,7 +789,12 @@ export default function TestClient({
         <h1 className="text-lg font-extrabold tracking-tight text-ink">
           {isRandom ? "Random Quiz" : "Today's Test"}
         </h1>
-        <p className="text-xs text-muted">
+        {/* Hidden on phones: the mascot perches at the right end of this row
+            and his box overlaps this text — measured 32.6px of overlap at
+            360px, enough to put his hand over the "20" of the date. The
+            marking is restated in the action bar at the bottom of the run, so
+            nothing here is the only copy of anything except the date. */}
+        <p className="hidden min-[621px]:block text-xs text-muted">
           {isRandom ? "" : `${date} · `}+{MARKING.correct} / −{penalty}
         </p>
       </div>

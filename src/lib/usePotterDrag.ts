@@ -67,7 +67,24 @@ export function usePotterDrag(
    */
   const clamp = useCallback((want: DragOffset): DragOffset => {
     const host = hostRef.current;
-    const panel = host?.closest(".app-panel");
+    /**
+     * Bound by the box he is CLIPPED to, not by the device frame.
+     *
+     * `.app-panel` spans the whole phone, header and tab bar included.
+     * `.panel-body` is `overflow: hidden` and sits below the header and above
+     * the tab bar. Clamping to the outer box therefore called positions "inside
+     * the panel" that paint nothing: measured at 390x844, a 44px-deep pocket
+     * under the header and 56px behind the tab bar.
+     *
+     * That is what turned a swallowed swipe into a vanished companion. Three
+     * upward swipes parked him at the top of the pocket with 24 of his 66px
+     * showing — head gone, boots visible — and because the raw value is never
+     * rewritten, reloading re-clamped him to the same bad place. Settings has a
+     * "Reset their position" button whose comment says a drag can strand him
+     * off-screen; it was anticipated rather than prevented.
+     */
+    const panel =
+      host?.closest(".panel-body") ?? host?.closest(".app-panel");
     if (!host || !panel) return want;
 
     const p = panel.getBoundingClientRect();
@@ -250,6 +267,28 @@ export function usePotterDrag(
         start.current = null;
         setDragging(false);
         if (!moved.current) return;
+
+        /**
+         * The browser took the gesture over — on a phone that means a `pan-y`
+         * scroll won the axis fight (see `.potter-drag` in globals.css).
+         *
+         * `SLOP` is 5px, so the drag arms a few pixels before the browser
+         * decides, and without this those pixels are recorded as if they were
+         * intent. Measured: a scroll swipe that correctly scrolled the page
+         * still wrote a −20px offset, which is the same slow drift into the
+         * header as before, just thirteen times slower. Put him back.
+         */
+        if (ev.type === "pointercancel") {
+          applied.current = { x: s.ox, y: s.oy };
+          setOffset({ x: s.ox, y: s.oy });
+          try {
+            host.releasePointerCapture(pointerId);
+          } catch {
+            /* capture already lost */
+          }
+          return;
+        }
+
         try {
           localStorage.setItem(storageKey, JSON.stringify(applied.current));
         } catch {

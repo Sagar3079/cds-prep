@@ -328,7 +328,18 @@ export default function PotterRider({
    * settled there is no figure to measure, and the perch line the loop works
    * in would be the wrong one.
    */
-  const mounted = shown && artReady && items.length > 0;
+  /**
+   * `roomToFly` belongs here, not only in `active`.
+   *
+   * Without it, a reader with Reduce Motion on got the host element in the DOM
+   * at `visibility: hidden` — the flight effect returns before it ever calls
+   * `setVisible(true)` — so the companion greeted them on the home screen
+   * (`PotterPerch` has no reduced-motion gate) and was then simply absent from
+   * the review, with a dead node and a stale transform left behind. Measured:
+   * 0px painted across the whole scroll range. Returning null is the honest
+   * version of what was already happening.
+   */
+  const mounted = shown && artReady && items.length > 0 && roomToFly;
 
   useEffect(() => {
     setTalk(thoughtsOn());

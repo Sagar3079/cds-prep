@@ -254,7 +254,7 @@ export default function LeaderboardPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
-              className="mt-1 w-full rounded-xl border border-line bg-paper px-3 py-2 text-[0.9375rem] font-normal text-ink"
+              className="mt-1 w-full rounded-xl border border-line bg-paper px-3 py-2 text-base font-normal text-ink"
               placeholder="you@example.com"
             />
           </label>
@@ -264,7 +264,7 @@ export default function LeaderboardPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               maxLength={24}
-              className="mt-1 w-full rounded-xl border border-line bg-paper px-3 py-2 text-[0.9375rem] font-normal text-ink"
+              className="mt-1 w-full rounded-xl border border-line bg-paper px-3 py-2 text-base font-normal text-ink"
               placeholder="How you want to appear"
             />
           </label>

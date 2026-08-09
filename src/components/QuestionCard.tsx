@@ -470,7 +470,7 @@ export default function QuestionCard({
           // which needs it to be focusable.
           // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
           tabIndex={0}
-          className={`text-sm text-ink bg-surface border border-line px-4 py-3 rounded-xl max-h-48 overflow-y-auto leading-relaxed ${FOCUS_RING}`}
+          className={`text-sm text-ink bg-surface border border-line px-4 py-3 rounded-xl max-h-48 overflow-y-auto overscroll-contain leading-relaxed ${FOCUS_RING}`}
         >
           {question.passage}
         </div>
@@ -488,9 +488,15 @@ export default function QuestionCard({
         {prompt && (
           <p className="text-[0.8125rem] text-muted leading-snug">{prompt}</p>
         )}
+        {/* `break-words` matches what the options already do. Without it one
+            long token in a stem drags the panel's inner scroller sideways —
+            measured 95px at 360px wide — and `.app-panel { overflow: hidden }`
+            keeps that off any page-level overflow check. No question in either
+            bank is long enough today (longest token is 23 chars); the options
+            were guarded against it and the stem was not. */}
         <p
           id={stemId}
-          className={`font-medium text-ink text-pretty ${
+          className={`font-medium text-ink text-pretty break-words ${
             split
               ? "text-[0.9375rem] leading-snug"
               : "text-[1.125rem] leading-[1.4]"
