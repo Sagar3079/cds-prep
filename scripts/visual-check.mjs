@@ -136,10 +136,25 @@ const TOL = 6;
 const CARD_PAD = 18;
 /** Below this many visible px he is, for practical purposes, not on screen. */
 const HIDDEN = 12;
-/** How far the bubble's foot may stand on a card's top edge. It is anchored to
-    that edge by construction, so the spring's overshoot puts a few px of it
-    over the card's own top padding; more than this and it is over text. */
-const FOOT = 8;
+/**
+ * How far the bubble's foot may stand on a card's BOX. It is anchored to that
+ * edge by construction, so the spring's overshoot puts a few px of it over the
+ * card's own top padding.
+ *
+ * 10, raised from 8, and the reason is worth recording rather than hiding. The
+ * rider now waits for a card edge it can actually reach before setting off (see
+ * PotterRider's handover note) — without that, a card taller than the
+ * scrollport parks him against the bottom of the screen for hundreds of px of
+ * scrolling. Approaching perches from the other side costs about 1px more
+ * overshoot, and 8 was the old number with no slack left in it.
+ *
+ * This is a PROXY and always was: `CARD_PAD` is 18, so the foot is inside the
+ * card's own padding well past 10. Measured at the deepest approach, the
+ * bubble's bottom sits 14px clear of the first line of text. The invariant that
+ * actually matters is asserted directly now — "his bubble never covers question
+ * TEXT" — so this one is a ratchet on the overshoot, not the safety line.
+ */
+const FOOT = 10;
 /**
  * How many px over `clientHeight` still counts as "fits". Not zero: there is
  * `.panel-body > main`'s own few px of bottom `padding-bottom` runway, sub-
@@ -436,15 +451,32 @@ const VISIBILITY_PROBE = () => {
   const say = rider.querySelector(".potter-rider__say");
   const bub = rider.querySelector(".potter-thought");
   let bubbleOver = 0;
+  /**
+   * How far the bubble is clear of the card's first line of TEXT.
+   *
+   * `bubbleOver` measures the bubble against the card's BOX, which is a proxy:
+   * the card carries 18px of its own top padding, so a few px over the box is
+   * still over nothing. The number that actually matters is this one, and
+   * negative means it is genuinely on top of the question.
+   */
+  let textClear = Infinity;
+  const cardEls = [...document.querySelectorAll("[data-review-card]")];
   if (bub && say && Number(getComputedStyle(say).opacity) > 0.05) {
     const b = bub.getBoundingClientRect();
-    for (const c of cards) {
-      if (Math.min(b.right, c.right) <= Math.max(b.left, c.left)) continue;
+    cardEls.forEach((el, i) => {
+      const c = cards[i];
+      if (Math.min(b.right, c.right) <= Math.max(b.left, c.left)) return;
       bubbleOver = Math.max(
         bubbleOver,
         Math.min(b.bottom, c.bottom) - Math.max(b.top, c.top),
       );
-    }
+      const txt = el.querySelector("p, h2, h3");
+      if (txt) {
+        const t = txt.getBoundingClientRect();
+        if (b.bottom > t.top - 400 && b.bottom < t.bottom)
+          textClear = Math.min(textClear, t.top - b.bottom);
+      }
+    });
   }
 
   /**
@@ -465,6 +497,7 @@ const VISIBILITY_PROBE = () => {
     geo: Math.round(geo),
     phase: rider.dataset.phase ?? "?",
     bubbleOver: Math.round(bubbleOver),
+    textClear: Number.isFinite(textClear) ? Math.round(textClear) : null,
     inPanel: f.left >= p.left - 1 && f.right <= p.right + 1,
     listOnScreen,
   };
@@ -860,6 +893,17 @@ for (const vp of VIEWPORTS) {
         `${vp.name} results: his bubble never covers a card at any scroll position`,
         onList.every((s) => s.bubbleOver <= FOOT),
         `deepest ${Math.max(...onList.map((s) => s.bubbleOver))}px over a card`,
+      );
+      // The invariant the one above only approximates. A card has 18px of its
+      // own top padding, so "over the card's box" and "over the question" are
+      // different questions, and this asks the one that matters.
+      const clears = onList.map((s) => s.textClear).filter((v) => v !== null);
+      check(
+        `${vp.name} results: his bubble never covers question TEXT`,
+        clears.every((v) => v >= 0),
+        clears.length
+          ? `closest approach ${Math.min(...clears)}px from the first line`
+          : "bubble never overlapped a card's text band",
       );
       check(
         `${vp.name} results: he stays inside the panel at every scroll position`,

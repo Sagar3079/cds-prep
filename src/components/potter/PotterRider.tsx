@@ -472,9 +472,27 @@ export default function PotterRider({
       // than sailing off the end; inside the dead band he keeps the edge he
       // already has, so scrubbing the wheel across the threshold cannot bounce
       // him between two cards.
+      /**
+       * …and he does not set off for an edge he cannot reach yet.
+       *
+       * `cross` is derived from where his perch meets the panel's top margin,
+       * which assumes the next card's edge is somewhere on screen by the time
+       * he leaves. On a phone it often is not: a review card is ~600px and the
+       * scrollport on a 667px-tall screen is ~523px, so the card is TALLER than
+       * the window and the next edge is still a screen and a half away when
+       * `t` passes `cross`. He commits to it, the clamp stops him at `hi`, and
+       * he sits against the bottom of the screen — measured at 390x667, frozen
+       * at the same pixel from scrollTop 600 to 800 — while the list keeps
+       * moving under him. It reads exactly as reported: he follows you down,
+       * then parks at the bottom instead of stopping at each question.
+       *
+       * So the handover also requires the edge to be within `hi`. Until it is,
+       * he stays with the card he is on, which is the one being read anyway.
+       */
       let cur = i;
       if (i < last) {
-        if (t >= cross) cur = i + 1;
+        const reachable = anchors[i + 1] <= hi.current;
+        if (t >= cross && reachable) cur = i + 1;
         else if (t > cross - HYST && idx.current === i + 1) cur = i + 1;
       }
       target.current = anchors[cur];
