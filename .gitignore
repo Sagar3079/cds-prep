@@ -9,6 +9,9 @@ node_modules/
 # slot is currently live. See ops/README.md.
 .next-*/
 /.deploy-slot
+# …and the commit that slot was built from, which is how deploy.sh knows the
+# running bundle is older than the checkout.
+/.deploy-slot.commit
 out/
 build/
 next-env.d.ts

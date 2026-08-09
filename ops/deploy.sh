@@ -78,7 +78,23 @@ if [ "${UNPUSHED:-0}" -gt 0 ]; then
   git log --oneline origin/main..HEAD | sed 's/^/    /'
   exit 1
 fi
-if [ "$PREV" = "$TARGET" ]; then echo "already at origin/main, nothing to do"; exit 0; fi
+# "Nothing to do" has to mean the RUNNING BUILD matches origin/main, not merely
+# that the checkout does.
+#
+# This compared HEAD against origin/main, which is the same question only when
+# nobody commits on the box. Commit here and push, and the next deploy finds
+# HEAD already at origin/main and exits before building — commit on GitHub,
+# checkout correct, CI green, and the process still serving the previous
+# bundle. That is not hypothetical: the mobile fixes reported as deployed were
+# still the old build until they were built by hand.
+BUILT=$(cat "$STATE.commit" 2>/dev/null || echo none)
+if [ "$PREV" = "$TARGET" ] && [ "$BUILT" = "$TARGET" ]; then
+  echo "already at origin/main and slot $LIVE is built from it, nothing to do"
+  exit 0
+fi
+if [ "$PREV" = "$TARGET" ]; then
+  echo "checkout is at origin/main but slot $LIVE was built from $BUILT — rebuilding"
+fi
 echo "current: $PREV"
 echo "target:  $TARGET"
 
@@ -155,6 +171,10 @@ if ! health "$NEXT_PORT" || ! curl -sf -o /dev/null --max-time 10 https://prepca
 fi
 
 echo "$NEXTSLOT" > "$STATE"
+# What the slot now serving was actually BUILT from. Read by the early-exit
+# above, so a checkout that is already at origin/main still rebuilds when the
+# running bundle is older than it.
+echo "$TARGET" > "$STATE.commit"
 rm -f "$UPSTREAM.bak"
 
 # Exactly the live slot is enabled, so a reboot brings back the one that was
