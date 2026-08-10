@@ -338,7 +338,7 @@ export default function AdminClient() {
             <Stat
               label="Visits (30d)"
               value={sum(m["visit"])}
-              hint="browsers that ran JS — excludes bots"
+              hint="to 10 Aug rebuilt from server logs; after that, measured"
             />
             <Stat
               label="Accounts"
@@ -369,8 +369,12 @@ export default function AdminClient() {
             <h2>Recent activity</h2>
             {data.recent.length === 0 ? (
               <p className={styles.empty}>
-                No tests recorded yet. This feed starts filling from the moment auto-save
-                shipped — it cannot show tests taken before then, because nothing recorded them.
+                No tests recorded yet. Visits, accounts and payments above go back
+                through your history — visits rebuilt from the server&apos;s own access
+                logs, accounts and payments read from the records themselves. Tests
+                are the one thing that cannot be recovered: nothing anywhere wrote
+                down a finished test before auto-save shipped, so this feed and the
+                two test charts start from now.
               </p>
             ) : (
               <div className={styles.tableWrap}><table className={styles.table}>

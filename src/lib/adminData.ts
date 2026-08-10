@@ -1,7 +1,7 @@
 import "server-only";
 import { kv, kvConfigured } from "./kv";
 import { accountKey, type Account } from "./account";
-import { activePlan } from "./entitlement";
+import { activePlan, istDayKey } from "./entitlement";
 import { series, recentDays, type Metric } from "./analytics";
 import { recentAttempts, attemptsFor } from "./attempts";
 import { looksGenerated } from "./username";
@@ -91,7 +91,9 @@ async function readAccounts(keys: string[]): Promise<Account[]> {
 export async function listUsers(opts: {
   limit?: number;
   withPlans?: boolean;
-} = {}): Promise<Walk<AdminUser> & { anonymous: number; bound: number }> {
+} = {}): Promise<
+  Walk<AdminUser> & { anonymous: number; bound: number; createdAts: number[] }
+> {
   const limit = opts.limit ?? 500;
   const walk = await walkKeys("acct:*");
   const accounts = await readAccounts(walk.items);
@@ -122,6 +124,10 @@ export async function listUsers(opts: {
     scanned: accounts.length,
     anonymous: accounts.filter((a) => !a.email).length,
     bound: accounts.filter((a) => Boolean(a.email)).length,
+    // Every account's creation time, not just this page's — the "new accounts
+    // per day" chart is built from these rather than from a counter that only
+    // knows about days since it shipped.
+    createdAts: accounts.map((a) => a.createdAt ?? 0).filter(Boolean),
   };
 }
 
@@ -258,6 +264,29 @@ export interface Overview {
 }
 
 /** Mean score per day per subject, reconstructed from the sum/count counters. */
+/**
+ * Bucket timestamps into a day series.
+ *
+ * The counters in `lib/analytics.ts` only know about events since they shipped,
+ * which is correct for things nothing recorded before — tests finished, visits.
+ * It is NOT correct for accounts and payments: both are permanent records
+ * carrying their own timestamp, so their history is sitting right there and
+ * reading it from a counter reports zero for days that demonstrably had events.
+ * That is what this fixes. Derived at read time, so it is right for every day
+ * the records cover rather than only for days after a deploy.
+ */
+function bucketByDay(timestamps: number[], days: number): Record<string, number> {
+  const window = recentDays(days);
+  const out: Record<string, number> = {};
+  for (const d of window) out[d] = 0;
+  for (const ts of timestamps) {
+    if (!ts) continue;
+    const day = istDayKey(ts);
+    if (day in out) out[day] += 1;
+  }
+  return out;
+}
+
 async function averageSeries(subject: "english" | "gk", days: number) {
   const sums = await series(`score:sum:${subject}`, days);
   const counts = await series(`score:n:${subject}`, days);
@@ -303,6 +332,24 @@ export async function overview(days = 30): Promise<Overview> {
     averageSeries("english", days),
     averageSeries("gk", days),
   ]);
+
+  /**
+   * Replace two counter series with the truth.
+   *
+   * Accounts and payments are permanent records with their own timestamps, so
+   * their day-by-day history is fully recoverable and does not depend on when
+   * instrumentation shipped. Reporting them from counters showed 0 new accounts
+   * over thirty days while ten accounts created inside that window sat in the
+   * store — a chart that is not merely incomplete but wrong.
+   *
+   * Everything else genuinely cannot be recovered: nothing anywhere recorded a
+   * finished test or a page view before the counters existed.
+   */
+  metrics["acct:new"] = bucketByDay(users.createdAts, days);
+  metrics["pay:ok"] = bucketByDay(
+    payments.items.map((p) => p.paidAt),
+    days,
+  );
 
   return {
     configured: true,
