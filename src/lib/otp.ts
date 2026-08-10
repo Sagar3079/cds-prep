@@ -24,6 +24,21 @@ const OTP_TTL_SEC = OTP_TTL_MINUTES * 60;
 export const OTP_MAX_ATTEMPTS = 5;
 
 const otpKey = (accountId: string) => `otp:${accountId}`;
+/**
+ * A separate key for the wrong-guess counter, incremented with `INCR`.
+ *
+ * The counter used to live inside the same JSON blob as the code, updated by
+ * reading the blob, adding one in JavaScript, and writing it back — three
+ * steps with two network round trips between them, and nothing serializing
+ * concurrent callers. A burst of guesses fired without waiting for each other
+ * (which costs an attacker nothing — no `await` needed between requests) would
+ * nearly all read the SAME attempts value before any of their writes landed,
+ * so the stored count advanced by however many writes happened to finish last
+ * rather than by the true number of guesses. `INCR` is a single atomic
+ * operation at the Redis level; there is no window for two callers to observe
+ * the same pre-increment value.
+ */
+const attemptsKey = (accountId: string) => `otp:${accountId}:attempts`;
 
 /** `randomInt`, not `Math.random()`: this is a credential, not a shuffle. */
 const newCode = () => String(randomInt(0, 1_000_000)).padStart(6, "0");
@@ -33,25 +48,31 @@ const hash = (code: string, accountId: string) =>
   // produce the same digest, and a stolen digest is useless anywhere else.
   createHash("sha256").update(`${accountId}:${code}`).digest("hex");
 
+const hashesMatch = (storedHash: string, accountId: string, supplied: string) => {
+  const a = Buffer.from(storedHash, "utf8");
+  const b = Buffer.from(hash(supplied, accountId), "utf8");
+  return a.length === b.length && timingSafeEqual(a, b);
+};
+
 interface Stored {
   hash: string;
-  attempts: number;
   sentAt: number;
 }
 
 /**
  * Mint a code and remember its hash. Returns the plaintext ONCE, for the mail
  * that is about to carry it — it is never readable again from anywhere.
+ *
+ * The attempts counter is a fresh key, not a field reset inside this record:
+ * deleting it here (rather than leaving a stale count from a previous code to
+ * be inherited) is what makes a freshly issued code start with a clean budget.
  */
 export async function issueCode(accountId: string): Promise<string> {
   const code = newCode();
-  const record: Stored = {
-    hash: hash(code, accountId),
-    attempts: 0,
-    sentAt: Date.now(),
-  };
+  const record: Stored = { hash: hash(code, accountId), sentAt: Date.now() };
   await kv.set(otpKey(accountId), JSON.stringify(record));
   await kv.expire(otpKey(accountId), OTP_TTL_SEC);
+  await kv.del(attemptsKey(accountId));
   return code;
 }
 
@@ -60,11 +81,15 @@ export type CheckResult =
   | { ok: false; reason: "expired" | "wrong" | "exhausted" };
 
 /**
- * Check a code, consuming an attempt.
+ * Check a code, consuming an attempt on a wrong guess.
  *
  * "expired" covers no-code-at-all as well as a genuinely elapsed one, on
  * purpose: distinguishing them tells a caller whether an address currently has
  * a code outstanding, which is information about someone else's account.
+ *
+ * The correctness check happens before the attempts budget is touched at all —
+ * a right answer is never at the mercy of a race on the counter, and a wrong
+ * one is only ever recorded through the atomic `INCR` below.
  */
 export async function checkCode(
   accountId: string,
@@ -81,37 +106,35 @@ export async function checkCode(
     return { ok: false, reason: "expired" };
   }
 
-  if (record.attempts >= OTP_MAX_ATTEMPTS) {
+  if (hashesMatch(record.hash, accountId, supplied)) {
+    // Single use: this code is now spent, whatever else happens to it.
     await kv.del(otpKey(accountId));
-    return { ok: false, reason: "exhausted" };
+    await kv.del(attemptsKey(accountId));
+    return { ok: true };
   }
 
-  const a = Buffer.from(record.hash, "utf8");
-  const b = Buffer.from(hash(supplied, accountId), "utf8");
-  const match = a.length === b.length && timingSafeEqual(a, b);
-
-  if (!match) {
-    const attempts = record.attempts + 1;
-    if (attempts >= OTP_MAX_ATTEMPTS) {
-      // Burnt, not just counted. The next try needs a whole new code, which
-      // costs a round trip through the send throttle.
-      await kv.del(otpKey(accountId));
-      return { ok: false, reason: "exhausted" };
-    }
-    await kv.set(otpKey(accountId), JSON.stringify({ ...record, attempts }));
-    // Re-arm the TTL the SET above cleared, so a wrong guess cannot extend the
-    // code's life beyond the window it was issued for.
+  const attempts = await kv.incr(attemptsKey(accountId));
+  if (attempts === 1) {
+    // Only the caller who created the key arms its TTL, so it cannot be
+    // pushed out past the code's own remaining life by a later wrong guess.
     const left = Math.max(
       1,
       OTP_TTL_SEC - Math.floor((Date.now() - record.sentAt) / 1000),
     );
-    await kv.expire(otpKey(accountId), left);
-    return { ok: false, reason: "wrong" };
+    await kv.expire(attemptsKey(accountId), left);
   }
-
-  // Single use: correct or not, this code is now spent.
-  await kv.del(otpKey(accountId));
-  return { ok: true };
+  // `kv` returns null on an unreachable store rather than throwing. Treating
+  // that as "wrong, not yet exhausted" matches how the rest of this codebase
+  // degrades under an outage — a guess that cannot be counted is not silently
+  // treated as the one that burns the code.
+  if (attempts !== null && attempts >= OTP_MAX_ATTEMPTS) {
+    // Burnt, not just counted. The next try needs a whole new code, which
+    // costs a round trip through the send throttle.
+    await kv.del(otpKey(accountId));
+    await kv.del(attemptsKey(accountId));
+    return { ok: false, reason: "exhausted" };
+  }
+  return { ok: false, reason: "wrong" };
 }
 
 /* ------------------------------------------------------------------------- *
@@ -134,6 +157,8 @@ export async function checkCode(
  * decided at send time and is not negotiable afterwards.
  */
 const bindKey = (accountId: string) => `bind:${accountId}`;
+/** Same reasoning as `attemptsKey` above: a separate key, incremented with `INCR`. */
+const bindAttemptsKey = (accountId: string) => `bind:${accountId}:attempts`;
 
 interface StoredBind extends Stored {
   email: string;
@@ -144,14 +169,10 @@ export async function issueBindCode(
   email: string,
 ): Promise<string> {
   const code = newCode();
-  const record: StoredBind = {
-    hash: hash(code, accountId),
-    attempts: 0,
-    sentAt: Date.now(),
-    email,
-  };
+  const record: StoredBind = { hash: hash(code, accountId), sentAt: Date.now(), email };
   await kv.set(bindKey(accountId), JSON.stringify(record));
   await kv.expire(bindKey(accountId), OTP_TTL_SEC);
+  await kv.del(bindAttemptsKey(accountId));
   return code;
 }
 
@@ -159,7 +180,15 @@ export type BindCheckResult =
   | { ok: true; email: string }
   | { ok: false; reason: "expired" | "wrong" | "exhausted" };
 
-/** As `checkCode`, but yields the address the code was actually sent to. */
+/**
+ * As `checkCode`, but yields the address the code was actually sent to.
+ *
+ * The higher-stakes of the two: a correct guess here permanently claims an
+ * address via the NX write on `email:<hash>` in `bind/confirm/route.ts`, and
+ * nothing anywhere removes an entry from that index. The same atomic `INCR`
+ * fix applies for the same reason — this is the code whose brute-force budget
+ * a race would have been most valuable to defeat.
+ */
 export async function checkBindCode(
   accountId: string,
   supplied: string,
@@ -175,30 +204,24 @@ export async function checkBindCode(
     return { ok: false, reason: "expired" };
   }
 
-  if (record.attempts >= OTP_MAX_ATTEMPTS) {
+  if (hashesMatch(record.hash, accountId, supplied)) {
     await kv.del(bindKey(accountId));
-    return { ok: false, reason: "exhausted" };
+    await kv.del(bindAttemptsKey(accountId));
+    return { ok: true, email: record.email };
   }
 
-  const a = Buffer.from(record.hash, "utf8");
-  const b = Buffer.from(hash(supplied, accountId), "utf8");
-  const match = a.length === b.length && timingSafeEqual(a, b);
-
-  if (!match) {
-    const attempts = record.attempts + 1;
-    if (attempts >= OTP_MAX_ATTEMPTS) {
-      await kv.del(bindKey(accountId));
-      return { ok: false, reason: "exhausted" };
-    }
-    await kv.set(bindKey(accountId), JSON.stringify({ ...record, attempts }));
+  const attempts = await kv.incr(bindAttemptsKey(accountId));
+  if (attempts === 1) {
     const left = Math.max(
       1,
       OTP_TTL_SEC - Math.floor((Date.now() - record.sentAt) / 1000),
     );
-    await kv.expire(bindKey(accountId), left);
-    return { ok: false, reason: "wrong" };
+    await kv.expire(bindAttemptsKey(accountId), left);
   }
-
-  await kv.del(bindKey(accountId));
-  return { ok: true, email: record.email };
+  if (attempts !== null && attempts >= OTP_MAX_ATTEMPTS) {
+    await kv.del(bindKey(accountId));
+    await kv.del(bindAttemptsKey(accountId));
+    return { ok: false, reason: "exhausted" };
+  }
+  return { ok: false, reason: "wrong" };
 }

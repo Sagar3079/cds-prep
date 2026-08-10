@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import LegalPage from "@/components/LegalPage";
 import { REPLY_WINDOW, SITE, SUPPORT_EMAIL, SUPPORT_HOURS } from "@/lib/legal";
+import { pageMetadata } from "@/lib/pageMeta";
 
-export const metadata: Metadata = {
-  title: "Contact us · CDS Prep",
+export const metadata: Metadata = pageMetadata({
+  path: "/contact",
+  title: "Contact us",
   description:
     "How to reach CDS Prep — support email, hours, and postal address.",
-};
+});
 
 export default function ContactPage() {
   return (

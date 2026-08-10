@@ -248,31 +248,50 @@ export default function AdminClient() {
     void load();
   }, [load]);
 
-  /** Each tab fetches once, on first open. */
+  /**
+   * Each tab fetches once, on first open — and each RESOURCE retries
+   * independently, which the money tab's two resources need in particular.
+   *
+   * `users` and `orders` load in parallel, and they used to share one guard,
+   * `!users`. If `orders` failed transiently while `users` succeeded, `users`
+   * becoming non-null retired the guard for BOTH — the orders panel was stuck
+   * with no data and no way to recover short of a full page reload. The guard
+   * is now `!users || !orders`, and only the piece still missing is actually
+   * re-requested, so a transient failure on one resource does not force the
+   * other to load again for nothing.
+   */
   useEffect(() => {
     if (authed !== true) return;
     void (async () => {
-      if (tab === "money" && !users) {
+      if (tab === "money" && (!users || !orders)) {
         setLoadingTab("money");
-        const [u, o] = await Promise.all([get("users", "&limit=500"), get("orders")]);
+        const [u, o] = await Promise.all([
+          users ? Promise.resolve(null) : get("users", "&limit=500"),
+          orders ? Promise.resolve(null) : get("orders"),
+        ]);
         if (u) setUsers(u as UsersView);
         if (o) setOrders(o as OrdersView);
-        setLoadingTab(null);
+        // Clear only if this load is still the one the user is looking at.
+        // Three loaders write the same `loadingTab` flag, and switching tabs
+        // before one resolves used to let a late-arriving OTHER tab's fetch
+        // clear the indicator for whichever tab is now on screen — flashing
+        // "no data" over a tab that is, in fact, still loading.
+        setLoadingTab((cur) => (cur === "money" ? null : cur));
       }
       if (tab === "traffic" && !traffic) {
         setLoadingTab("traffic");
         const t = await get("traffic", "&days=14");
         if (t) setTraffic(t as TrafficView);
-        setLoadingTab(null);
+        setLoadingTab((cur) => (cur === "traffic" ? null : cur));
       }
       if (tab === "health" && !health) {
         setLoadingTab("health");
         const h = await get("health");
         if (h) setHealth(h as HealthView);
-        setLoadingTab(null);
+        setLoadingTab((cur) => (cur === "health" ? null : cur));
       }
     })();
-  }, [tab, authed, users, traffic, health, get]);
+  }, [tab, authed, users, orders, traffic, health, get]);
 
   useEffect(() => {
     if (!authed || !live) return;
@@ -516,7 +535,7 @@ export default function AdminClient() {
 
             <Panel
               title="Recent activity"
-              subtitle="Every finished test, newest first. Random scores are self-reported — random sets are chosen in the browser, so the server holds no key to check them against."
+              subtitle="Every finished test, newest first. Every row here is self-reported by the browser — this feed shape-checks that the counts add up but does not re-verify a daily submission against that day's real answer key the way the leaderboard does. Random rows are additionally unverifiable in principle: a random set is chosen client-side, so there is no server-side answer key to check them against at all."
             >
               {data.recent.length === 0 ? (
                 <p className={styles.empty}>
@@ -546,9 +565,26 @@ export default function AdminClient() {
                           <td>{r.subject === "gk" ? "GK" : "English"}</td>
                           <td>
                             {r.mode}
-                            {r.mode === "random" ? (
-                              <span className={styles.tag}>self-reported</span>
-                            ) : null}
+                            {/*
+                              Every row this table shows comes from
+                              POST /api/attempt, which shape-checks a
+                              submission but never re-derives the real
+                              question set — so this applies to daily rows
+                              exactly as much as random ones. It used to show
+                              only on random, which correctly said random is
+                              unverifiable but wrongly implied daily here
+                              was checked against something.
+                            */}
+                            <span
+                              className={styles.tag}
+                              title={
+                                r.mode === "random"
+                                  ? "Random sets are chosen in the browser — no server-side answer key exists to check this against, even in principle."
+                                  : "Shape-checked (the counts add up) but not re-verified against that day's real answer key."
+                              }
+                            >
+                              self-reported
+                            </span>
                           </td>
                           <td>
                             {r.score} / {r.total}

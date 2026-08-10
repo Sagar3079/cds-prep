@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage from "@/components/LegalPage";
 import { BILLING_LIVE, SITE, SUPPORT_EMAIL } from "@/lib/legal";
+import { pageMetadata } from "@/lib/pageMeta";
 
-export const metadata: Metadata = {
-  title: "Delivery policy · CDS Prep",
+export const metadata: Metadata = pageMetadata({
+  path: "/shipping",
+  title: "Delivery policy",
   description:
     "CDS Prep sells digital access only. Nothing is shipped; access unlocks as soon as payment is confirmed.",
-};
+});
 
 /**
  * Payment gateways require a "shipping and delivery" page even from merchants

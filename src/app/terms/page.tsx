@@ -7,12 +7,14 @@ import {
   SITE,
   SUPPORT_EMAIL,
 } from "@/lib/legal";
+import { pageMetadata } from "@/lib/pageMeta";
 
-export const metadata: Metadata = {
-  title: "Terms & conditions · CDS Prep",
+export const metadata: Metadata = pageMetadata({
+  path: "/terms",
+  title: "Terms & conditions",
   description:
     "The terms you agree to by using CDS Prep — accounts, subscriptions, acceptable use, and the limits of what this app claims.",
-};
+});
 
 /**
  * The counterparty, named the way the rest of the site names it.

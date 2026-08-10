@@ -38,6 +38,26 @@ export async function POST(req: Request) {
     );
   }
 
+  /**
+   * One bound address per account, forever.
+   *
+   * `email:<hash>` is a permanent NX index and nothing anywhere deletes an
+   * entry from it. Letting an already-verified account bind a SECOND address
+   * would overwrite `account.email` with the new one while the old index
+   * entry kept pointing at this same account id forever — the account would
+   * show only the new address, but the old one would stay permanently
+   * unclaimable by its real owner, with no trace anywhere that it happened.
+   * Changing an email is a real thing somebody might want, but it needs a
+   * flow that retires the old index entry, not a silent re-run of first-time
+   * binding.
+   */
+  if (acct.emailVerified) {
+    return NextResponse.json(
+      { error: "This account already has an email attached. Contact support to change it." },
+      { status: 409 },
+    );
+  }
+
   const read = await readJsonCapped<{ email?: unknown }>(req);
   if (!read.ok) {
     return NextResponse.json({ error: read.error }, { status: read.status });

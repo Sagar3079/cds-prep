@@ -57,6 +57,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Session expired. Start again." }, { status: 401 });
   }
 
+  /**
+   * The actual gate, mirroring `../route.ts`. This module's own docstring
+   * says this file is the sole place an account is mutated, so this is where
+   * the invariant has to be enforced even though `/bind` checks it too — a
+   * caller who somehow reaches this endpoint with a pending code from before
+   * their account last verified must not be allowed to silently re-point the
+   * permanent `email:<hash>` index at a second address. See `../route.ts` for
+   * why that would be irreversible.
+   */
+  if (acct.emailVerified) {
+    return NextResponse.json(
+      { error: "This account already has an email attached. Contact support to change it." },
+      { status: 409 },
+    );
+  }
+
   const read = await readJsonCapped<{ code?: unknown }>(req);
   if (!read.ok) {
     return NextResponse.json({ error: read.error }, { status: read.status });
@@ -124,9 +140,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, outcome: "bound", name: displayName(acct) });
   }
 
-  // Returning customer. Move anything they paid for across before switching them.
-  const moved = await transferPlan(acct.id, ownerId);
-
+  /**
+   * Load and validate the owner account BEFORE touching anything of this
+   * caller's own. `transferPlan` below is what deletes `acct.id`'s plan as
+   * part of moving it — it used to run first, so if the owner record then
+   * turned out unloadable, the caller's own plan was already gone, the
+   * response was a 500, and nobody was signed in to receive what had just
+   * been taken from them. Validating first means that failure costs nothing
+   * beyond the one request: `acct.id`'s plan stays put, and the caller can
+   * simply try again once the owner record exists.
+   */
   const ownerRaw = await kv.get(accountKey(ownerId));
   if (!ownerRaw) {
     return NextResponse.json(
@@ -154,6 +177,11 @@ export async function POST(req: Request) {
     await kv.set(accountKey(ownerId), JSON.stringify(owner));
     await makePermanent(ownerId);
   }
+
+  // The owner account is confirmed loadable — only now is it safe to move
+  // anything the caller paid for across, since this is the step that deletes
+  // it from `acct.id`.
+  const moved = await transferPlan(acct.id, ownerId);
 
   const token = newToken();
   await kv.set(sessionKey(token), ownerId);

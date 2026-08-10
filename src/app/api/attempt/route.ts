@@ -15,14 +15,19 @@ import { MARKING } from "@/lib/daily";
  * there would score it near zero *and* burn the day's claim. So this is a
  * separate, weaker record: history, not competition.
  *
- * **Random scores are self-reported and the admin panel says so.** For a daily
- * test the server knows which ten questions were asked and cannot be lied to.
- * For a random set the selection happens in the browser (`lib/daily.ts`), so
- * there is no server-side answer key to check a claim against — the numbers
- * below are whatever the client sent. They are bounds-checked for shape, which
- * stops a malformed or absurd payload from poisoning the day's averages, and
- * that is all it stops. Making these trustworthy means moving random selection
- * server-side, which is a larger change than this one.
+ * **Every score recorded here is self-reported, daily included, and the admin
+ * panel says so.** An earlier version of this comment claimed daily mode was
+ * different — "the server knows which ten questions were asked and cannot be
+ * lied to" — which is true of `/api/submit`, the route this one is contrasted
+ * with above, and was never true of THIS route for either mode: nothing below
+ * re-derives the day's question set the way `/api/submit` does. What actually
+ * happens for both `mode`s is bounds-checking the shape of whatever the client
+ * sent — the counts have to add up, and the score is recomputed from them
+ * rather than trusted as a fourth number — which stops a malformed or absurd
+ * payload from poisoning the averages, and is all it stops. Distrust every
+ * number this route writes equally, regardless of `mode`. Making daily-mode
+ * counts here trustworthy would mean re-deriving the day's actual answer key
+ * the way `/api/submit` does, which is a larger change than this one.
  */
 export async function POST(req: Request) {
   const limited = await rateLimit(req, "attempt:save");

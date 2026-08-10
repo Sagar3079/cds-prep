@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage from "@/components/LegalPage";
 import { SITE, SUPPORT_EMAIL } from "@/lib/legal";
+import { pageMetadata } from "@/lib/pageMeta";
 
-export const metadata: Metadata = {
-  title: "About us · CDS Prep",
+export const metadata: Metadata = pageMetadata({
+  path: "/about",
+  title: "About us",
   description:
     "What CDS Prep is, who runs it, and where the questions come from. Independent — not affiliated with UPSC or the Ministry of Defence.",
-};
+});
 
 export default function AboutPage() {
   return (

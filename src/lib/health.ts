@@ -59,8 +59,24 @@ const PROVENANCE: Record<string, { source: string; trust: Trust }> = {
   "pay:ok": { source: "derived from every rzp:paid:* record's paidAt", trust: "derived" },
   "test:start:daily": { source: "browser, when a daily test begins", trust: "measured" },
   "test:start:random": { source: "browser, when a random test begins", trust: "measured" },
-  "test:done:daily": { source: "server, on POST /api/attempt", trust: "measured" },
-  "test:done:random": { source: "server, on POST /api/attempt", trust: "measured" },
+  /**
+   * "measured" here means "the app counted a real POST" — it does NOT mean
+   * server-verified. /api/attempt bounds-checks shape (the counts must add
+   * up) for both modes but re-derives nothing: it never confirms a "daily"
+   * submission actually corresponds to that day's real question set the way
+   * /api/submit does for the leaderboard. A caller holding any session cookie
+   * can self-report fabricated results here, daily included. Calling this
+   * "measured" without saying so would be the same mistake this file exists
+   * to catch elsewhere — a trust label that oversells what happened.
+   */
+  "test:done:daily": {
+    source: "self-reported via POST /api/attempt — shape-checked, not verified against the answer key",
+    trust: "measured",
+  },
+  "test:done:random": {
+    source: "self-reported via POST /api/attempt — no server-side answer key exists for a random set",
+    trust: "measured",
+  },
   "pay:order": { source: "server, when a Razorpay order is created", trust: "measured" },
   "pay:fail": { source: "browser, when Razorpay reports a decline", trust: "measured" },
   "bind:ok": { source: "server, when an email is attached", trust: "measured" },

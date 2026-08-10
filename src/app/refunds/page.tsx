@@ -9,12 +9,14 @@ import {
   SITE,
   SUPPORT_EMAIL,
 } from "@/lib/legal";
+import { pageMetadata } from "@/lib/pageMeta";
 
-export const metadata: Metadata = {
-  title: "Refunds & cancellation · CDS Prep",
+export const metadata: Metadata = pageMetadata({
+  path: "/refunds",
+  title: "Refunds & cancellation",
   description:
     "How to cancel a CDS Prep plan, when a refund is available, and how long it takes.",
-};
+});
 
 export default function RefundsPage() {
   return (

@@ -92,6 +92,17 @@ const SERVED_EXACTLY = new Set([
   "/privacy",
   "/refunds",
   "/shipping",
+  "/admin",
+  /**
+   * NOT bare "/download" — that path genuinely 404s (verified live: only
+   * /download/android resolves, to a 302). `REAL_PAGE` above matches the
+   * whole `download` prefix because that regex only decides which requests
+   * enter the funnel/session-tracking logic, where a bare miss under a real
+   * route is still worth attributing to a visitor. This set answers a
+   * narrower question — which exact paths return success — and those are not
+   * the same list. Confusing the two here would hide a genuine 404.
+   */
+  "/download/android",
 ]);
 
 const LINE =

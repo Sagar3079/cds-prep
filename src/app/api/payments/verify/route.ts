@@ -120,6 +120,35 @@ export async function POST(req: Request) {
   );
 
   /**
+   * `setIfAbsent` returning false is ambiguous on its own, and the ambiguity
+   * matters here more than almost anywhere else in this app: it means EITHER
+   * the NX write genuinely lost a race — the webhook, or a concurrent
+   * `/verify` call, already recorded this exact payment, which is the normal
+   * and safe case — OR the write itself never landed because the store was
+   * briefly unreachable, in which case NOTHING about this payment exists
+   * anywhere. A signature-valid payment with real money moved must not
+   * silently vanish behind a "Payment confirmed" message just because a
+   * transient Redis hiccup was indistinguishable from a race loss. One more
+   * read settles which case this actually is before deciding what to tell
+   * the customer.
+   */
+  let genuinelyRecorded = firstToRecord;
+  if (!firstToRecord) {
+    genuinelyRecorded = (await kv.get(paidKey(orderId))) != null;
+  }
+  if (!genuinelyRecorded) {
+    return NextResponse.json(
+      {
+        error:
+          "Payment taken but we couldn't confirm it just now. Email support with this order number and it will be sorted manually.",
+        orderId,
+        paymentId,
+      },
+      { status: 502 },
+    );
+  }
+
+  /**
    * The point of all of this: turn a payment into access.
    *
    * Gated on `firstToRecord`, and that is load-bearing rather than tidy.

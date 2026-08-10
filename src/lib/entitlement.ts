@@ -63,35 +63,85 @@ export async function activePlan(
 }
 
 /**
+ * Serialize read-modify-write access to one account's entitlement.
+ *
+ * `grantPlan` and `transferPlan` both GET the current record, compute a new
+ * one, then SET it — two network round trips with nothing atomic connecting
+ * them. Two grants for the SAME account that overlap in time — a webhook
+ * retry landing while a fresh purchase's own `verify` call is also granting,
+ * which is routine, since Razorpay's webhook typically fires within seconds of
+ * the client-side confirmation — both read the same pre-grant state, and
+ * whichever write lands second silently discards the first. A customer who
+ * paid for two plans in quick succession could end up credited for only one.
+ * This lock turns that window into a queue instead of a race.
+ *
+ * Built on `setIfAbsent`, a primitive already proven against this store,
+ * rather than on Redis Lua scripting or `WATCH`/`MULTI` transactions — this
+ * app's REST client has never exercised either, and a payment endpoint is not
+ * where to first find out whether the hosting plan even allows them.
+ *
+ * Release is a plain `DEL`, not compare-and-delete, so there is a narrow
+ * window where a holder whose section outlasts the TTL could delete a lock a
+ * later caller has since acquired. That is a possible harmless double-release,
+ * not a correctness problem: every section here completes in a handful of
+ * Redis round trips, milliseconds against a five-second TTL, so the window
+ * exists in theory and not in the traffic this app actually sees.
+ */
+async function withAccountLock<T>(
+  accountId: string,
+  fn: () => Promise<T>,
+): Promise<T> {
+  const lockKey = `lock:entl:${accountId}`;
+  let acquired = false;
+  for (let i = 0; i < 30 && !acquired; i += 1) {
+    acquired = await kv.setIfAbsent(lockKey, "1", 5);
+    if (!acquired) await new Promise((r) => setTimeout(r, 50 + Math.random() * 50));
+  }
+  // ~3s of contention and still no lock: proceed unlocked rather than hang a
+  // payment confirmation indefinitely. This one call degrades to the pre-fix
+  // behaviour instead of failing the request outright — a real regression
+  // only under contention far beyond anything this app has ever seen.
+  try {
+    return await fn();
+  } finally {
+    if (acquired) await kv.del(lockKey);
+  }
+}
+
+/**
  * Record a paid plan.
  *
  * Extends from whatever is left rather than from today, so buying a second
  * month while the first still has a week on it adds thirty days to the week
  * instead of throwing it away. Somebody who pays twice must never end up with
- * less than they paid for.
+ * less than they paid for — which is exactly the property `withAccountLock`
+ * exists to protect: without it, "extends from whatever is left" is only true
+ * when the two grants happen to run one after the other.
  */
 export async function grantPlan(o: {
   accountId: string;
   planId: PlanId;
   orderId: string;
 }): Promise<Entitlement> {
-  const plan = PLANS.find((p) => p.id === o.planId);
-  const days = plan?.days ?? 0;
-  const existing = await activePlan(o.accountId);
-  const from = existing ? existing.until : Date.now();
-  const record: Entitlement = {
-    planId: o.planId,
-    until: from + days * 86_400_000,
-    orderId: o.orderId,
-  };
-  await kv.set(planKey(o.accountId), JSON.stringify(record));
-  // TTL a week past expiry: the record is worth reading for a few days after
-  // it lapses (support asking "what did they buy?") and worth nothing forever.
-  await kv.expire(
-    planKey(o.accountId),
-    Math.ceil((record.until - Date.now()) / 1000) + 7 * 86_400,
-  );
-  return record;
+  return withAccountLock(o.accountId, async () => {
+    const plan = PLANS.find((p) => p.id === o.planId);
+    const days = plan?.days ?? 0;
+    const existing = await activePlan(o.accountId);
+    const from = existing ? existing.until : Date.now();
+    const record: Entitlement = {
+      planId: o.planId,
+      until: from + days * 86_400_000,
+      orderId: o.orderId,
+    };
+    await kv.set(planKey(o.accountId), JSON.stringify(record));
+    // TTL a week past expiry: the record is worth reading for a few days after
+    // it lapses (support asking "what did they buy?") and worth nothing forever.
+    await kv.expire(
+      planKey(o.accountId),
+      Math.ceil((record.until - Date.now()) / 1000) + 7 * 86_400,
+    );
+    return record;
+  });
 }
 
 /**
@@ -118,30 +168,45 @@ export async function transferPlan(
   toId: string,
 ): Promise<Entitlement | null> {
   if (fromId === toId) return null;
-  const source = await activePlan(fromId);
-  if (!source) return null;
 
-  const marker = `xfer:${source.orderId}`;
-  const won = await kv.setIfAbsent(marker, toId, 400 * 86_400);
-  // Already transferred — a double-submitted form, or a retry after a timeout.
-  if (!won) return null;
+  /**
+   * Both accounts are locked, in a fixed order regardless of which is "from"
+   * and which is "to". Without the fixed order, `transferPlan(A, B)` and a
+   * concurrent `transferPlan(B, A)` — pathological, but the lock has to hold
+   * even for cases that should never happen — would each acquire one side
+   * first and wait forever on the other. Sorting by id means both calls agree
+   * on which lock to take first, so one of them simply queues behind the
+   * other instead of deadlocking.
+   */
+  const [firstId, secondId] = fromId < toId ? [fromId, toId] : [toId, fromId];
+  return withAccountLock(firstId, () =>
+    withAccountLock(secondId, async () => {
+      const source = await activePlan(fromId);
+      if (!source) return null;
 
-  const target = await activePlan(toId);
-  const remaining = Math.max(0, source.until - Date.now());
-  const from = target ? target.until : Date.now();
-  const record: Entitlement = {
-    planId: source.planId,
-    until: from + remaining,
-    orderId: source.orderId,
-  };
+      const marker = `xfer:${source.orderId}`;
+      const won = await kv.setIfAbsent(marker, toId, 400 * 86_400);
+      // Already transferred — a double-submitted form, or a retry after a timeout.
+      if (!won) return null;
 
-  await kv.set(planKey(toId), JSON.stringify(record));
-  await kv.expire(
-    planKey(toId),
-    Math.ceil((record.until - Date.now()) / 1000) + 7 * 86_400,
+      const target = await activePlan(toId);
+      const remaining = Math.max(0, source.until - Date.now());
+      const from = target ? target.until : Date.now();
+      const record: Entitlement = {
+        planId: source.planId,
+        until: from + remaining,
+        orderId: source.orderId,
+      };
+
+      await kv.set(planKey(toId), JSON.stringify(record));
+      await kv.expire(
+        planKey(toId),
+        Math.ceil((record.until - Date.now()) / 1000) + 7 * 86_400,
+      );
+      await kv.del(planKey(fromId));
+      return record;
+    }),
   );
-  await kv.del(planKey(fromId));
-  return record;
 }
 
 export interface RandomAccess {

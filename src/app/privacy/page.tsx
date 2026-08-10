@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage from "@/components/LegalPage";
 import { BILLING_LIVE, SITE, SUPPORT_EMAIL } from "@/lib/legal";
+import { pageMetadata } from "@/lib/pageMeta";
 
-export const metadata: Metadata = {
-  title: "Privacy policy · CDS Prep",
+export const metadata: Metadata = pageMetadata({
+  path: "/privacy",
+  title: "Privacy policy",
   description:
     "Exactly what CDS Prep stores, where it stores it, who else can see it, and how to have it deleted.",
-};
+});
 
 /**
  * Written against the code, not from a template.

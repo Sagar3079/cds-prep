@@ -257,6 +257,25 @@ export async function listPayments(limit = 500): Promise<Walk<AdminPayment> & {
 
   const orderWalk = await walkKeys("rzp:order:*");
 
+  /**
+   * A real set difference, not a subtraction of two differently-scoped totals.
+   *
+   * This used to be `orderWalk.items.length - rows.length`: orders currently
+   * ALIVE (a 7-day TTL keeps that count small) minus payments taken EVER
+   * (permanent, unbounded). The moment lifetime payments exceed a week's
+   * worth of new orders — which happens almost immediately for a site with
+   * any history — that subtraction goes negative, `Math.max(0, …)` floors it,
+   * and the figure reads zero forever regardless of how many checkouts are
+   * actually being abandoned. Comparing the actual order IDs against the
+   * actual paid IDs is what `openOrders()` below already does correctly;
+   * this is the same technique, reusing `walk.items` (already fetched above)
+   * instead of a second `rzp:paid:*` scan.
+   */
+  const paidIds = new Set(walk.items.map((k) => k.slice("rzp:paid:".length)));
+  const abandoned = orderWalk.items.filter(
+    (k) => !paidIds.has(k.slice("rzp:order:".length)),
+  ).length;
+
   return {
     items: rows.slice(0, limit),
     complete: walk.complete,
@@ -264,9 +283,9 @@ export async function listPayments(limit = 500): Promise<Walk<AdminPayment> & {
     totalPaise: rows.reduce((n, r) => n + r.paise, 0),
     paidCount: rows.length,
     orders: orderWalk.items.length,
-    // An order with no matching payment was started and not finished. Order
-    // keys live seven days, so this is a one-week window, not all time.
-    abandoned: Math.max(0, orderWalk.items.length - rows.length),
+    // Order keys carry a 7-day TTL, so this is naturally a rolling one-week
+    // window rather than all time.
+    abandoned,
   };
 }
 

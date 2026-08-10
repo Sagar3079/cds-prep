@@ -19,7 +19,13 @@ import { LEGAL_LINKS, SITE } from "@/lib/legal";
 const PAGES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
   { path: "/", changeFrequency: "daily", priority: 1 },
   { path: "/leaderboard", changeFrequency: "daily", priority: 0.8 },
-  { path: "/history", changeFrequency: "weekly", priority: 0.5 },
+  // `/history` is deliberately absent. Its content lives entirely in the
+  // visitor's own localStorage — nothing a crawler (or a first-time visitor)
+  // has — so the server-rendered HTML for this URL is permanently just
+  // "Loading your history…" with nothing else, verified live: there is no
+  // static content on the page at all, only that one placeholder string.
+  // Listing a URL that can never carry indexable content asks a crawl budget
+  // to be spent on a page that will never earn it a result.
   { path: "/settings", changeFrequency: "monthly", priority: 0.4 },
 ];
 

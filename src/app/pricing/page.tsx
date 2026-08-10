@@ -11,12 +11,14 @@ import {
   rupees,
 } from "@/lib/legal";
 import { keyMode } from "@/lib/razorpay";
+import { pageMetadata } from "@/lib/pageMeta";
 
-export const metadata: Metadata = {
-  title: "Pricing · CDS Prep",
+export const metadata: Metadata = pageMetadata({
+  path: "/pricing",
+  title: "Pricing",
   description:
     "What CDS Prep costs. Today's test is free. Weekly ₹49, monthly ₹149, in Indian Rupees, inclusive of taxes.",
-};
+});
 
 /**
  * Rendered per request rather than at build time, solely so that whether

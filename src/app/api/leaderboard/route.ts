@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { isSubjectReady } from "@/lib/bank";
 import { kv, kvConfigured } from "@/lib/kv";
 import { rateLimit } from "@/lib/ratelimit";
-import { currentAccount } from "@/lib/account";
+import { currentAccount, type Account } from "@/lib/account";
 import { toSubject } from "@/lib/subject";
 import type { Subject } from "@/types";
 
@@ -64,32 +64,60 @@ export const boardNameKey = (week: string, subject: Subject) =>
 
 const TOP = 50;
 
+export interface BoardResult {
+  week: string;
+  subject: Subject;
+  ready: boolean;
+  rows: {
+    rank: number;
+    name: string;
+    score: number;
+    isYou: boolean;
+    paid: boolean;
+  }[];
+  yourRank: number | null;
+  total: number;
+  configured: boolean;
+}
+
 /**
  * This week's board for one subject, highest first.
  *
  * This week only, by design and by key: the sorted set is per-week and expires,
  * so last week cannot leak into the ranking and the store cannot grow without
  * bound. Each row is that person's best score of the week, not their latest.
+ *
+ * Exported directly, not just reached through `GET` below, so `/leaderboard`'s
+ * server component can call it in-process and render real rows into the HTML a
+ * crawler sees on the first request. It used to be reachable only through this
+ * route, and `robots.ts` disallows all of `/api/` — Google's renderer respects
+ * that even for fetches a client-side script makes during rendering, so a page
+ * whose only content arrived through this endpoint had no content a crawler
+ * could ever index.
+ *
+ * `me` is optional and lets a caller who already resolved `currentAccount()`
+ * (the page does, for its own "signed in as" line) pass it straight through
+ * instead of this function resolving it a second time. `GET` below has nothing
+ * to pass, so it is left undefined and resolved here as before.
  */
-export async function GET(req: Request) {
-  const limited = await rateLimit(req, "leaderboard");
-  if (limited) return limited;
-
-  // Anything unrecognised is english, so a hand-typed query string gets a real
-  // board rather than a 400 or an empty one that looks like a bug.
-  const subject = toSubject(new URL(req.url).searchParams.get("subject"));
+export async function getBoard(
+  subject: Subject,
+  me?: Account | null,
+): Promise<BoardResult> {
   // The board exists whether or not the bank does; `ready` is what lets the page
   // say "not built yet" instead of "nobody has taken it".
   const ready = isSubjectReady(subject);
 
   if (!kvConfigured) {
-    return NextResponse.json({
+    return {
       week: istWeek(),
       subject,
       ready,
       rows: [],
+      yourRank: null,
+      total: 0,
       configured: false,
-    });
+    };
   }
   const week = istWeek();
   const flat = (await kv.zrevrange(boardKey(week, subject), 0, TOP - 1)) ?? [];
@@ -104,7 +132,7 @@ export async function GET(req: Request) {
     entries.map((e) => kv.get(`${boardNameKey(week, subject)}:${e.id}`)),
   );
 
-  const me = await currentAccount();
+  const account = me !== undefined ? me : await currentAccount();
 
   /**
    * Which rows belong to somebody on a plan, so the board can mark them.
@@ -133,17 +161,17 @@ export async function GET(req: Request) {
     // Scores are stored ×100 so the sorted set stays integer-clean with the
     // −0.25 penalty in play.
     score: e.score / 100,
-    isYou: Boolean(me && me.id === e.id),
+    isYou: Boolean(account && account.id === e.id),
     paid: paidRow[i] ?? false,
   }));
 
   let yourRank: number | null = null;
-  if (me) {
-    const r = await kv.zrevrank(boardKey(week, subject), me.id);
+  if (account) {
+    const r = await kv.zrevrank(boardKey(week, subject), account.id);
     if (typeof r === "number") yourRank = r + 1;
   }
 
-  return NextResponse.json({
+  return {
     week,
     subject,
     ready,
@@ -151,5 +179,15 @@ export async function GET(req: Request) {
     yourRank,
     total: (await kv.zcard(boardKey(week, subject))) ?? rows.length,
     configured: true,
-  });
+  };
+}
+
+export async function GET(req: Request) {
+  const limited = await rateLimit(req, "leaderboard");
+  if (limited) return limited;
+
+  // Anything unrecognised is english, so a hand-typed query string gets a real
+  // board rather than a 400 or an empty one that looks like a bug.
+  const subject = toSubject(new URL(req.url).searchParams.get("subject"));
+  return NextResponse.json(await getBoard(subject));
 }
