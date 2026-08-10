@@ -15,7 +15,8 @@ interface Row {
   paid?: boolean;
 }
 interface Board {
-  day: string;
+  /** The Sunday this week's board opened on, in IST. */
+  week: string;
   subject: Subject;
   /** The subject's bank is big enough to run a test at all. */
   ready: boolean;
@@ -110,11 +111,12 @@ export default function LeaderboardPage() {
     <div className="space-y-4 px-4 py-6">
       <div>
         <h1 className="text-2xl font-extrabold tracking-tight text-ink">
-          Today&apos;s leaderboard
+          This week&apos;s leaderboard
         </h1>
         <p className="mt-0.5 text-[0.8125rem] leading-relaxed text-muted">
-          Today&apos;s daily test only, first attempt, scored on the server.
-          One board per subject, and both reset every day.
+          Your best daily score this week, scored on the server. One board per
+          subject, and both reset on Sunday. A later, lower score never replaces
+          a better one.
         </p>
       </div>
 
@@ -182,7 +184,7 @@ export default function LeaderboardPage() {
           Playing as <span className="font-bold text-ink">{me.name}</span>
           {board?.yourRank
             ? ` · ranked #${board.yourRank} in ${SUBJECT_LABEL[subject]}`
-            : ` · no ${SUBJECT_SHORT[subject]} score today yet`}
+            : ` · no ${SUBJECT_SHORT[subject]} score this week yet`}
         </p>
       )}
 
@@ -211,7 +213,7 @@ export default function LeaderboardPage() {
         )}
         {board && board.ready && board.rows.length === 0 && (
           <p className="py-6 text-center text-[0.8125rem] text-muted">
-            Nobody has finished today&apos;s {SUBJECT_SHORT[subject]} test yet.
+            Nobody has finished a {SUBJECT_SHORT[subject]} test this week yet.
             Be first.
           </p>
         )}

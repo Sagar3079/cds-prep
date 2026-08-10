@@ -6,10 +6,20 @@ import { kv, kvConfigured } from "@/lib/kv";
 import { rateLimit } from "@/lib/ratelimit";
 import { currentAccount, displayName } from "@/lib/account";
 import { toSubject } from "@/lib/subject";
-import { boardKey, boardNameKey, istDay } from "../leaderboard/route";
+import { boardKey, boardNameKey, istDay, istWeek } from "../leaderboard/route";
 
-/** Two days, so a board outlives the IST day it belongs to and then goes. */
-const BOARD_TTL = 2 * 86400;
+/**
+ * Nine days.
+ *
+ * Was two, when a board lasted a day. A week-long board has to outlive its own
+ * week, and then some: the key is named for its Sunday, so it must survive the
+ * following Saturday plus enough slack that a late-Saturday submission is not
+ * writing to a key about to expire underneath it.
+ *
+ * This is also what does the resetting. Nothing runs on Sunday — the new week
+ * is simply a different key, and the old one falls out on its own.
+ */
+const BOARD_TTL = 9 * 86400;
 
 interface Body {
   /** Question id and the TEXT of the option chosen — see below. */
@@ -19,7 +29,7 @@ interface Body {
 }
 
 /**
- * Score a finished daily test on the server and record it on today's board.
+ * Score a finished daily test on the server and record it on this week's board.
  *
  * The client sends what it CHOSE, never what it scored. Options are shuffled
  * per run, so a chosen index is meaningless here — the answer travels as the
@@ -42,11 +52,16 @@ interface Body {
  * questions without answers and hand them back only after submission; until
  * that lands, this board is honest about scores but not proof against a cheat.
  *
- * One entry per account per day PER SUBJECT, first attempt only — a retake must
- * not let someone grind the same ten questions upward. The subject is part of
- * both the board key and the first-attempt claim, so an English run and a GK run
- * on the same day are two separate entries on two separate boards and neither
- * spends the other's claim.
+ * One COUNTED attempt per account per day per subject, first attempt only — a
+ * retake must not let someone grind the same ten questions upward. The subject
+ * is part of both the board key and the first-attempt claim, so an English run
+ * and a GK run on the same day are two separate entries on two separate boards
+ * and neither spends the other's claim.
+ *
+ * The board those attempts land on is WEEKLY, and holds each person's best of
+ * the week rather than their latest — so a week accumulates up to seven counted
+ * daily attempts per subject and the highest one stands. It resets on Sunday by
+ * expiry rather than by anything running.
  */
 export async function POST(req: Request) {
   const limited = await rateLimit(req, "submit");
@@ -81,6 +96,7 @@ export async function POST(req: Request) {
   const byId = bankById(subject);
 
   const day = istDay();
+  const week = istWeek();
 
   /**
    * Which ten questions this run is allowed to be about.
@@ -154,7 +170,9 @@ export async function POST(req: Request) {
   const claimed = await kv.setIfAbsent(
     `done:${day}:${subject}:${acct.id}`,
     "1",
-    BOARD_TTL,
+    // Two days, NOT the board's nine: this governs one counted attempt per DAY.
+    // Giving it the board's lifetime would silently make it one per week.
+    2 * 86400,
   );
   if (!claimed) {
     return NextResponse.json({
@@ -165,11 +183,25 @@ export async function POST(req: Request) {
     });
   }
 
-  const nameKey = `${boardNameKey(day, subject)}:${acct.id}`;
+  /**
+   * The board is weekly and keeps your BEST, so this is the write that decides
+   * what a row means.
+   *
+   * `zaddGt` only ever raises a score. A strong Monday therefore survives a bad
+   * Thursday — the daily claim above still allows one counted attempt per day,
+   * and across the week the highest of them is the one that stands. Overwriting
+   * unconditionally would mean a leaderboard that quietly punished practising,
+   * which is the opposite of what it is for.
+   *
+   * The name is written every time rather than once, so somebody who binds an
+   * email or changes how they appear is not stuck under the name their first
+   * attempt of the week was filed under.
+   */
+  const nameKey = `${boardNameKey(week, subject)}:${acct.id}`;
   await kv.set(nameKey, displayName(acct));
   await kv.expire(nameKey, BOARD_TTL);
-  await kv.zadd(boardKey(day, subject), Math.round(score * 100), acct.id);
-  await kv.expire(boardKey(day, subject), BOARD_TTL);
+  await kv.zaddGt(boardKey(week, subject), Math.round(score * 100), acct.id);
+  await kv.expire(boardKey(week, subject), BOARD_TTL);
 
   return NextResponse.json({
     subject,

@@ -100,6 +100,17 @@ export const kv = {
   incrBy: (key: string, by: number) => cmd<number>("INCRBY", key, by),
   zadd: (key: string, score: number, member: string) =>
     cmd<number>("ZADD", key, score, member),
+  /**
+   * Add, but never lower an existing score.
+   *
+   * `GT` is what makes a weekly leaderboard hold each person's BEST rather than
+   * their most recent. Doing it read-then-write instead would be a race — two
+   * submissions in the same moment both read the old score and the second wins
+   * regardless of which is higher — and would also need a round trip it does
+   * not need. Redis 6.2+; Upstash supports it.
+   */
+  zaddGt: (key: string, score: number, member: string) =>
+    cmd<number>("ZADD", key, "GT", "CH", score, member),
   /** Highest first. */
   zrevrange: (key: string, start: number, stop: number) =>
     cmd<string[]>("ZRANGE", key, start, stop, "REV", "WITHSCORES"),

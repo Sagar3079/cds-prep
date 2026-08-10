@@ -19,26 +19,57 @@ export function istDay(now = new Date()): string {
 }
 
 /**
- * One board per day per subject.
+ * The week a day belongs to, named by its Sunday, in IST.
  *
- * The subject is in the key rather than in a field, so a GK score physically
- * cannot land on the English board and one person can hold a place on both. The
- * two-day TTL means there is nothing to migrate: keys written under the old
- * `board:<day>` shape simply expire.
+ * Boards run Sunday to Saturday and are identified by the date of the Sunday
+ * they opened — so every day from Sunday to the following Saturday returns the
+ * same string, and the board rolls over at midnight IST on Sunday without
+ * anything having to run at that moment. There is no reset job: the new week is
+ * simply a different key, and the old one expires on its own.
+ *
+ * Derived from the IST day rather than the server clock's day, for the reason
+ * `istDay` already exists: the box is on UTC and a candidate at 01:00 IST on
+ * Sunday is still in Saturday's week by UTC reckoning.
  */
-export const boardKey = (day: string, subject: Subject) =>
-  `board:${day}:${subject}`;
-export const boardNameKey = (day: string, subject: Subject) =>
-  `boardnames:${day}:${subject}`;
+export function istWeek(now = new Date()): string {
+  const day = istDay(now);
+  const [y, m, d] = day.split("-").map(Number);
+  // Constructed as UTC from IST parts, so the arithmetic below cannot be
+  // dragged across a boundary by the host's own offset.
+  const at = new Date(Date.UTC(y, m - 1, d));
+  at.setUTCDate(at.getUTCDate() - at.getUTCDay()); // getUTCDay: Sunday === 0
+  return at.toISOString().slice(0, 10);
+}
+
+/**
+ * One board per WEEK per subject, holding each person's best score.
+ *
+ * It used to be one board per day, wiped nightly, which meant a board that was
+ * empty every morning and a score that was gone before anyone saw it. Now a
+ * week accumulates: a row goes up on the first attempt and is only ever
+ * replaced by a better one from the same person — see the `GT` write in
+ * `../submit`. A bad Thursday cannot cost you the place you earned on Monday.
+ *
+ * The subject stays in the key rather than in a field, so a GK score physically
+ * cannot land on the English board and one person can hold a place on both.
+ *
+ * Nothing migrates. Old `board:<day>:<subject>` keys carried a two-day TTL and
+ * have expired or shortly will; the week keys are a different shape and simply
+ * start empty.
+ */
+export const boardKey = (week: string, subject: Subject) =>
+  `board:w${week}:${subject}`;
+export const boardNameKey = (week: string, subject: Subject) =>
+  `boardnames:w${week}:${subject}`;
 
 const TOP = 50;
 
 /**
- * Today's board for one subject, highest first.
+ * This week's board for one subject, highest first.
  *
- * Today only, by design and by key: the sorted set is per-day and expires, so
- * yesterday cannot leak into the ranking and the store cannot grow without
- * bound.
+ * This week only, by design and by key: the sorted set is per-week and expires,
+ * so last week cannot leak into the ranking and the store cannot grow without
+ * bound. Each row is that person's best score of the week, not their latest.
  */
 export async function GET(req: Request) {
   const limited = await rateLimit(req, "leaderboard");
@@ -53,15 +84,15 @@ export async function GET(req: Request) {
 
   if (!kvConfigured) {
     return NextResponse.json({
-      day: istDay(),
+      week: istWeek(),
       subject,
       ready,
       rows: [],
       configured: false,
     });
   }
-  const day = istDay();
-  const flat = (await kv.zrevrange(boardKey(day, subject), 0, TOP - 1)) ?? [];
+  const week = istWeek();
+  const flat = (await kv.zrevrange(boardKey(week, subject), 0, TOP - 1)) ?? [];
 
   // ZRANGE ... WITHSCORES returns [member, score, member, score, …].
   const entries: { id: string; score: number }[] = [];
@@ -70,7 +101,7 @@ export async function GET(req: Request) {
   }
 
   const names = await Promise.all(
-    entries.map((e) => kv.get(`${boardNameKey(day, subject)}:${e.id}`)),
+    entries.map((e) => kv.get(`${boardNameKey(week, subject)}:${e.id}`)),
   );
 
   const me = await currentAccount();
@@ -108,17 +139,17 @@ export async function GET(req: Request) {
 
   let yourRank: number | null = null;
   if (me) {
-    const r = await kv.zrevrank(boardKey(day, subject), me.id);
+    const r = await kv.zrevrank(boardKey(week, subject), me.id);
     if (typeof r === "number") yourRank = r + 1;
   }
 
   return NextResponse.json({
-    day,
+    week,
     subject,
     ready,
     rows,
     yourRank,
-    total: (await kv.zcard(boardKey(day, subject))) ?? rows.length,
+    total: (await kv.zcard(boardKey(week, subject))) ?? rows.length,
     configured: true,
   });
 }

@@ -280,6 +280,7 @@ export default function AdminClient() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.inner}>
       <header className={styles.header}>
         <div>
           <h1>CDS Prep — admin</h1>
@@ -372,7 +373,7 @@ export default function AdminClient() {
                 shipped — it cannot show tests taken before then, because nothing recorded them.
               </p>
             ) : (
-              <table className={styles.table}>
+              <div className={styles.tableWrap}><table className={styles.table}>
                 <thead>
                   <tr>
                     <th>When</th>
@@ -406,7 +407,7 @@ export default function AdminClient() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             )}
           </section>
         </>
@@ -423,7 +424,7 @@ export default function AdminClient() {
           {!users ? (
             <p className={styles.empty}>Loading…</p>
           ) : (
-            <table className={styles.table}>
+            <div className={styles.tableWrap}><table className={styles.table}>
               <thead>
                 <tr>
                   <th>Joined</th>
@@ -477,7 +478,7 @@ export default function AdminClient() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )}
         </section>
       ) : null}
@@ -490,7 +491,7 @@ export default function AdminClient() {
           {data.payments.length === 0 ? (
             <p className={styles.empty}>No payments recorded.</p>
           ) : (
-            <table className={styles.table}>
+            <div className={styles.tableWrap}><table className={styles.table}>
               <thead>
                 <tr>
                   <th>When</th>
@@ -520,10 +521,11 @@ export default function AdminClient() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )}
         </section>
       ) : null}
+      </div>
     </div>
   );
 }
