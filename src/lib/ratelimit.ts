@@ -274,7 +274,7 @@ const limiters: Record<LimitedRoute, Ratelimit> | null = kvConfigured
  * Requests with no forwarding header at all share the "unknown" bucket — the
  * only safe default, and not a case that arises behind the real proxy.
  */
-function clientIp(req: Request): string {
+export function clientIp(req: Request): string {
   const real = req.headers.get("x-real-ip")?.trim();
   if (real) return real;
   const forwarded = req.headers.get("x-forwarded-for");

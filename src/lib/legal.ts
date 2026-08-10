@@ -79,6 +79,21 @@ export type PlanId = (typeof PLANS)[number]["id"];
  */
 export const FREE_RANDOM_PER_DAY = 2;
 
+/**
+ * The same allowance, counted per network rather than per account.
+ *
+ * Not advertised anywhere, deliberately: it is not a promise made to a
+ * customer, it is the floor under the promise above. An account costs one
+ * cookie now that signing up is gone, so the per-account limit resets for
+ * anyone willing to clear their browser — this is the number that does not.
+ *
+ * Four times the per-account figure because the sharing is real: coaching
+ * centres, hostels and college wifi put many genuine candidates behind one
+ * address, and throttling them is the worse error. Eight a day still makes
+ * clearing cookies pointless, which is its whole job.
+ */
+export const FREE_RANDOM_PER_IP_PER_DAY = 8;
+
 export const rupees = (paise: number) =>
   `₹${(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 

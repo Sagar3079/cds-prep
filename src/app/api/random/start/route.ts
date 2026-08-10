@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { currentAccount } from "@/lib/account";
 import { consumeRandom } from "@/lib/entitlement";
-import { rateLimit } from "@/lib/ratelimit";
+import { clientIp, rateLimit } from "@/lib/ratelimit";
 
 /**
  * Spend one free random test, or none when a plan is active.
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   if (limited) return limited;
 
   const acct = await currentAccount();
-  const result = await consumeRandom(acct);
+  const result = await consumeRandom(acct, clientIp(req));
 
   if (!result.ok) {
     return NextResponse.json(

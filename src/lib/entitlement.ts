@@ -1,6 +1,12 @@
 import "server-only";
+import { createHash } from "node:crypto";
 import { kv } from "./kv";
-import { FREE_RANDOM_PER_DAY, PLANS, type PlanId } from "./legal";
+import {
+  FREE_RANDOM_PER_DAY,
+  FREE_RANDOM_PER_IP_PER_DAY,
+  PLANS,
+  type PlanId,
+} from "./legal";
 import type { Account } from "./account";
 
 /**
@@ -194,6 +200,7 @@ export type ConsumeResult =
  */
 export async function consumeRandom(
   acct: Account | null,
+  ip?: string,
 ): Promise<ConsumeResult> {
   if (!acct) return { ok: false, reason: "signed-out" };
 
@@ -211,5 +218,38 @@ export async function consumeRandom(
   if (n === 1) await kv.expire(key, 2 * 86_400);
 
   if (n > FREE_RANDOM_PER_DAY) return { ok: false, reason: "used-up" };
+
+  /**
+   * The backstop behind the per-account allowance.
+   *
+   * The per-account count above is now worth very little on its own: an account
+   * costs one cookie, and clearing cookies mints a new one with a fresh two
+   * free runs. Nothing can stop a browser clearing its own storage — so the
+   * only allowance that survives it is one keyed to something the visitor does
+   * not control, and their address is the only such thing available here.
+   *
+   * Checked AFTER the per-account increment, so the cheap and correct case
+   * costs one extra command and never blocks. The IP ceiling is deliberately
+   * several times the per-account one: a coaching centre or a hostel behind a
+   * single NAT'd address is the normal case in this market, not the abusive
+   * one, and the number that matters is the one that makes cookie-clearing
+   * pointless rather than the one that makes sharing a network painful. It
+   * bites the person on their ninth run of the day, and nobody reaches nine by
+   * accident.
+   *
+   * Fails open, like everything else that touches this store: `kv.incr`
+   * returns null when Redis is unreachable and the run is allowed. An outage
+   * must not stop somebody practising.
+   */
+  if (ip && ip !== "unknown") {
+    const ipHash = createHash("sha256").update(ip).digest("hex").slice(0, 24);
+    const ipKey = `rqip:${ipHash}:${day}`;
+    const m = await kv.incr(ipKey);
+    if (m !== null) {
+      if (m === 1) await kv.expire(ipKey, 2 * 86_400);
+      if (m > FREE_RANDOM_PER_IP_PER_DAY) return { ok: false, reason: "used-up" };
+    }
+  }
+
   return { ok: true, used: n, limit: FREE_RANDOM_PER_DAY, plan: null };
 }
