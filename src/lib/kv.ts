@@ -67,6 +67,13 @@ export const kv = {
   persist: (key: string) => cmd<number>("PERSIST", key),
   /** Seconds left, -1 for no expiry, -2 for no key. Null if unreachable. */
   ttl: (key: string) => cmd<number>("TTL", key),
+  /**
+   * Server statistics, as one text blob to be parsed by the caller.
+   *
+   * `CONFIG GET` is the obvious way to ask for limits and returns an empty
+   * array on Upstash, so `INFO` is the only source for key count and memory.
+   */
+  info: () => cmd<string>("INFO"),
   del: (key: string) => cmd<number>("DEL", key),
   /**
    * Many keys, one round trip.

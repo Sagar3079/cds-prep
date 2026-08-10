@@ -4,6 +4,7 @@ import { currentAccount } from "@/lib/account";
 import { kv, kvConfigured } from "@/lib/kv";
 import { PLANS } from "@/lib/legal";
 import { rateLimit } from "@/lib/ratelimit";
+import { bumpAsync } from "@/lib/analytics";
 import {
   MIN_PAISE,
   checkoutKeyId,
@@ -136,6 +137,15 @@ export async function POST(req: Request) {
   if (!result.ok) {
     return NextResponse.json({ error: result.message }, { status: result.status });
   }
+
+  /**
+   * A checkout opened. The denominator for conversion.
+   *
+   * `rzp:order:*` records this too, but only for seven days and only as a
+   * count of keys — it cannot say which day an order was started once it has
+   * expired, so a trend needs its own counter.
+   */
+  bumpAsync("pay:order");
 
   /**
    * The order, remembered.

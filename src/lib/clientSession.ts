@@ -82,3 +82,27 @@ export function saveAttempt(payload: AttemptPayload): void {
     // Fire and forget means forget.
   }
 }
+
+/**
+ * Report a funnel step the server cannot see for itself.
+ *
+ * A test beginning happens entirely in the browser, and a declined card is
+ * reported by Razorpay's widget to the page and never to us — so without this
+ * the funnel has holes exactly where the drop-offs are. Fire-and-forget: a lost
+ * count is a gap in a chart, and nothing a user is doing should wait on it.
+ *
+ * The server keeps its own allowlist of acceptable events; this type only stops
+ * typos reaching it.
+ */
+export type ClientEvent = "test:start:daily" | "test:start:random" | "pay:fail";
+
+export function reportEvent(event: ClientEvent): void {
+  try {
+    void fetch(`/api/beacon?event=${encodeURIComponent(event)}`, {
+      method: "POST",
+      keepalive: true,
+    }).catch(() => {});
+  } catch {
+    // Fire and forget means forget.
+  }
+}

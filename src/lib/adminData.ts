@@ -102,9 +102,33 @@ export async function listUsers(opts: {
   accounts.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
   const page = accounts.slice(0, limit);
 
+  /**
+   * Plans for the page in one round trip.
+   *
+   * `Promise.all` over `activePlan` looked concurrent but was not: `kv` opens
+   * one HTTPS request per command, so a page of five hundred users was five
+   * hundred in flight at once — which is a different way to be slow, and rather
+   * ruder to the store.
+   */
+  const planRaw =
+    opts.withPlans === false
+      ? page.map(() => null)
+      : await kv.mget(page.map((a) => `entl:${a.id}`));
+
   const users: AdminUser[] = await Promise.all(
-    page.map(async (a) => {
-      const plan = opts.withPlans === false ? null : await activePlan(a.id);
+    page.map(async (a, i) => {
+      let plan: { planId: string; until: number } | null = null;
+      const raw = planRaw[i];
+      if (raw) {
+        try {
+          const e = JSON.parse(raw) as { planId?: string; until?: number };
+          if (typeof e.until === "number" && e.until > Date.now()) {
+            plan = { planId: e.planId ?? "?", until: e.until };
+          }
+        } catch {
+          plan = null;
+        }
+      }
       return {
         id: a.id,
         name: a.username?.trim() || (a.email ? a.email.split("@")[0] : "Cadet"),
@@ -113,7 +137,7 @@ export async function listUsers(opts: {
         anonymous: Boolean(a.anonymous),
         generatedName: looksGenerated(a.username),
         createdAt: a.createdAt ?? 0,
-        plan: plan ? { planId: plan.planId, until: plan.until } : null,
+        plan,
       };
     }),
   );
@@ -201,15 +225,34 @@ export async function listPayments(limit = 500): Promise<Walk<AdminPayment> & {
   rows.sort((a, b) => b.paidAt - a.paidAt);
 
   /**
-   * Flag payments whose account holds no live plan. An expired plan reads the
-   * same as one never granted, so this is a prompt to look rather than proof of
-   * a fault — but the one real orphan in this store had no account at all, and
-   * that case is unambiguous.
+   * Flag payments whose account holds no live plan.
+   *
+   * One MGET rather than a `GET` per row. The loop this replaces made one
+   * sequential round trip per payment at up to six seconds each, so a hundred
+   * payments was a dashboard that timed out — a panel that gets slower the more
+   * money you take is the wrong shape.
+   *
+   * An expired plan reads the same as one never granted, so this is a prompt to
+   * look rather than proof of a fault. The unambiguous case is a payment with
+   * no account at all, which `orphaned` already carries.
    */
-  for (const row of rows.slice(0, limit)) {
-    if (!row.accountId) continue;
-    const plan = await activePlan(row.accountId);
-    row.ungranted = !plan;
+  const page = rows.slice(0, limit);
+  const withAccounts = page.filter((r) => r.accountId);
+  if (withAccounts.length > 0) {
+    const plans = await kv.mget(withAccounts.map((r) => `entl:${r.accountId}`));
+    withAccounts.forEach((row, i) => {
+      const raw = plans[i];
+      if (!raw) {
+        row.ungranted = true;
+        return;
+      }
+      try {
+        const until = (JSON.parse(raw) as { until?: number }).until;
+        row.ungranted = !(typeof until === "number" && until > Date.now());
+      } catch {
+        row.ungranted = true;
+      }
+    });
   }
 
   const orderWalk = await walkKeys("rzp:order:*");
@@ -225,6 +268,94 @@ export async function listPayments(limit = 500): Promise<Walk<AdminPayment> & {
     // keys live seven days, so this is a one-week window, not all time.
     abandoned: Math.max(0, orderWalk.items.length - rows.length),
   };
+}
+
+
+/* -------------------------------------------------------------- open orders */
+
+export interface OpenOrder {
+  orderId: string;
+  planId: string | null;
+  paise: number;
+  accountId: string | null;
+  createdAt: number;
+  /** Seconds until the order record disappears. */
+  ttlSec: number | null;
+  /** Whether the account this order names still exists. */
+  accountExists: boolean;
+}
+
+/**
+ * Orders started and never paid.
+ *
+ * Invisible in the payments view by construction: that one walks `rzp:paid:*`,
+ * and an order with no payment has no key there to be found under. So the
+ * abandoned-checkout figure has only ever been a subtraction — orders minus
+ * payments — which is a number with no rows behind it and nothing to act on.
+ *
+ * The check that matters is `accountExists`. An order naming an account that is
+ * gone cannot be granted to anyone if it is ever paid, which is the same defect
+ * as the null-account payment already sitting in this store, caught earlier.
+ * Order records carry a seven-day TTL, so this evidence deletes itself.
+ */
+export async function openOrders(limit = 100): Promise<OpenOrder[]> {
+  const orders = await walkKeys("rzp:order:*");
+  if (orders.items.length === 0) return [];
+
+  const paid = await walkKeys("rzp:paid:*");
+  const paidIds = new Set(
+    paid.items.map((k) => k.slice("rzp:paid:".length)),
+  );
+
+  const unpaidKeys = orders.items.filter(
+    (k) => !paidIds.has(k.slice("rzp:order:".length)),
+  );
+  if (unpaidKeys.length === 0) return [];
+
+  const page = unpaidKeys.slice(0, limit);
+  const raws = await kv.mget(page);
+
+  const rows: OpenOrder[] = [];
+  page.forEach((key, i) => {
+    const raw = raws[i];
+    if (!raw) return;
+    try {
+      const o = JSON.parse(raw) as {
+        planId?: string;
+        paise?: number;
+        accountId?: string | null;
+        createdAt?: number;
+      };
+      rows.push({
+        orderId: key.slice("rzp:order:".length),
+        planId: o.planId ?? null,
+        paise: typeof o.paise === "number" ? o.paise : 0,
+        accountId: o.accountId ?? null,
+        createdAt: o.createdAt ?? 0,
+        ttlSec: null,
+        accountExists: false,
+      });
+    } catch {
+      // Skip; see readAccounts.
+    }
+  });
+
+  // One MGET for the accounts, one TTL per row. TTL has no batch form, so this
+  // is capped at the page rather than run over the whole family.
+  const named = rows.filter((r) => r.accountId);
+  if (named.length > 0) {
+    const accts = await kv.mget(named.map((r) => accountKey(r.accountId!)));
+    named.forEach((r, i) => {
+      r.accountExists = accts[i] != null;
+    });
+  }
+  await Promise.all(
+    rows.slice(0, 40).map(async (r) => {
+      r.ttlSec = await kv.ttl(`rzp:order:${r.orderId}`);
+    }),
+  );
+
+  return rows.sort((a, b) => b.createdAt - a.createdAt);
 }
 
 /* ----------------------------------------------------------------- overview */

@@ -24,6 +24,7 @@ import {
 import { getMastery, recordAttempt, topicWeights } from "@/lib/mastery";
 import {
   ensureSession,
+  reportEvent,
   saveAttempt as saveAttemptToServer,
 } from "@/lib/clientSession";
 import {
@@ -555,6 +556,14 @@ export default function TestClient({
     setDeadline(now + MARKING.durationSec * 1000);
     setSeconds(MARKING.durationSec);
     setStarted(true);
+    /**
+     * A test beginning is invisible to the server — the questions are already
+     * in the bundle and nothing is fetched to start one. Without this the panel
+     * can only compare visits against COMPLETIONS, which collapses two very
+     * different failures into one number: nobody started, and everybody started
+     * and walked out halfway. Those call for opposite fixes.
+     */
+    reportEvent(isRandom ? "test:start:random" : "test:start:daily");
   };
 
   /**

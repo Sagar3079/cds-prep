@@ -2,18 +2,43 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./admin.module.css";
+import {
+  BarList,
+  Bars,
+  Funnel,
+  HourStrip,
+  Panel,
+  Stat,
+  TrustTag,
+  ago,
+  duration,
+  rupees,
+  sum,
+  tail,
+  when,
+  type Trust,
+} from "./parts";
 
 /**
  * The dashboard.
  *
- * Client-rendered against `/api/admin/data` rather than server-rendered, for
- * one reason: it polls. A server component would have to re-render the whole
- * route to refresh a number, and the panel's job is to show what is happening
- * now — during an ad campaign, "now" is the only interesting tense.
+ * Client-rendered against `/api/admin/data` because it polls; a server
+ * component would have to re-render the route to refresh a number.
  *
- * Authentication is not decided here. A signed-out caller gets a 404 from the
- * API (not a 401 — the path should be indistinguishable from one that does not
- * exist), and that 404 is what puts the password form on screen.
+ * Two rules shape everything here.
+ *
+ * **Every number says where it came from.** The panel once showed "0 tests in
+ * 30 days" for a metric nothing had ever written, which is indistinguishable on
+ * screen from nobody taking a test — and those call for opposite responses. So
+ * counters carry a trust tag, and a metric with no writer says so instead of
+ * rendering a confident zero.
+ *
+ * **Counts, not percentages.** At one payment and a few hundred arrivals every
+ * rate rounds to 0%, and the first real customer would not move it.
+ *
+ * Tabs fetch their own data on first open. Traffic streams megabytes of access
+ * log and Health shells out to git, so folding either into the fifteen-second
+ * poll would make everyone pay for a panel nobody is looking at.
  */
 
 interface Overview {
@@ -74,81 +99,111 @@ interface UsersView {
   bound: number;
 }
 
-const rupees = (paise: number) =>
-  `₹${(paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+interface TrafficView {
+  visitorsByDay: Record<string, number>;
+  sources: { source: string; visitors: number }[];
+  landingPages: { path: string; visitors: number }[];
+  byHour: number[];
+  devices: { device: string; visitors: number }[];
+  browsers: { browser: string; visitors: number }[];
+  funnel: { step: string; visitors: number }[];
+  errors: { status: number; path: string; count: number }[];
+  totals: {
+    requests: number;
+    humanPageViews: number;
+    visitors: number;
+    botRequests: number;
+    bounced: number;
+    foreignHostRequests: number;
+  };
+  meta: { files: number; bytes: number; parsedMs: number; from: string; to: string };
+}
 
-const when = (ms: number) =>
-  ms
-    ? new Date(ms).toLocaleString("en-IN", {
-        dateStyle: "medium",
-        timeStyle: "short",
-        timeZone: "Asia/Kolkata",
-      })
-    : "—";
+interface HealthView {
+  metrics: {
+    metric: string;
+    source: string;
+    trust: Trust;
+    everWritten: boolean;
+    lastDay: string | null;
+    total30d: number;
+  }[];
+  deploy: {
+    liveSlot: string | null;
+    liveCommit: string | null;
+    head: string | null;
+    headSubject: string | null;
+    drifted: boolean;
+    dirtyFiles: number;
+    unpushed: number;
+    buildAgeMs: number | null;
+    uptimeSec: number | null;
+    rssMb: number | null;
+    upstreamPort: string | null;
+  };
+  host: {
+    tlsDaysLeft: number | null;
+    tlsExpires: string | null;
+    diskFreeGb: number | null;
+    diskTotalGb: number | null;
+    memFreeMb: number | null;
+    memTotalMb: number | null;
+    load1: number;
+    cores: number;
+    storeKeys: number | null;
+    storeMemoryMb: number | null;
+  };
+  errors: {
+    key: string;
+    message: string;
+    route: string;
+    stack?: string;
+    ts: number;
+    synthetic: boolean;
+  }[];
+}
 
-const sum = (s: Record<string, number> | undefined) =>
-  s ? Object.values(s).reduce((a, b) => a + b, 0) : 0;
+interface OrdersView {
+  orders: {
+    orderId: string;
+    planId: string | null;
+    paise: number;
+    accountId: string | null;
+    createdAt: number;
+    ttlSec: number | null;
+    accountExists: boolean;
+  }[];
+}
 
-/** Last `n` days of a series, most recent last. */
-const tail = (s: Record<string, number> | undefined, n: number) => {
-  if (!s) return [];
-  const keys = Object.keys(s).sort();
-  return keys.slice(-n).map((k) => ({ day: k, value: s[k] }));
+type Tab = "now" | "traffic" | "money" | "product" | "health";
+const TABS: { id: Tab; label: string }[] = [
+  { id: "now", label: "Now" },
+  { id: "traffic", label: "Traffic" },
+  { id: "money", label: "Money" },
+  { id: "product", label: "Product" },
+  { id: "health", label: "Health" },
+];
+
+/** Trust for each counter, mirroring `lib/health.ts` so the fold can tag rows. */
+const TRUST: Record<string, Trust> = {
+  visit: "reconstructed",
+  "acct:new": "derived",
+  "pay:ok": "derived",
+  "test:start:daily": "measured",
+  "test:start:random": "measured",
+  "test:done:daily": "measured",
+  "test:done:random": "measured",
+  "pay:order": "measured",
+  "pay:fail": "measured",
+  "bind:ok": "measured",
+  "restore:ok": "measured",
 };
 
-/**
- * A bar chart in CSS.
- *
- * No chart library: this is one dashboard behind a password, and a charting
- * dependency would ship to every visitor's bundle for the benefit of one person
- * looking at it once a day.
- */
-function Bars({ data, label }: { data: { day: string; value: number }[]; label: string }) {
-  const max = Math.max(1, ...data.map((d) => d.value));
-  return (
-    <div className={styles.chart}>
-      <div className={styles.chartHead}>
-        <span>{label}</span>
-        <span className={styles.chartTotal}>{data.reduce((a, b) => a + b.value, 0)}</span>
-      </div>
-      <div className={styles.bars}>
-        {data.map((d) => (
-          <div key={d.day} className={styles.barWrap} title={`${d.day}: ${d.value}`}>
-            <div
-              className={styles.bar}
-              style={{ height: `${Math.max(2, (d.value / max) * 100)}%` }}
-              data-zero={d.value === 0 ? "" : undefined}
-            />
-          </div>
-        ))}
-      </div>
-      <div className={styles.chartFoot}>
-        <span>{data[0]?.day.slice(5) ?? ""}</span>
-        <span>{data[data.length - 1]?.day.slice(5) ?? ""}</span>
-      </div>
-    </div>
-  );
-}
-
-function Stat({
-  label,
-  value,
-  hint,
-  tone,
-}: {
-  label: string;
-  value: string | number;
-  hint?: string;
-  tone?: "warn" | "good";
-}) {
-  return (
-    <div className={styles.stat} data-tone={tone}>
-      <div className={styles.statValue}>{value}</div>
-      <div className={styles.statLabel}>{label}</div>
-      {hint ? <div className={styles.statHint}>{hint}</div> : null}
-    </div>
-  );
-}
+const mean = (s: Record<string, number>) => {
+  const vals = Object.values(s).filter((v) => v !== 0);
+  if (vals.length === 0) return 0;
+  return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10;
+};
 
 export default function AdminClient() {
   const [authed, setAuthed] = useState<boolean | null>(null);
@@ -158,42 +213,67 @@ export default function AdminClient() {
 
   const [data, setData] = useState<Overview | null>(null);
   const [users, setUsers] = useState<UsersView | null>(null);
-  const [tab, setTab] = useState<"overview" | "users" | "payments">("overview");
+  const [traffic, setTraffic] = useState<TrafficView | null>(null);
+  const [health, setHealth] = useState<HealthView | null>(null);
+  const [orders, setOrders] = useState<OrdersView | null>(null);
+  const [loadingTab, setLoadingTab] = useState<Tab | null>(null);
+
+  const [tab, setTab] = useState<Tab>("now");
   const [live, setLive] = useState(true);
   const [fetchedAt, setFetchedAt] = useState<number | null>(null);
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
+  const [hideFixtures, setHideFixtures] = useState(true);
 
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const load = useCallback(async () => {
-    const res = await fetch("/api/admin/data?view=overview&days=30", {
-      cache: "no-store",
-    });
+  const get = useCallback(async (view: string, extra = "") => {
+    const res = await fetch(`/api/admin/data?view=${view}${extra}`, { cache: "no-store" });
     if (res.status === 404) {
       setAuthed(false);
-      return;
+      return null;
     }
-    if (!res.ok) return;
-    setData((await res.json()) as Overview);
-    setAuthed(true);
-    setFetchedAt(Date.now());
+    if (!res.ok) return null;
+    return res.json();
   }, []);
 
-  const loadUsers = useCallback(async () => {
-    const res = await fetch("/api/admin/data?view=users&limit=500", { cache: "no-store" });
-    if (!res.ok) return;
-    setUsers((await res.json()) as UsersView);
-  }, []);
+  const load = useCallback(async () => {
+    const d = (await get("overview", "&days=30")) as Overview | null;
+    if (!d) return;
+    setData(d);
+    setAuthed(true);
+    setFetchedAt(Date.now());
+  }, [get]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
+  /** Each tab fetches once, on first open. */
   useEffect(() => {
-    if (tab === "users" && !users) void loadUsers();
-  }, [tab, users, loadUsers]);
+    if (authed !== true) return;
+    void (async () => {
+      if (tab === "money" && !users) {
+        setLoadingTab("money");
+        const [u, o] = await Promise.all([get("users", "&limit=500"), get("orders")]);
+        if (u) setUsers(u as UsersView);
+        if (o) setOrders(o as OrdersView);
+        setLoadingTab(null);
+      }
+      if (tab === "traffic" && !traffic) {
+        setLoadingTab("traffic");
+        const t = await get("traffic", "&days=14");
+        if (t) setTraffic(t as TrafficView);
+        setLoadingTab(null);
+      }
+      if (tab === "health" && !health) {
+        setLoadingTab("health");
+        const h = await get("health");
+        if (h) setHealth(h as HealthView);
+        setLoadingTab(null);
+      }
+    })();
+  }, [tab, authed, users, traffic, health, get]);
 
-  /** Poll while the tab is visible. A background tab does not need fresh numbers. */
   useEffect(() => {
     if (!authed || !live) return;
     const tick = () => {
@@ -216,19 +296,11 @@ export default function AdminClient() {
         body: JSON.stringify({ password }),
       });
       if (!res.ok) {
-        /**
-         * Only 401 means the password was wrong.
-         *
-         * This said "Wrong password." for every failure, which is how a
-         * same-origin check that rejected all real browsers spent a deploy
-         * looking like a typo. A message that names the wrong cause is worse
-         * than a vague one — it sends you to check the thing that is fine.
-         */
-        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        const d = (await res.json().catch(() => ({}))) as { error?: string };
         setError(
           res.status === 401
             ? "Wrong password."
-            : `Sign-in failed (${res.status}). ${data.error ?? ""}`.trim(),
+            : `Sign-in failed (${res.status}). ${d.error ?? ""}`.trim(),
         );
         return;
       }
@@ -246,11 +318,12 @@ export default function AdminClient() {
     setAuthed(false);
     setData(null);
     setUsers(null);
+    setTraffic(null);
+    setHealth(null);
+    setOrders(null);
   };
 
-  if (authed === null) {
-    return <div className={styles.loading}>Loading…</div>;
-  }
+  if (authed === null) return <div className={styles.loading}>Loading…</div>;
 
   if (!authed) {
     return (
@@ -278,257 +351,771 @@ export default function AdminClient() {
   const t = data?.totals;
   const m = data?.metrics ?? {};
 
+  const arrivals30 = sum(m["visit"]);
+  const testsFinished = sum(m["test:done:daily"]) + sum(m["test:done:random"]);
+  const testsStarted = sum(m["test:start:daily"]) + sum(m["test:start:random"]);
+  const unresolved = (t?.orphanedPayments ?? 0) + (t?.ungrantedPayments ?? 0);
+
+  /**
+   * What is wrong right now, in priority order, rendered only when non-empty.
+   * A banner that is always on screen becomes furniture, and furniture is not
+   * read.
+   */
+  const flags: { severity: "bad" | "warn"; text: string }[] = [];
+  if (t && t.orphanedPayments > 0) {
+    flags.push({
+      severity: "bad",
+      text: `${t.orphanedPayments} payment(s) taken with no account attached — money received for access that could never be granted. See Money.`,
+    });
+  }
+  if (t && t.ungrantedPayments > 0) {
+    flags.push({
+      severity: "bad",
+      text: `${t.ungrantedPayments} payment(s) belong to an account holding no live plan. Either it expired, or it never arrived.`,
+    });
+  }
+  if (health?.deploy.drifted) {
+    flags.push({
+      severity: "warn",
+      text: `The running build is not the current checkout — live is ${health.deploy.liveCommit?.slice(0, 7)}, HEAD is ${health.deploy.head?.slice(0, 7)}. Anything instrumented since the live build will read zero.`,
+    });
+  }
+  if (data && !data.configured) {
+    flags.push({
+      severity: "bad",
+      text: "The data store is unreachable, so every figure below is empty for that reason rather than because nothing happened.",
+    });
+  }
+  if (t && !t.accountsComplete) {
+    flags.push({
+      severity: "warn",
+      text: "The account scan hit its page ceiling — account totals are a floor, not a count.",
+    });
+  }
+
   return (
     <div className={styles.page}>
       <div className={styles.inner}>
-      <header className={styles.header}>
-        <div>
-          <h1>CDS Prep — admin</h1>
-          <p className={styles.sub}>
-            {fetchedAt ? `Updated ${new Date(fetchedAt).toLocaleTimeString("en-IN")}` : "—"}
-            {" · "}
-            <button className={styles.linkBtn} onClick={() => void load()}>
-              Refresh
-            </button>
-            {" · "}
-            <label className={styles.liveToggle}>
-              <input type="checkbox" checked={live} onChange={(e) => setLive(e.target.checked)} />
-              Live (15s)
-            </label>
-          </p>
-        </div>
-        <button className={styles.signOut} onClick={() => void signOut()}>
-          Sign out
-        </button>
-      </header>
-
-      {data && !data.configured ? (
-        <p className={styles.banner}>
-          The data store is not configured on this deployment, so everything below is empty —
-          that is a configuration problem, not a reading of zero.
-        </p>
-      ) : null}
-
-      {t && !t.accountsComplete ? (
-        <p className={styles.banner}>
-          The account scan hit its page ceiling, so the account totals below are a floor, not a
-          count.
-        </p>
-      ) : null}
-
-      {t && (t.orphanedPayments > 0 || t.ungrantedPayments > 0) ? (
-        <p className={styles.bannerWarn}>
-          {t.orphanedPayments > 0 ? `${t.orphanedPayments} payment(s) landed with no account attached. ` : ""}
-          {t.ungrantedPayments > 0 ? `${t.ungrantedPayments} payment(s) have no live plan on the account. ` : ""}
-          Check the Payments tab — this is money received against access that may never have been granted.
-        </p>
-      ) : null}
-
-      <nav className={styles.tabs}>
-        {(["overview", "users", "payments"] as const).map((k) => (
-          <button key={k} data-active={tab === k ? "" : undefined} onClick={() => setTab(k)}>
-            {k[0].toUpperCase() + k.slice(1)}
+        <header className={styles.header}>
+          <div>
+            <h1>CDS Prep — admin</h1>
+            <p className={styles.sub}>
+              {fetchedAt ? `Updated ${ago(fetchedAt)}` : "—"}
+              {" · "}
+              <button className={styles.linkBtn} onClick={() => void load()}>
+                Refresh
+              </button>
+              {" · "}
+              <label className={styles.liveToggle}>
+                <input
+                  type="checkbox"
+                  checked={live}
+                  onChange={(e) => setLive(e.target.checked)}
+                />
+                Live (15s)
+              </label>
+              {health?.deploy ? (
+                <>
+                  {" · "}
+                  <span
+                    className={styles.slotTag}
+                    data-drift={health.deploy.drifted ? "" : undefined}
+                    title={`Slot ${health.deploy.liveSlot} on port ${health.deploy.upstreamPort}, built from ${health.deploy.liveCommit?.slice(0, 7)}`}
+                  >
+                    slot {health.deploy.liveSlot} · {health.deploy.liveCommit?.slice(0, 7)}
+                    {health.deploy.drifted ? " · DRIFTED" : ""}
+                  </span>
+                </>
+              ) : null}
+            </p>
+          </div>
+          <button className={styles.signOut} onClick={() => void signOut()}>
+            Sign out
           </button>
-        ))}
-      </nav>
+        </header>
 
-      {tab === "overview" && data ? (
-        <>
-          <section className={styles.stats}>
-            <Stat
-              label="Visits (30d)"
-              value={sum(m["visit"])}
-              hint="to 10 Aug rebuilt from server logs; after that, measured"
-            />
-            <Stat
-              label="Accounts"
-              value={t?.accounts ?? 0}
-              hint={`${t?.bound ?? 0} with email · ${t?.anonymous ?? 0} anonymous`}
-            />
-            <Stat label="Revenue (all time)" value={rupees(t?.revenuePaise ?? 0)} hint={`${t?.payments ?? 0} payments`} />
-            <Stat label="Tests done (30d)" value={sum(m["test:done:daily"]) + sum(m["test:done:random"])} hint={`${sum(m["test:done:daily"])} daily · ${sum(m["test:done:random"])} random`} />
-            <Stat label="New accounts (30d)" value={sum(m["acct:new"])} />
-            <Stat label="Emails bound (30d)" value={sum(m["bind:ok"])} hint={`${sum(m["restore:ok"])} restored`} />
-            <Stat
-              label="Abandoned checkouts"
-              value={t?.abandonedOrders ?? 0}
-              hint="last 7 days"
-              tone={(t?.abandonedOrders ?? 0) > 0 ? "warn" : undefined}
-            />
-          </section>
-
-          <section className={styles.charts}>
-            <Bars data={tail(m["visit"], 30)} label="Visits / day" />
-            <Bars data={tail(m["acct:new"], 30)} label="New accounts / day" />
-            <Bars data={tail(m["test:done:daily"], 30)} label="Daily tests finished" />
-            <Bars data={tail(m["test:done:random"], 30)} label="Random tests finished" />
-            <Bars data={tail(m["pay:ok"], 30)} label="Payments / day" />
-          </section>
-
-          <section className={styles.panel}>
-            <h2>Recent activity</h2>
-            {data.recent.length === 0 ? (
-              <p className={styles.empty}>
-                No tests recorded yet. Visits, accounts and payments above go back
-                through your history — visits rebuilt from the server&apos;s own access
-                logs, accounts and payments read from the records themselves. Tests
-                are the one thing that cannot be recovered: nothing anywhere wrote
-                down a finished test before auto-save shipped, so this feed and the
-                two test charts start from now.
+        {flags.length > 0 ? (
+          <div className={styles.flags}>
+            {flags.map((f) => (
+              <p
+                key={f.text}
+                className={f.severity === "bad" ? styles.bannerWarn : styles.banner}
+              >
+                {f.text}
               </p>
-            ) : (
-              <div className={styles.tableWrap}><table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>When</th>
-                    <th>Who</th>
-                    <th>Subject</th>
-                    <th>Mode</th>
-                    <th>Score</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.recent.map((r, i) => (
-                    <tr key={`${r.accountId}-${r.at}-${i}`}>
-                      <td className={styles.dim}>{when(r.at)}</td>
-                      <td>{r.name}</td>
-                      <td>{r.subject === "gk" ? "GK" : "English"}</td>
-                      <td>
-                        {r.mode}
-                        {r.mode === "random" ? (
-                          <span className={styles.tag} title="Random sets are picked in the browser, so this score is self-reported and cannot be checked server-side.">
-                            self-reported
-                          </span>
-                        ) : null}
-                      </td>
-                      <td>
-                        {r.score} / {r.total}
-                        <span className={styles.dim}>
-                          {" "}
-                          ({r.correct}✓ {r.wrong}✗ {r.blank}–)
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table></div>
-            )}
-          </section>
-        </>
-      ) : null}
+            ))}
+          </div>
+        ) : null}
 
-      {tab === "users" ? (
-        <section className={styles.panel}>
-          <h2>
-            Users{" "}
-            <span className={styles.dim}>
-              {users ? `${users.scanned} total · showing ${users.items.length}` : ""}
-            </span>
-          </h2>
-          {!users ? (
-            <p className={styles.empty}>Loading…</p>
+        {/*
+          The fold: the one number this business turns on, then the money.
+          Activation is a raw fraction because at this scale every percentage
+          rounds to zero and the first real customer would not move it.
+        */}
+        <section className={styles.hero}>
+          <div className={styles.heroMain}>
+            <div className={styles.heroValue}>
+              {testsFinished}
+              <span className={styles.heroSlash}>/</span>
+              {arrivals30.toLocaleString("en-IN")}
+            </div>
+            <div className={styles.heroLabel}>
+              Arrivals who finished a test · 30 days
+              <TrustTag trust="reconstructed" />
+            </div>
+            <div className={styles.heroHint}>
+              {testsStarted > 0
+                ? `${testsStarted} started, ${testsFinished} finished — ${testsStarted - testsFinished} walked out mid-test.`
+                : "Nothing has started a test in this window. If that looks wrong, check Health — a metric with no writer reads zero for the same reason as one nobody triggered."}
+            </div>
+          </div>
+          <div className={styles.heroSide}>
+            <Stat
+              label="Revenue, all time"
+              value={rupees(t?.revenuePaise ?? 0)}
+              hint={`${t?.payments ?? 0} payment(s)`}
+              trust="derived"
+            />
+            <Stat
+              label="Unresolved payments"
+              value={unresolved}
+              hint="paid, no live plan"
+              tone={unresolved > 0 ? "warn" : undefined}
+              trust="derived"
+            />
+            <Stat
+              label="Open orders"
+              value={t?.abandonedOrders ?? 0}
+              hint="started, unpaid · 7-day window"
+              trust="derived"
+            />
+          </div>
+        </section>
+
+        <nav className={styles.tabs}>
+          {TABS.map((k) => (
+            <button
+              key={k.id}
+              data-active={tab === k.id ? "" : undefined}
+              onClick={() => setTab(k.id)}
+            >
+              {k.label}
+            </button>
+          ))}
+        </nav>
+
+        {/* ------------------------------------------------------------ NOW */}
+        {tab === "now" && data ? (
+          <>
+            <section className={styles.charts}>
+              <Bars data={tail(m["visit"], 30)} label="Arrivals / day" trust={TRUST["visit"]} />
+              <Bars data={tail(m["acct:new"], 30)} label="New accounts / day" trust={TRUST["acct:new"]} />
+              <Bars data={tail(m["test:done:daily"], 30)} label="Daily tests finished" trust={TRUST["test:done:daily"]} />
+              <Bars data={tail(m["pay:ok"], 30)} label="Payments / day" trust={TRUST["pay:ok"]} />
+            </section>
+
+            <Panel
+              title="Recent activity"
+              subtitle="Every finished test, newest first. Random scores are self-reported — random sets are chosen in the browser, so the server holds no key to check them against."
+            >
+              {data.recent.length === 0 ? (
+                <p className={styles.empty}>
+                  No tests recorded yet. Arrivals, accounts and payments above reach back
+                  through your history; finished tests are the one thing that cannot be
+                  recovered, because nothing wrote one down before auto-save shipped.
+                </p>
+              ) : (
+                <div className={styles.tableWrap}>
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        <th>When</th>
+                        <th>Who</th>
+                        <th>Subject</th>
+                        <th>Mode</th>
+                        <th>Score</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.recent.map((r, i) => (
+                        <tr key={`${r.accountId}-${r.at}-${i}`}>
+                          <td className={styles.dim} title={when(r.at)}>
+                            {ago(r.at)}
+                          </td>
+                          <td>{r.name}</td>
+                          <td>{r.subject === "gk" ? "GK" : "English"}</td>
+                          <td>
+                            {r.mode}
+                            {r.mode === "random" ? (
+                              <span className={styles.tag}>self-reported</span>
+                            ) : null}
+                          </td>
+                          <td>
+                            {r.score} / {r.total}
+                            <span className={styles.dim}>
+                              {" "}
+                              ({r.correct}✓ {r.wrong}✗ {r.blank}–)
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </Panel>
+          </>
+        ) : null}
+
+        {/* -------------------------------------------------------- TRAFFIC */}
+        {tab === "traffic" ? (
+          !traffic ? (
+            <Panel title="Traffic">
+              <p className={styles.empty}>
+                {loadingTab === "traffic" ? "Reading access logs…" : "No traffic data."}
+              </p>
+            </Panel>
           ) : (
-            <div className={styles.tableWrap}><table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Joined</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Plan</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.items.map((u) => (
-                  <tr key={u.id}>
-                    <td className={styles.dim}>{when(u.createdAt)}</td>
-                    <td>
-                      {u.name}
-                      {u.generatedName ? <span className={styles.tag}>auto</span> : null}
-                    </td>
-                    <td>
-                      {/*
-                        Masked until asked for. The rest of this app never shows a
-                        whole address back to anyone — the leaderboard masks, whoami
-                        does not return one at all, and the email index is a
-                        truncated hash so it cannot be walked back to addresses. A
-                        dashboard that prints every address in plaintext by default
-                        would undo all of that on one screen.
-                      */}
-                      {!u.email ? (
-                        <span className={styles.dim}>—</span>
-                      ) : revealed.has(u.id) ? (
-                        <span>{u.email}</span>
-                      ) : (
-                        <button
-                          className={styles.linkBtn}
-                          onClick={() => setRevealed((s) => new Set(s).add(u.id))}
+            <>
+              <section className={styles.stats}>
+                <Stat
+                  label="Visitors"
+                  value={traffic.totals.visitors.toLocaleString("en-IN")}
+                  hint={`${traffic.meta.from} → ${traffic.meta.to}`}
+                  trust="reconstructed"
+                />
+                <Stat
+                  label="Page views"
+                  value={traffic.totals.humanPageViews.toLocaleString("en-IN")}
+                  hint="prefetches excluded"
+                  trust="reconstructed"
+                />
+                <Stat
+                  label="Saw one page and left"
+                  value={traffic.totals.bounced.toLocaleString("en-IN")}
+                  hint={`of ${traffic.totals.visitors.toLocaleString("en-IN")} visitors`}
+                  tone={
+                    traffic.totals.bounced > traffic.totals.visitors * 0.7 ? "warn" : undefined
+                  }
+                  trust="reconstructed"
+                />
+                <Stat
+                  label="Bot &amp; scanner requests"
+                  value={(
+                    traffic.totals.botRequests + traffic.totals.foreignHostRequests
+                  ).toLocaleString("en-IN")}
+                  hint={`of ${traffic.totals.requests.toLocaleString("en-IN")} total · ${traffic.totals.foreignHostRequests.toLocaleString("en-IN")} aimed at the bare IP`}
+                  trust="reconstructed"
+                />
+              </section>
+
+              <Panel
+                title="Where they land, and how far they get"
+                subtitle="Hard page loads only. Clicking a link inside the app does not reach the server, so a step reading zero means nobody loaded that page fresh — not that nobody got there."
+              >
+                <Funnel
+                  steps={traffic.funnel.map((f) => ({
+                    ...f,
+                    trust: "reconstructed" as Trust,
+                  }))}
+                />
+              </Panel>
+
+              <div className={styles.twoUp}>
+                <Panel title="Where they came from">
+                  <BarList
+                    rows={traffic.sources.map((s) => ({ label: s.source, value: s.visitors }))}
+                  />
+                </Panel>
+                <Panel title="First page seen">
+                  <BarList
+                    rows={traffic.landingPages.map((s) => ({ label: s.path, value: s.visitors }))}
+                  />
+                </Panel>
+              </div>
+
+              <div className={styles.twoUp}>
+                <Panel
+                  title="When they arrive (IST)"
+                  subtitle="Page views by hour of day — the input for ad scheduling."
+                >
+                  <HourStrip byHour={traffic.byHour} />
+                </Panel>
+                <Panel title="What they are using">
+                  <BarList
+                    rows={traffic.browsers.map((s) => ({ label: s.browser, value: s.visitors }))}
+                  />
+                </Panel>
+              </div>
+
+              <Panel
+                title="Broken pages"
+                subtitle="Failures the app actually produced. Excluded: scanner probes for /wp-admin and /.env, and requests aimed at the bare IP rather than the domain — nginx answers those before they reach the app, so a 404 on a page that plainly works is not a fault."
+              >
+                {traffic.errors.length === 0 ? (
+                  <p className={styles.empty}>No errors on real routes.</p>
+                ) : (
+                  <div className={styles.tableWrap}>
+                    <table className={styles.table}>
+                      <thead>
+                        <tr>
+                          <th>Status</th>
+                          <th>Path</th>
+                          <th>Count</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {traffic.errors.map((e) => (
+                          <tr key={`${e.status}-${e.path}`}>
+                            <td className={e.status >= 500 ? styles.warn : undefined}>
+                              {e.status}
+                            </td>
+                            <td className={styles.mono}>{e.path}</td>
+                            <td>{e.count}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </Panel>
+
+              <p className={styles.footnote}>
+                Read {traffic.meta.files} log file(s), {(traffic.meta.bytes / 1e6).toFixed(1)} MB,
+                in {traffic.meta.parsedMs} ms. Cached five minutes. A visitor here is a distinct
+                network address: several people on one wifi count as one, and one person on two
+                networks counts as two.
+              </p>
+            </>
+          )
+        ) : null}
+
+        {/* ---------------------------------------------------------- MONEY */}
+        {tab === "money" && data ? (
+          <>
+            <Panel
+              title="Every payment, and whether it was honoured"
+              subtitle="The join between money received and access granted. Read-only by design — the paid record is the guard against granting one plan twice, so this surface never writes to it."
+            >
+              {data.payments.length === 0 ? (
+                <p className={styles.empty}>No payments recorded.</p>
+              ) : (
+                <div className={styles.tableWrap}>
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        <th>When</th>
+                        <th>Amount</th>
+                        <th>Plan</th>
+                        <th>Account</th>
+                        <th>State</th>
+                        <th>Via</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.payments.map((p) => (
+                        <tr key={p.orderId} data-warn={p.orphaned || p.ungranted ? "" : undefined}>
+                          <td className={styles.dim}>{when(p.paidAt)}</td>
+                          <td>{rupees(p.paise)}</td>
+                          <td>{p.planId ?? "—"}</td>
+                          <td className={styles.mono}>
+                            {p.accountId ?? <span className={styles.warn}>none</span>}
+                          </td>
+                          <td>
+                            {p.orphaned ? (
+                              <span className={styles.warn}>no account — cannot be granted</span>
+                            ) : p.ungranted ? (
+                              <span className={styles.warn}>no live plan</span>
+                            ) : (
+                              <span className={styles.good}>granted</span>
+                            )}
+                          </td>
+                          <td className={styles.dim}>{p.via ?? "verify"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </Panel>
+
+            <Panel
+              title="Started checkout, never paid"
+              subtitle="Invisible in the table above by construction — an unpaid order has no payment record to be found under. These expire after seven days, so the evidence deletes itself."
+            >
+              {!orders ? (
+                <p className={styles.empty}>{loadingTab === "money" ? "Loading…" : "—"}</p>
+              ) : orders.orders.length === 0 ? (
+                <p className={styles.empty}>No open orders.</p>
+              ) : (
+                <div className={styles.tableWrap}>
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        <th>Started</th>
+                        <th>Plan</th>
+                        <th>Amount</th>
+                        <th>Account</th>
+                        <th>Expires in</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orders.orders.map((o) => (
+                        <tr
+                          key={o.orderId}
+                          data-warn={o.accountId && !o.accountExists ? "" : undefined}
                         >
-                          reveal
-                        </button>
-                      )}
-                      {u.email && !u.emailVerified ? (
-                        <span className={styles.tag}>unverified</span>
-                      ) : null}
-                    </td>
-                    <td>
-                      {u.plan ? (
-                        <span className={styles.good}>
-                          {u.plan.planId} → {when(u.plan.until)}
-                        </span>
-                      ) : (
-                        <span className={styles.dim}>free</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table></div>
-          )}
-        </section>
-      ) : null}
+                          <td className={styles.dim} title={when(o.createdAt)}>
+                            {ago(o.createdAt)}
+                          </td>
+                          <td>{o.planId ?? "—"}</td>
+                          <td>{rupees(o.paise)}</td>
+                          <td className={styles.mono}>
+                            {!o.accountId ? (
+                              <span className={styles.warn}>none</span>
+                            ) : o.accountExists ? (
+                              o.accountId
+                            ) : (
+                              <span
+                                className={styles.warn}
+                                title="This order names an account that no longer exists. If it were paid, the plan could not be granted to anyone."
+                              >
+                                {o.accountId} — gone
+                              </span>
+                            )}
+                          </td>
+                          <td className={styles.dim}>
+                            {o.ttlSec == null
+                              ? "—"
+                              : o.ttlSec < 0
+                                ? "no expiry"
+                                : `${Math.round(o.ttlSec / 3600)}h`}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </Panel>
 
-      {tab === "payments" && data ? (
-        <section className={styles.panel}>
-          <h2>
-            Payments <span className={styles.dim}>{rupees(t?.revenuePaise ?? 0)} all time</span>
-          </h2>
-          {data.payments.length === 0 ? (
-            <p className={styles.empty}>No payments recorded.</p>
+            <Panel
+              title="People"
+              subtitle="Emails stay hidden until asked for — the rest of the app never shows one in full, and a dashboard printing them all by default would undo that on one screen."
+            >
+              <label className={styles.inlineToggle}>
+                <input
+                  type="checkbox"
+                  checked={hideFixtures}
+                  onChange={(e) => setHideFixtures(e.target.checked)}
+                />
+                Hide test fixtures (@example.com)
+              </label>
+              {!users ? (
+                <p className={styles.empty}>{loadingTab === "money" ? "Loading…" : "—"}</p>
+              ) : (
+                (() => {
+                  const rows = users.items.filter(
+                    (u) => !hideFixtures || !u.email?.endsWith("@example.com"),
+                  );
+                  return (
+                    <>
+                      <p className={styles.panelSub}>
+                        {users.scanned} account(s) · {users.bound} with an email ·{" "}
+                        {users.anonymous} anonymous · showing {rows.length}
+                      </p>
+                      <div className={styles.tableWrap}>
+                        <table className={styles.table}>
+                          <thead>
+                            <tr>
+                              <th>Joined</th>
+                              <th>Name</th>
+                              <th>Email</th>
+                              <th>Plan</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {rows.map((u) => (
+                              <tr key={u.id}>
+                                <td className={styles.dim}>{when(u.createdAt)}</td>
+                                <td>
+                                  {u.name}
+                                  {u.generatedName ? <span className={styles.tag}>auto</span> : null}
+                                </td>
+                                <td>
+                                  {!u.email ? (
+                                    <span className={styles.dim}>—</span>
+                                  ) : revealed.has(u.id) ? (
+                                    <span className={styles.mono}>{u.email}</span>
+                                  ) : (
+                                    <button
+                                      className={styles.linkBtn}
+                                      onClick={() => setRevealed((s) => new Set(s).add(u.id))}
+                                    >
+                                      reveal
+                                    </button>
+                                  )}
+                                  {u.email && !u.emailVerified ? (
+                                    <span className={styles.tag}>unverified</span>
+                                  ) : null}
+                                </td>
+                                <td>
+                                  {u.plan ? (
+                                    <span className={styles.good}>
+                                      {u.plan.planId} → {when(u.plan.until)}
+                                    </span>
+                                  ) : (
+                                    <span className={styles.dim}>free</span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
+                  );
+                })()
+              )}
+            </Panel>
+          </>
+        ) : null}
+
+        {/* -------------------------------------------------------- PRODUCT */}
+        {tab === "product" && data ? (
+          <>
+            <section className={styles.stats}>
+              <Stat
+                label="Tests started"
+                value={testsStarted}
+                hint="30 days · daily + random"
+                trust={TRUST["test:start:daily"]}
+              />
+              <Stat
+                label="Tests finished"
+                value={testsFinished}
+                hint="30 days"
+                trust={TRUST["test:done:daily"]}
+              />
+              <Stat
+                label="Walked out mid-test"
+                value={Math.max(0, testsStarted - testsFinished)}
+                hint="started but never submitted"
+                tone={
+                  testsStarted > 0 && testsStarted - testsFinished > testsStarted / 2
+                    ? "warn"
+                    : undefined
+                }
+                trust="measured"
+              />
+              <Stat
+                label="Emails bound"
+                value={sum(m["bind:ok"])}
+                hint={`${sum(m["restore:ok"])} restored`}
+                trust={TRUST["bind:ok"]}
+              />
+            </section>
+
+            <div className={styles.twoUp}>
+              <Panel title="Daily vs random">
+                <BarList
+                  rows={[
+                    { label: "Daily started", value: sum(m["test:start:daily"]) },
+                    { label: "Daily finished", value: sum(m["test:done:daily"]) },
+                    { label: "Random started", value: sum(m["test:start:random"]) },
+                    { label: "Random finished", value: sum(m["test:done:random"]) },
+                  ]}
+                  unit="tests"
+                />
+              </Panel>
+              <Panel
+                title="Mean score"
+                subtitle="Marks out of 10, negative marking applied. Daily scores are server-checked; random scores are whatever the browser reported."
+              >
+                <BarList
+                  rows={[
+                    { label: "English", value: mean(data.averages.english) },
+                    { label: "GK", value: mean(data.averages.gk) },
+                  ]}
+                  unit="marks"
+                />
+              </Panel>
+            </div>
+
+            <Panel
+              title="Paywall pressure"
+              subtitle="Free random tests are capped at 2 per account per day, with 8 per network behind that. If nobody reaches the cap, the paywall is not what is stopping people buying."
+            >
+              <BarList
+                rows={[
+                  { label: "Random tests started", value: sum(m["test:start:random"]) },
+                  { label: "Checkouts opened", value: sum(m["pay:order"]) },
+                  { label: "Payments failed", value: sum(m["pay:fail"]) },
+                  { label: "Payments succeeded", value: sum(m["pay:ok"]) },
+                ]}
+                unit="events"
+              />
+            </Panel>
+          </>
+        ) : null}
+
+        {/* --------------------------------------------------------- HEALTH */}
+        {tab === "health" ? (
+          !health ? (
+            <Panel title="Health">
+              <p className={styles.empty}>{loadingTab === "health" ? "Checking…" : "—"}</p>
+            </Panel>
           ) : (
-            <div className={styles.tableWrap}><table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>When</th>
-                  <th>Amount</th>
-                  <th>Plan</th>
-                  <th>Account</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.payments.map((p) => (
-                  <tr key={p.orderId} data-warn={p.orphaned || p.ungranted ? "" : undefined}>
-                    <td className={styles.dim}>{when(p.paidAt)}</td>
-                    <td>{rupees(p.paise)}</td>
-                    <td>{p.planId ?? "—"}</td>
-                    <td className={styles.mono}>{p.accountId ?? <span className={styles.warn}>none</span>}</td>
-                    <td>
-                      {p.orphaned ? (
-                        <span className={styles.warn}>orphaned — no account</span>
-                      ) : p.ungranted ? (
-                        <span className={styles.warn}>no live plan</span>
-                      ) : (
-                        <span className={styles.good}>granted</span>
-                      )}
-                      {p.via ? <span className={styles.tag}>{p.via}</span> : null}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table></div>
-          )}
-        </section>
-      ) : null}
+            <>
+              <Panel
+                title="What is actually being counted"
+                subtitle="The most important table here. A zero beside “not counted” is a gap in the code; a zero beside “measured” is a fact about your users. Without this, every other number on this dashboard is ambiguous."
+              >
+                <div className={styles.tableWrap}>
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        <th>Metric</th>
+                        <th>Where it comes from</th>
+                        <th>Trust</th>
+                        <th>Last seen</th>
+                        <th>30d</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {health.metrics.map((x) => (
+                        <tr key={x.metric} data-warn={x.trust === "no-writer" ? "" : undefined}>
+                          <td className={styles.mono}>{x.metric}</td>
+                          <td className={styles.dim}>{x.source}</td>
+                          <td>
+                            <TrustTag trust={x.trust} />
+                          </td>
+                          <td className={styles.dim}>
+                            {x.lastDay ?? <span className={styles.warn}>never</span>}
+                          </td>
+                          <td>{x.total30d}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Panel>
+
+              <div className={styles.twoUp}>
+                <Panel title="Deploy">
+                  <dl className={styles.kv}>
+                    <dt>Live slot</dt>
+                    <dd>
+                      {health.deploy.liveSlot ?? "—"} (port {health.deploy.upstreamPort ?? "?"})
+                    </dd>
+                    <dt>Running build</dt>
+                    <dd className={styles.mono}>
+                      {health.deploy.liveCommit?.slice(0, 12) ?? "—"}
+                    </dd>
+                    <dt>Checkout HEAD</dt>
+                    <dd className={health.deploy.drifted ? styles.warn : undefined}>
+                      <span className={styles.mono}>{health.deploy.head?.slice(0, 12) ?? "—"}</span>
+                      {health.deploy.drifted ? " — differs from the running build" : ""}
+                    </dd>
+                    <dt>Latest commit</dt>
+                    <dd>{health.deploy.headSubject ?? "—"}</dd>
+                    <dt>Uncommitted files</dt>
+                    <dd>{health.deploy.dirtyFiles}</dd>
+                    <dt>Unpushed commits</dt>
+                    <dd className={health.deploy.unpushed > 0 ? styles.warn : undefined}>
+                      {health.deploy.unpushed}
+                      {health.deploy.unpushed > 0
+                        ? " — deploy.sh will refuse until these are pushed"
+                        : ""}
+                    </dd>
+                    <dt>Build age</dt>
+                    <dd>
+                      {health.deploy.buildAgeMs == null
+                        ? "—"
+                        : `${duration(health.deploy.buildAgeMs)} old`}
+                    </dd>
+                    <dt>Process</dt>
+                    <dd>
+                      up {health.deploy.uptimeSec == null ? "—" : `${Math.round(health.deploy.uptimeSec / 3600)}h`}
+                      {" · "}
+                      {health.deploy.rssMb} MB
+                    </dd>
+                  </dl>
+                </Panel>
+
+                <Panel title="Host and store">
+                  <dl className={styles.kv}>
+                    <dt>TLS certificate</dt>
+                    <dd className={(health.host.tlsDaysLeft ?? 99) < 21 ? styles.warn : undefined}>
+                      {health.host.tlsDaysLeft == null
+                        ? "—"
+                        : `${health.host.tlsDaysLeft} days left`}
+                      {health.host.tlsExpires ? ` (${health.host.tlsExpires})` : ""}
+                    </dd>
+                    <dt>Disk</dt>
+                    <dd>
+                      {health.host.diskFreeGb ?? "—"} GB free of {health.host.diskTotalGb ?? "—"} GB
+                    </dd>
+                    <dt>Memory</dt>
+                    <dd>
+                      {health.host.memFreeMb ?? "—"} MB free of {health.host.memTotalMb ?? "—"} MB
+                    </dd>
+                    <dt>Load</dt>
+                    <dd>
+                      {health.host.load1} on {health.host.cores} cores
+                    </dd>
+                    <dt>Store keys</dt>
+                    <dd>{health.host.storeKeys ?? "—"}</dd>
+                    <dt>Store memory</dt>
+                    <dd>
+                      {health.host.storeMemoryMb == null ? "—" : `${health.host.storeMemoryMb} MB`}
+                    </dd>
+                  </dl>
+                </Panel>
+              </div>
+
+              <Panel
+                title="Client errors"
+                subtitle="Crashes reported by the app's error boundaries. Kept three days, then deleted. Carries no email, no cookie and no answers, by design."
+              >
+                {health.errors.length === 0 ? (
+                  <p className={styles.empty}>No client errors reported.</p>
+                ) : (
+                  <div className={styles.tableWrap}>
+                    <table className={styles.table}>
+                      <thead>
+                        <tr>
+                          <th>When</th>
+                          <th>Route</th>
+                          <th>Message</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {health.errors.map((e) => (
+                          <tr key={e.key}>
+                            <td className={styles.dim}>{ago(e.ts)}</td>
+                            <td className={styles.mono}>{e.route}</td>
+                            <td>
+                              {e.message}
+                              {e.synthetic ? (
+                                <span
+                                  className={styles.tag}
+                                  title="Written by the deploy smoke test, not a real fault."
+                                >
+                                  smoke test
+                                </span>
+                              ) : null}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </Panel>
+            </>
+          )
+        ) : null}
       </div>
     </div>
   );

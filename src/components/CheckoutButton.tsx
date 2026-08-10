@@ -5,6 +5,7 @@ import Link from "next/link";
 import { SUPPORT_EMAIL } from "@/lib/legal";
 import VerifyEmail from "./VerifyEmail";
 import BindEmail from "./BindEmail";
+import { reportEvent } from "@/lib/clientSession";
 
 /**
  * Razorpay Standard Checkout, for one plan.
@@ -251,6 +252,14 @@ export default function CheckoutButton({
       });
 
       instance.on("payment.failed", (e) => {
+        /**
+         * Razorpay reports a declined card to this page and never to our
+         * server, so a failure is invisible unless the page says so. Without
+         * it, "six checkouts started, one paid" cannot be read: five people
+         * changing their mind and five cards being declined are the same
+         * number and completely different problems.
+         */
+        reportEvent("pay:fail");
         set(
           "idle",
           e.error?.description ??
