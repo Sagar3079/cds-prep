@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import AppFrame from "@/components/AppFrame";
+import VisitBeacon from "@/components/VisitBeacon";
 import StructuredData from "@/components/StructuredData";
 import { SITE } from "@/lib/legal";
 import "./globals.css";
@@ -104,6 +105,9 @@ export default function RootLayout({
             all live in `AppFrame`, which also knows the routes that must NOT
             be framed. */}
         <AppFrame>{children}</AppFrame>
+        {/* Counts arrivals, including the majority who land and leave without
+            touching anything. Renders nothing and fires once per tab. */}
+        <VisitBeacon />
       </body>
     </html>
   );

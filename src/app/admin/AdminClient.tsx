@@ -322,6 +322,11 @@ export default function AdminClient() {
         <>
           <section className={styles.stats}>
             <Stat
+              label="Visits (30d)"
+              value={sum(m["visit"])}
+              hint="browsers that ran JS — excludes bots"
+            />
+            <Stat
               label="Accounts"
               value={t?.accounts ?? 0}
               hint={`${t?.bound ?? 0} with email · ${t?.anonymous ?? 0} anonymous`}
@@ -339,6 +344,7 @@ export default function AdminClient() {
           </section>
 
           <section className={styles.charts}>
+            <Bars data={tail(m["visit"], 30)} label="Visits / day" />
             <Bars data={tail(m["acct:new"], 30)} label="New accounts / day" />
             <Bars data={tail(m["test:done:daily"], 30)} label="Daily tests finished" />
             <Bars data={tail(m["test:done:random"], 30)} label="Random tests finished" />
