@@ -33,6 +33,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ sent: false, alreadyVerified: true });
   }
 
+  /**
+   * An anonymous account has no address to send to.
+   *
+   * This route deliberately takes the address from the session and never from
+   * the body, so there is nothing to fall back to — and that restriction is the
+   * whole reason it is safe. Binding a *new* address is a different operation
+   * with a different proof obligation, and it lives in `POST /api/account/bind`.
+   */
+  if (!acct.email) {
+    return NextResponse.json(
+      { error: "There's no email on this account yet.", needsBind: true },
+      { status: 409 },
+    );
+  }
+
   const code = await issueCode(acct.id);
   const result = await sendVerificationCode(acct.email, code, OTP_TTL_MINUTES);
 

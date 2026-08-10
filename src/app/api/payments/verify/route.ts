@@ -4,6 +4,7 @@ import { currentAccount } from "@/lib/account";
 import { kv } from "@/lib/kv";
 import { PLANS, type PlanId } from "@/lib/legal";
 import { grantPlan } from "@/lib/entitlement";
+import { bumpAsync } from "@/lib/analytics";
 import { rateLimit } from "@/lib/ratelimit";
 import {
   paidKey,
@@ -134,6 +135,13 @@ export async function POST(req: Request) {
    * `null` is not a thing to attempt. Those are recorded and reconciled by
    * hand, which is the honest failure.
    */
+  /**
+   * Counted here rather than at the webhook, and gated on the same NX write
+   * that gates the grant — otherwise `verify` and the webhook would both count
+   * one payment and the admin panel would report double the revenue it took.
+   */
+  if (firstToRecord) bumpAsync("pay:ok");
+
   if (firstToRecord && record.accountId && record.planId) {
     await grantPlan({
       accountId: record.accountId,

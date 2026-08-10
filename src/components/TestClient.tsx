@@ -23,6 +23,10 @@ import {
 } from "@/lib/daily";
 import { getMastery, recordAttempt, topicWeights } from "@/lib/mastery";
 import {
+  ensureSession,
+  saveAttempt as saveAttemptToServer,
+} from "@/lib/clientSession";
+import {
   getAskedIds,
   getAttemptsForDate,
   getLatestAttempt,
@@ -200,7 +204,7 @@ export default function TestClient({
   const [started, setStarted] = useState(false);
   /** Set when the server refuses a random run, cleared by navigating away. */
   const [gate, setGate] = useState<{
-    reason: "signed-out" | "used-up";
+    reason: "signed-out" | "used-up" | "no-cookies";
     message: string;
   } | null>(null);
   const [gateBusy, setGateBusy] = useState(false);
@@ -415,6 +419,26 @@ export default function TestClient({
     if (!isRandom) reportRun(quiz, answers, timeTaken, subject);
     else clearRunStatus();
 
+    /**
+     * The server's copy of this attempt — history and admin analytics, not the
+     * leaderboard, which `reportRun` above owns and which is daily-only.
+     *
+     * Both modes, unlike the board: the point of recording a random set is that
+     * a person's practice history should not end at the browser they took it
+     * in. Fire-and-forget with `keepalive`, because the redirect two lines down
+     * unmounts this component. A caller with no session — the daily test works
+     * with cookies blocked — is answered with `saved: false` rather than an
+     * error, and nothing here needs to know either way.
+     */
+    saveAttemptToServer({
+      subject,
+      mode: isRandom ? "random" : "daily",
+      correct: result.correct,
+      wrong: result.wrong,
+      blank: result.skipped,
+      total: result.total,
+    });
+
     clearProgress(mode, subject);
     setSubmitted(true);
     if (handedOff && persisted) {
@@ -548,6 +572,14 @@ export default function TestClient({
    */
   const start = () => {
     if (!isRandom) {
+      /**
+       * The daily test does not wait for this and does not care if it fails.
+       * A session is what lets the score reach the server and the name reach
+       * the leaderboard, and both are worth having — but neither is worth
+       * standing between somebody and a test they came here to take. With
+       * cookies blocked this quietly does nothing and the test runs anyway.
+       */
+      void ensureSession();
       beginRun();
       return;
     }
@@ -559,6 +591,25 @@ export default function TestClient({
     setGate(null);
     void (async () => {
       try {
+        /**
+         * Random mode is metered, and metering needs somebody to meter. Unlike
+         * the daily test this cannot degrade: with no session there is no
+         * account to count against, and every refresh would hand out a fresh
+         * free allowance. So a browser that will not keep a cookie is told
+         * plainly rather than being let through to an allowance that resets
+         * itself.
+         */
+        const hasSession = await ensureSession();
+        if (!hasSession) {
+          setGateBusy(false);
+          setGate({
+            reason: "no-cookies",
+            message:
+              "Random tests need cookies switched on — that's how your free tests each day are counted. The daily test works without them.",
+          });
+          return;
+        }
+
         const res = await fetch("/api/random/start", { method: "POST" });
         if (!res.ok) {
           const data = (await res.json().catch(() => ({}))) as {
@@ -716,16 +767,29 @@ export default function TestClient({
               <p className="text-sm leading-relaxed text-accent-ink">
                 {gate.message}
               </p>
-              <p className="mt-2">
-                <Link
-                  href={gate.reason === "signed-out" ? "/leaderboard" : "/pricing"}
-                  className="text-sm font-bold text-accent-ink underline"
-                >
-                  {gate.reason === "signed-out"
-                    ? "Sign in — it takes an email and nothing else"
-                    : "See plans for unlimited random tests"}
-                </Link>
-              </p>
+              {/*
+                No link when cookies are the problem: the fix is in the
+                browser's own settings and there is nowhere on this site to send
+                somebody for it. Offering "see plans" to a person who cannot
+                hold a session would sell them something they could not then be
+                given.
+
+                "signed-out" no longer means what it did — an account now
+                arrives by taking a test rather than by signing up — so the only
+                way to reach it is a session that vanished between the check
+                above and the server's own. Pricing is the honest destination
+                for both that and a used-up allowance.
+              */}
+              {gate.reason !== "no-cookies" && (
+                <p className="mt-2">
+                  <Link
+                    href="/pricing"
+                    className="text-sm font-bold text-accent-ink underline"
+                  >
+                    See plans for unlimited random tests
+                  </Link>
+                </p>
+              )}
             </div>
           )}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">

@@ -1,0 +1,444 @@
+/*
+ * Scoped to the panel, and deliberately not built from the app's design tokens.
+ * The rest of the site is a phone-shaped study app; this is a desktop dashboard
+ * that one person reads. Sharing a palette would constrain both.
+ */
+
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 20px 80px;
+  font-family: var(--font-sans, system-ui, sans-serif);
+  color: #16202b;
+}
+
+.loading,
+.gate {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  color: #16202b;
+}
+
+.gateCard {
+  width: min(360px, calc(100vw - 40px));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 28px;
+  border: 1px solid #dfe5ec;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 12px 40px rgb(16 32 48 / 8%);
+}
+
+.gateCard h1 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+}
+
+.gateCard p {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7986;
+}
+
+.gateCard input,
+.gateCard button {
+  height: 42px;
+  border-radius: 9px;
+  font-size: 15px;
+  padding: 0 12px;
+}
+
+.gateCard input {
+  border: 1px solid #cfd8e3;
+  background: #fbfcfd;
+}
+
+.gateCard input:focus-visible {
+  outline: 2px solid #2f6fed;
+  outline-offset: 1px;
+}
+
+.gateCard button {
+  border: 0;
+  background: #16202b;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.gateCard button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.gateError {
+  color: #b3261e;
+  font-size: 13px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  margin: 0 0 4px;
+  font-size: 22px;
+  letter-spacing: -0.015em;
+}
+
+.sub {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7986;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.liveToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.linkBtn {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: #2f6fed;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.signOut {
+  border: 1px solid #cfd8e3;
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.banner,
+.bannerWarn {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.banner {
+  background: #eef4ff;
+  border: 1px solid #cfe0ff;
+  color: #1f3c6d;
+}
+
+.bannerWarn {
+  background: #fff4ed;
+  border: 1px solid #ffd5bd;
+  color: #8a3d10;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e6ebf1;
+}
+
+.tabs button {
+  border: 0;
+  background: none;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7986;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.tabs button[data-active] {
+  color: #16202b;
+  border-bottom-color: #16202b;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat {
+  padding: 16px;
+  border: 1px solid #e6ebf1;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.stat[data-tone="warn"] {
+  border-color: #ffd5bd;
+  background: #fffaf7;
+}
+
+.statValue {
+  font-size: 26px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.statLabel {
+  font-size: 13px;
+  color: #6b7986;
+  margin-top: 2px;
+}
+
+.statHint {
+  font-size: 12px;
+  color: #93a0ad;
+  margin-top: 6px;
+}
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.chart {
+  padding: 14px 16px 10px;
+  border: 1px solid #e6ebf1;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.chartHead {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #6b7986;
+  margin-bottom: 10px;
+}
+
+.chartTotal {
+  font-weight: 650;
+  color: #16202b;
+  font-variant-numeric: tabular-nums;
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 72px;
+}
+
+.barWrap {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.bar {
+  width: 100%;
+  background: #2f6fed;
+  border-radius: 2px 2px 0 0;
+  min-height: 2px;
+}
+
+.bar[data-zero] {
+  background: #e6ebf1;
+}
+
+.chartFoot {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #93a0ad;
+  margin-top: 6px;
+}
+
+.panel {
+  border: 1px solid #e6ebf1;
+  border-radius: 12px;
+  background: #fff;
+  padding: 16px 18px 6px;
+  margin-bottom: 16px;
+}
+
+.panel h2 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 650;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.empty {
+  color: #6b7986;
+  font-size: 14px;
+  line-height: 1.5;
+  padding-bottom: 12px;
+  max-width: 62ch;
+}
+
+/* Wide tables scroll inside their own box rather than the page. */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.table th {
+  text-align: left;
+  font-weight: 600;
+  color: #6b7986;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 8px 12px 8px 0;
+  border-bottom: 1px solid #e6ebf1;
+}
+
+.table td {
+  padding: 9px 12px 9px 0;
+  border-bottom: 1px solid #f1f4f8;
+  vertical-align: baseline;
+}
+
+.table tr[data-warn] td {
+  background: #fffaf7;
+}
+
+.dim {
+  color: #93a0ad;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+
+.warn {
+  color: #b3261e;
+  font-weight: 550;
+}
+
+.good {
+  color: #1a7f4b;
+}
+
+.tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #f0f3f7;
+  color: #6b7986;
+  font-size: 11px;
+  vertical-align: middle;
+}
+
+@media (prefers-color-scheme: dark) {
+  .page,
+  .loading,
+  .gate {
+    color: #e8edf3;
+  }
+
+  .gateCard,
+  .stat,
+  .chart,
+  .panel {
+    background: #131a22;
+    border-color: #26313d;
+  }
+
+  .gateCard input {
+    background: #0e141a;
+    border-color: #2c3844;
+    color: #e8edf3;
+  }
+
+  .gateCard button {
+    background: #2f6fed;
+  }
+
+  .gateCard h1 {
+    color: #e8edf3;
+  }
+
+  .statValue,
+  .chartTotal,
+  .tabs button[data-active] {
+    color: #e8edf3;
+  }
+
+  .tabs {
+    border-bottom-color: #26313d;
+  }
+
+  .tabs button[data-active] {
+    border-bottom-color: #e8edf3;
+  }
+
+  .signOut {
+    background: #131a22;
+    border-color: #2c3844;
+    color: #e8edf3;
+  }
+
+  .table th {
+    border-bottom-color: #26313d;
+  }
+
+  .table td {
+    border-bottom-color: #1c242e;
+  }
+
+  .table tr[data-warn] td {
+    background: #241a14;
+  }
+
+  .bar[data-zero] {
+    background: #26313d;
+  }
+
+  .tag {
+    background: #1c242e;
+    color: #93a0ad;
+  }
+
+  .banner {
+    background: #14243d;
+    border-color: #1f3c6d;
+    color: #b8d0f5;
+  }
+
+  .bannerWarn {
+    background: #2a1a10;
+    border-color: #5c3418;
+    color: #f5c9a8;
+  }
+}

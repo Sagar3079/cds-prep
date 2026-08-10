@@ -24,7 +24,9 @@ import TabBar from "./TabBar";
  * `children` stays a prop, so pages below remain server components: only the
  * frame is client, not what it frames.
  */
-const BARE_ROUTES = ["/landing"];
+// `/admin` is a dashboard of tables and charts, read on a desktop. The phone-
+// shaped panel would give it a 420px column to draw them in.
+const BARE_ROUTES = ["/landing", "/admin"];
 
 export default function AppFrame({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

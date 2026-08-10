@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { readTextCapped } from "@/lib/body";
 import { kv } from "@/lib/kv";
 import { grantPlan } from "@/lib/entitlement";
+import { bumpAsync } from "@/lib/analytics";
 import type { PlanId } from "@/lib/legal";
 
 /** A payment.captured event is a couple of KB. This is generous, not tight. */
@@ -136,6 +137,13 @@ export async function POST(req: Request) {
   };
 
   const won = await kv.setIfAbsent(paidKey(orderId), JSON.stringify(record));
+
+  /**
+   * Counted on the same NX write that gates the grant below. This route and
+   * `verify` both run for the same payment in the normal case, so counting
+   * outside this guard would report twice the revenue actually taken.
+   */
+  if (won) bumpAsync("pay:ok");
 
   /**
    * The point of all of this: turn a payment into access.

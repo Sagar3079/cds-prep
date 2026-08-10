@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { SUPPORT_EMAIL } from "@/lib/legal";
 import VerifyEmail from "./VerifyEmail";
+import BindEmail from "./BindEmail";
 
 /**
  * Razorpay Standard Checkout, for one plan.
@@ -110,6 +111,20 @@ export default function CheckoutButton({
   const [need, setNeed] = useState<Need | null>(null);
 
   /**
+   * Whether this account already has an address, which decides if the prompt
+   * after a successful payment is shown at all.
+   *
+   * Null until known. Asked for on mount rather than after the payment, so the
+   * answer is in hand the moment it is needed — a fetch fired at "paid" would
+   * put a spinner in front of somebody who has just been charged. A failed
+   * lookup leaves it null and the prompt is skipped: a missing prompt is a
+   * smaller harm than one shown to a person who bound an address months ago.
+   */
+  const [hasEmail, setHasEmail] = useState<boolean | null>(null);
+  const [bindDone, setBindDone] = useState(false);
+  const [dismissedBind, setDismissedBind] = useState(false);
+
+  /**
    * Everything below runs across an await and a third-party callback, so both
    * guards are needed: `alive` stops a state update landing on an unmounted
    * component, and `rzp` lets the cleanup close a modal the user has navigated
@@ -124,6 +139,19 @@ export default function CheckoutButton({
       rzp.current?.close();
       rzp.current = null;
     };
+  }, []);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const res = await fetch("/api/account");
+        if (!res.ok) return;
+        const data = (await res.json()) as { signedIn?: boolean; hasEmail?: boolean };
+        if (alive.current) setHasEmail(Boolean(data.signedIn) ? Boolean(data.hasEmail) : false);
+      } catch {
+        // Leaves it null, which suppresses the prompt. See the state comment.
+      }
+    })();
   }, []);
 
   const set = useCallback((next: Phase, message: string | null = null) => {
@@ -255,16 +283,23 @@ export default function CheckoutButton({
     );
   }
 
+  /**
+   * Reachable only when the account this checkout needs does not exist — which,
+   * now that one is created on the first test, means cookies are being refused.
+   * There is no sign-in page to send them to any more, and the fix is in their
+   * browser rather than on this site.
+   */
   if (need === "sign-in") {
     return (
       <div className={`rounded-xl bg-accent-soft px-3 py-3 text-left ${className}`}>
         <p className="text-sm leading-relaxed text-accent-ink">
-          <strong>Sign in first.</strong> A plan is access for a person, and
-          right now there is nobody to give it to — signing in takes an email
-          and nothing else.
+          <strong>We can&apos;t set up your account.</strong> A plan is access for
+          a person, and right now there is nobody to give it to. Switch cookies
+          on for this site, then take a test — that creates your account — and
+          come back.
         </p>
-        <Link href="/leaderboard" className="btn-primary mt-3 w-full">
-          Sign in
+        <Link href="/" className="btn-primary mt-3 w-full">
+          Take a test
         </Link>
       </div>
     );
@@ -272,9 +307,42 @@ export default function CheckoutButton({
 
   if (phase === "paid") {
     return (
-      <p className={`text-center text-[0.8125rem] font-bold text-ok-ink ${className}`}>
-        Payment confirmed. Thank you.
-      </p>
+      <div className={className}>
+        <p className="text-center text-[0.8125rem] font-bold text-ok-ink">
+          Payment confirmed. Thank you.
+        </p>
+        {/*
+          The prompt that replaced the pre-payment email gate.
+
+          Checkout no longer demands a verified address, which means the plan
+          just bought is attached to an anonymous account and lives on this
+          browser's cookie alone. This is where that gets fixed, and it is
+          shown only to somebody who actually needs it — `hasEmail` is false.
+          Dismissible, because refusing to let go of the screen after taking
+          somebody's money is worse than the risk it avoids, and settings goes
+          on offering the same thing afterwards.
+        */}
+        {hasEmail === false ? (
+          <div className="mt-3">
+            {bindDone ? (
+              <p className="text-center text-[0.8125rem] text-accent-ink">
+                Saved — your plan will follow that address.
+              </p>
+            ) : dismissedBind ? (
+              <p className="text-center text-[0.8125rem] text-accent-ink">
+                Your plan is on this browser only. Add an email in Settings whenever
+                you like.
+              </p>
+            ) : (
+              <BindEmail
+                context="purchase"
+                onDone={() => setBindDone(true)}
+                onDismiss={() => setDismissedBind(true)}
+              />
+            )}
+          </div>
+        ) : null}
+      </div>
     );
   }
 

@@ -88,6 +88,56 @@ export async function grantPlan(o: {
   return record;
 }
 
+/**
+ * Move a plan from one account to another, once.
+ *
+ * The case: somebody paid anonymously, then bound an address that already had
+ * an account. They sign in as the older account and their plan is on the newer
+ * one — the exact outcome the bind prompt exists to prevent.
+ *
+ * Why this is not just `grantPlan(to)`: `grantPlan` *extends* from whatever the
+ * target already has, and the only thing standing between a payment and a
+ * double grant anywhere in this app is the NX write on `rzp:paid:<orderId>`,
+ * which was already consumed when the payment was first recorded. Calling it a
+ * second time for the same order would hand out the days twice. So the transfer
+ * carries its own one-shot marker, keyed by order, and the days moved are the
+ * days remaining rather than a fresh grant of the plan's full length.
+ *
+ * The source record is deleted last. A crash between the two writes leaves the
+ * plan on both accounts, which costs one duplicated entitlement; the other
+ * order leaves it on neither, which costs a customer their purchase.
+ */
+export async function transferPlan(
+  fromId: string,
+  toId: string,
+): Promise<Entitlement | null> {
+  if (fromId === toId) return null;
+  const source = await activePlan(fromId);
+  if (!source) return null;
+
+  const marker = `xfer:${source.orderId}`;
+  const won = await kv.setIfAbsent(marker, toId, 400 * 86_400);
+  // Already transferred — a double-submitted form, or a retry after a timeout.
+  if (!won) return null;
+
+  const target = await activePlan(toId);
+  const remaining = Math.max(0, source.until - Date.now());
+  const from = target ? target.until : Date.now();
+  const record: Entitlement = {
+    planId: source.planId,
+    until: from + remaining,
+    orderId: source.orderId,
+  };
+
+  await kv.set(planKey(toId), JSON.stringify(record));
+  await kv.expire(
+    planKey(toId),
+    Math.ceil((record.until - Date.now()) / 1000) + 7 * 86_400,
+  );
+  await kv.del(planKey(fromId));
+  return record;
+}
+
 export interface RandomAccess {
   allowed: boolean;
   /** Why not, when `allowed` is false. */

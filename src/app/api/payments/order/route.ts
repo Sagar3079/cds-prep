@@ -85,30 +85,39 @@ export async function POST(req: Request) {
   }
 
   /**
-   * Buying requires a signed-in, VERIFIED account, and this is where that is
-   * enforced rather than in the button.
+   * Buying requires an account. It no longer requires a verified email.
    *
-   * Not gatekeeping for its own sake: a plan is access granted to somebody, and
-   * an anonymous payment has no somebody to grant it to. The first live
-   * payment this app took landed with `accountId: null` and could not have
-   * unlocked anything for anyone — which is the bug this closes. Verification
-   * on top, because an unverified address is a claim, and a plan attached to a
-   * claim is claimable by whoever types that address next.
+   * The rule this replaces was: signed in AND verified, on the reasoning that a
+   * plan is access granted to somebody and an anonymous payment has no somebody
+   * to grant it to. The first live payment this app took landed with
+   * `accountId: null` and could not have unlocked anything for anyone.
+   *
+   * That reasoning was right about the disease and wrong about the cure. What
+   * broke that payment was the *missing account*, not the missing address — and
+   * every visitor now has an account before they can reach a checkout button,
+   * so `accountId` is never null again. Demanding a verified email on top meant
+   * demanding a signup, a mailbox and a six-digit code from somebody holding a
+   * card, which is three chances to leave.
+   *
+   * What the address was actually protecting is recoverability: a plan on an
+   * anonymous account lives on one cookie, and a cleared cookie loses it. That
+   * protection moved to where it costs nothing to convert — the bind prompt
+   * shown immediately after a successful payment (`CheckoutButton`), and the
+   * restore path in settings. The trade is deliberate: a small window in which
+   * a purchase is device-bound, against a checkout somebody will actually
+   * finish. Anyone who does lose one can restore it by binding the address
+   * later, and the admin panel lists every payment whose account holds no live
+   * plan so an orphan is visible rather than silent.
    */
   const acct = await currentAccount();
   if (!acct) {
     return NextResponse.json(
-      { error: "Sign in before buying, so the plan has somewhere to go.", need: "sign-in" },
-      { status: 401 },
-    );
-  }
-  if (!acct.emailVerified) {
-    return NextResponse.json(
       {
-        error: "Verify your email before buying — we'll send a six-digit code.",
-        need: "verify",
+        error:
+          "Your session isn't set up yet — take a test first, or switch cookies on if they're blocked.",
+        need: "sign-in",
       },
-      { status: 403 },
+      { status: 401 },
     );
   }
 

@@ -113,3 +113,92 @@ export async function checkCode(
   await kv.del(otpKey(accountId));
   return { ok: true };
 }
+
+/* ------------------------------------------------------------------------- *
+ * Binding an address to an account that does not have one yet.
+ * ------------------------------------------------------------------------- */
+
+/**
+ * A separate key family, for two independent reasons.
+ *
+ * **Collision.** `issueCode` overwrites `otp:<accountId>` and resets `attempts`
+ * to zero. A bind code and an in-session verify code issued for the same
+ * account would destroy each other, and the second one would silently hand back
+ * a fresh attempt budget for the first.
+ *
+ * **Scope.** The stored record carries the address the code was mailed to, and
+ * `checkBindCode` returns it rather than accepting one from the caller. Without
+ * that, the obvious implementation — mail a code to the address in the body,
+ * then confirm with `{code, email}` — lets somebody request a code for an
+ * address they own and confirm with an address they do not. The address is
+ * decided at send time and is not negotiable afterwards.
+ */
+const bindKey = (accountId: string) => `bind:${accountId}`;
+
+interface StoredBind extends Stored {
+  email: string;
+}
+
+export async function issueBindCode(
+  accountId: string,
+  email: string,
+): Promise<string> {
+  const code = newCode();
+  const record: StoredBind = {
+    hash: hash(code, accountId),
+    attempts: 0,
+    sentAt: Date.now(),
+    email,
+  };
+  await kv.set(bindKey(accountId), JSON.stringify(record));
+  await kv.expire(bindKey(accountId), OTP_TTL_SEC);
+  return code;
+}
+
+export type BindCheckResult =
+  | { ok: true; email: string }
+  | { ok: false; reason: "expired" | "wrong" | "exhausted" };
+
+/** As `checkCode`, but yields the address the code was actually sent to. */
+export async function checkBindCode(
+  accountId: string,
+  supplied: string,
+): Promise<BindCheckResult> {
+  const raw = await kv.get(bindKey(accountId));
+  if (!raw) return { ok: false, reason: "expired" };
+
+  let record: StoredBind;
+  try {
+    record = JSON.parse(raw) as StoredBind;
+  } catch {
+    await kv.del(bindKey(accountId));
+    return { ok: false, reason: "expired" };
+  }
+
+  if (record.attempts >= OTP_MAX_ATTEMPTS) {
+    await kv.del(bindKey(accountId));
+    return { ok: false, reason: "exhausted" };
+  }
+
+  const a = Buffer.from(record.hash, "utf8");
+  const b = Buffer.from(hash(supplied, accountId), "utf8");
+  const match = a.length === b.length && timingSafeEqual(a, b);
+
+  if (!match) {
+    const attempts = record.attempts + 1;
+    if (attempts >= OTP_MAX_ATTEMPTS) {
+      await kv.del(bindKey(accountId));
+      return { ok: false, reason: "exhausted" };
+    }
+    await kv.set(bindKey(accountId), JSON.stringify({ ...record, attempts }));
+    const left = Math.max(
+      1,
+      OTP_TTL_SEC - Math.floor((Date.now() - record.sentAt) / 1000),
+    );
+    await kv.expire(bindKey(accountId), left);
+    return { ok: false, reason: "wrong" };
+  }
+
+  await kv.del(bindKey(accountId));
+  return { ok: true, email: record.email };
+}

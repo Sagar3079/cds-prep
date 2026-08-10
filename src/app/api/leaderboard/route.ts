@@ -74,6 +74,28 @@ export async function GET(req: Request) {
   );
 
   const me = await currentAccount();
+
+  /**
+   * Which rows belong to somebody on a plan, so the board can mark them.
+   *
+   * One `MGET` for the page rather than a `GET` per row: this renders on every
+   * leaderboard view, and a round trip per entry would put twenty sequential
+   * calls in front of it.
+   *
+   * It is only ever a colour on a name. Rank is the score and nothing else — a
+   * board where paying moved you up would not be a leaderboard.
+   */
+  const plans = await kv.mget(entries.map((e) => `entl:${e.id}`));
+  const paidRow = plans.map((raw) => {
+    if (!raw) return false;
+    try {
+      const until = (JSON.parse(raw) as { until?: number }).until;
+      return typeof until === "number" && until > Date.now();
+    } catch {
+      return false;
+    }
+  });
+
   const rows = entries.map((e, i) => ({
     rank: i + 1,
     name: names[i] ?? "Someone",
@@ -81,6 +103,7 @@ export async function GET(req: Request) {
     // −0.25 penalty in play.
     score: e.score / 100,
     isYou: Boolean(me && me.id === e.id),
+    paid: paidRow[i] ?? false,
   }));
 
   let yourRank: number | null = null;

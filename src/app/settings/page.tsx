@@ -17,6 +17,7 @@ import {
 } from "@/lib/potterPrefs";
 import { POTTER, useCharacterRoster } from "@/components/potter/characters";
 import { clearMastery, getMastery } from "@/lib/mastery";
+import BindEmail from "@/components/BindEmail";
 
 function Toggle({
   id,
@@ -384,6 +385,100 @@ export default function SettingsPage() {
           </Link>
         </div>
       </section>
+
+      <AccountSection />
     </div>
+  );
+}
+
+/**
+ * Where a purchase is secured and recovered.
+ *
+ * The only place in the app that asks for an email, and it exists because
+ * signing up no longer does. An account arrives with the first test and lives
+ * on a cookie — enough for practice, not enough for something somebody paid
+ * for, because a cleared browser or a new phone would lose it.
+ *
+ * Deliberately quiet, and deliberately not on the leaderboard. Nobody needs
+ * this until they have bought something or lost something, and an email field
+ * in front of everybody else is the friction that was just removed. The
+ * post-payment prompt catches most people; this catches the rest.
+ */
+function AccountSection() {
+  const [state, setState] = useState<{
+    signedIn: boolean;
+    hasEmail: boolean;
+    name?: string;
+  } | null>(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      try {
+        const res = await fetch("/api/account");
+        if (!res.ok) return;
+        const d = (await res.json()) as {
+          signedIn?: boolean;
+          hasEmail?: boolean;
+          name?: string;
+        };
+        if (alive) {
+          setState({
+            signedIn: Boolean(d.signedIn),
+            hasEmail: Boolean(d.hasEmail),
+            name: d.name,
+          });
+        }
+      } catch {
+        // Leaves the section unrendered rather than showing a broken one.
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  if (!state) return null;
+
+  return (
+    <section className="card space-y-3">
+      <div>
+        <h2 className="text-[0.9375rem] font-bold text-ink">Your account</h2>
+        <p className="mt-0.5 text-[0.8125rem] leading-relaxed text-muted">
+          {state.signedIn ? (
+            <>
+              You appear as <span className="font-bold text-ink">{state.name}</span>.{" "}
+              {state.hasEmail
+                ? "An email is saved, so your plan follows you to a new phone."
+                : "Nothing is saved to an email yet, so everything here lives on this browser only."}
+            </>
+          ) : (
+            <>
+              No account on this browser yet — take a test and one is created
+              automatically. If cookies are switched off, that can&apos;t happen.
+            </>
+          )}
+        </p>
+      </div>
+
+      {state.signedIn && !open ? (
+        <button
+          type="button"
+          className="btn-primary w-full"
+          onClick={() => setOpen(true)}
+        >
+          {state.hasEmail ? "Use a different email" : "Save or restore a purchase"}
+        </button>
+      ) : null}
+
+      {state.signedIn && open ? (
+        <BindEmail
+          context="restore"
+          onDone={() => setState((s) => (s ? { ...s, hasEmail: true } : s))}
+          onDismiss={() => setOpen(false)}
+        />
+      ) : null}
+    </section>
   );
 }

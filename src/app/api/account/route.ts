@@ -34,6 +34,14 @@ export async function GET(req: Request) {
     name: displayName(acct),
     hasUsername: Boolean(acct.username),
     emailVerified: acct.emailVerified,
+    /**
+     * Whether there is an address at all — not what it is. Every account now
+     * starts without one, so "signed in" no longer implies "recoverable", and
+     * the post-payment prompt and the settings restore panel both need to know
+     * which. Still no address in the response: this route has never returned
+     * one, and a caller holding the cookie has not proved they own it.
+     */
+    hasEmail: Boolean(acct.email),
   });
 
   /**

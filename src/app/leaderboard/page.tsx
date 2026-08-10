@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { SUBJECTS, SUBJECT_LABEL, SUBJECT_SHORT, toSubject } from "@/lib/subject";
 import { getSubjectPref } from "@/lib/storage";
 import { formatScore } from "@/components/ScoreRing";
@@ -12,6 +11,8 @@ interface Row {
   name: string;
   score: number;
   isYou: boolean;
+  /** On a paid plan. Colours the name; never affects the rank. */
+  paid?: boolean;
 }
 interface Board {
   day: string;
@@ -38,17 +39,6 @@ export default function LeaderboardPage() {
   const [board, setBoard] = useState<Board | null>(null);
   const [failed, setFailed] = useState(false);
   const [me, setMe] = useState<{ signedIn: boolean; name?: string } | null>(null);
-  const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
-  /**
-   * Set once the server has mailed a code to an address that already has an
-   * account. Holds the masked form to show back, and switching it on is what
-   * swaps the join form for the code entry below.
-   */
-  const [sentTo, setSentTo] = useState<string | null>(null);
-  const [code, setCode] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const alive = useRef(true);
   const loadId = useRef(0);
 
@@ -116,70 +106,6 @@ export default function LeaderboardPage() {
     };
   }, [load]);
 
-  const signUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/account", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email, username }),
-      });
-      const data = (await res.json()) as {
-        error?: string;
-        name?: string;
-        needsCode?: boolean;
-        to?: string;
-      };
-      if (!res.ok) {
-        setError(data.error ?? "That didn't work. Try again.");
-        return;
-      }
-      /**
-       * The address already has an account, so the server sent it a code
-       * instead of a cookie. Nothing is signed in until that code comes back —
-       * see the takeover note in `api/account/route.ts`.
-       */
-      if (data.needsCode) {
-        setSentTo(data.to ?? email);
-        return;
-      }
-      setMe({ signedIn: true, name: data.name });
-      void load();
-    } catch {
-      setError("Couldn't reach the server.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const claim = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/account/claim", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email, code }),
-      });
-      const data = (await res.json()) as { error?: string; name?: string };
-      if (!res.ok) {
-        setError(data.error ?? "That didn't work. Try again.");
-        return;
-      }
-      setSentTo(null);
-      setCode("");
-      setMe({ signedIn: true, name: data.name });
-      void load();
-    } catch {
-      setError("Couldn't reach the server.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
   return (
     <div className="space-y-4 px-4 py-6">
       <div>
@@ -235,115 +161,21 @@ export default function LeaderboardPage() {
         })}
       </div>
 
-      {me && !me.signedIn && !sentTo && (
-        <form onSubmit={signUp} className="card space-y-3">
-          <div>
-            <h2 className="text-[0.9375rem] font-bold text-ink">
-              Join the board
-            </h2>
-            <p className="mt-0.5 text-[0.8125rem] leading-relaxed text-muted">
-              Without a username your email shows masked, like{" "}
-              <span className="whitespace-nowrap">s••••@gmail.com</span>.
-            </p>
-          </div>
-          <label className="block text-[0.8125rem] font-semibold text-ink">
-            Email
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-              className="mt-1 w-full rounded-xl border border-line bg-paper px-3 py-2 text-base font-normal text-ink"
-              placeholder="you@example.com"
-            />
-          </label>
-          <label className="block text-[0.8125rem] font-semibold text-ink">
-            Username <span className="font-normal text-muted">(optional)</span>
-            <input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              maxLength={24}
-              className="mt-1 w-full rounded-xl border border-line bg-paper px-3 py-2 text-base font-normal text-ink"
-              placeholder="How you want to appear"
-            />
-          </label>
-          {error && (
-            <p role="alert" className="text-[0.8125rem] font-semibold text-err-ink">
-              {error}
-            </p>
-          )}
-          <button type="submit" className="btn-primary w-full" disabled={busy}>
-            {busy ? "Joining…" : "Join"}
-          </button>
-          <p className="text-xs leading-relaxed text-muted">
-            Your address isn&apos;t verified yet and is never shown in full. It
-            is stored so your row survives a reload. Joining means you agree to
-            the{" "}
-            <Link
-              href="/terms"
-              className="font-bold text-accent-ink underline underline-offset-2"
-            >
-              terms
-            </Link>{" "}
-            and the{" "}
-            <Link
-              href="/privacy"
-              className="font-bold text-accent-ink underline underline-offset-2"
-            >
-              privacy policy
-            </Link>
-            .
-          </p>
-        </form>
-      )}
+      {/*
+        The join form used to live here: email, optional username, and a
+        six-digit code when the address already had an account.
 
-      {me && !me.signedIn && sentTo && (
-        <form onSubmit={claim} className="card space-y-3">
-          <div>
-            <h2 className="text-[0.9375rem] font-bold text-ink">
-              You&apos;ve been here before
-            </h2>
-            <p className="mt-0.5 text-[0.8125rem] leading-relaxed text-muted">
-              That address already has an account, so we sent a six-digit code
-              to <span className="whitespace-nowrap font-semibold">{sentTo}</span>.
-              Enter it to sign back in.
-            </p>
-          </div>
-          <label className="block text-[0.8125rem] font-semibold text-ink">
-            Code
-            <input
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              required
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              maxLength={7}
-              className="mt-1 w-full rounded-xl border border-line bg-paper px-3 py-2 text-center text-[1.25rem] font-bold tracking-[0.3em] text-ink"
-              placeholder="000000"
-            />
-          </label>
-          {error && (
-            <p role="alert" className="text-[0.8125rem] font-semibold text-err-ink">
-              {error}
-            </p>
-          )}
-          <button type="submit" className="btn-primary w-full" disabled={busy}>
-            {busy ? "Checking…" : "Sign in"}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setSentTo(null);
-              setCode("");
-              setError(null);
-            }}
-            className="w-full text-[0.8125rem] font-semibold text-muted underline underline-offset-2 hover:text-ink"
-          >
-            Use a different address
-          </button>
-        </form>
-      )}
+        It is gone because signing up is gone. An account is created the first
+        time somebody starts a test, with a generated name, so by the time
+        anyone reaches this page they already have a row waiting — asking them
+        to type an address to "join" a board they are on would be asking for
+        something the site no longer needs.
+
+        Nothing that stood here was deleted outright. `POST /api/account/claim`
+        still exists and still trades a code for a session; the entry point to
+        it moved to Settings, where somebody restoring a purchase on a new
+        phone will look for it, rather than sitting in front of everybody else.
+      */}
 
       {me?.signedIn && (
         <p className="text-[0.8125rem] text-muted">
@@ -393,7 +225,23 @@ export default function LeaderboardPage() {
             <span className="w-7 shrink-0 text-[0.8125rem] font-bold tabular-nums text-muted">
               {r.rank}
             </span>
-            <span className="min-w-0 flex-1 truncate text-[0.9375rem] font-semibold text-ink">
+            {/*
+              A plan colours the name and nothing else — no badge, no crown, no
+              change to the ordering. Rank on this board is the score, and a
+              board where paying moved you up would not be a leaderboard.
+
+              `title` rather than visible label text so the colour has a stated
+              meaning for anyone who hovers, without adding a second thing to
+              read to every row. Colour is not carrying information a reader
+              would otherwise miss: the rank and score are already there in
+              text.
+            */}
+            <span
+              className={`min-w-0 flex-1 truncate text-[0.9375rem] font-semibold ${
+                r.paid ? "text-accent-ink" : "text-ink"
+              }`}
+              title={r.paid ? "On a plan" : undefined}
+            >
               {r.name}
               {r.isYou && <span className="ml-1.5 text-accent-ink">you</span>}
             </span>

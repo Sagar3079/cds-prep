@@ -40,6 +40,15 @@ async function cmd<T>(...parts: (string | number)[]): Promise<T | null> {
 export const kv = {
   get: (key: string) => cmd<string>("GET", key),
   set: (key: string, value: string) => cmd<string>("SET", key, value),
+  /**
+   * Set with an expiry, in one round trip.
+   *
+   * `set` followed by `expire` is two calls, and a crash between them leaves a
+   * key that never dies. Anonymous accounts are created on a TTL and there are
+   * a great many of them, so that leak is not one to accept.
+   */
+  setEx: (key: string, ttlSec: number, value: string) =>
+    cmd<string>("SET", key, value, "EX", ttlSec),
   /** Set only if absent. Returns true when this call created the key. */
   setIfAbsent: async (key: string, value: string, ttlSec?: number) => {
     const r = ttlSec
@@ -48,9 +57,47 @@ export const kv = {
     return r === "OK";
   },
   expire: (key: string, sec: number) => cmd<number>("EXPIRE", key, sec),
+  /**
+   * Drop the expiry, making a key permanent.
+   *
+   * The counterpart to anonymous accounts being born on a TTL: the moment one
+   * binds an email or holds a plan it has to stop being disposable, and this is
+   * the call that promotes it.
+   */
+  persist: (key: string) => cmd<number>("PERSIST", key),
+  /** Seconds left, -1 for no expiry, -2 for no key. Null if unreachable. */
+  ttl: (key: string) => cmd<number>("TTL", key),
   del: (key: string) => cmd<number>("DEL", key),
+  /**
+   * Many keys, one round trip.
+   *
+   * The admin panel reads accounts a page at a time, and a page of fifty read
+   * one-by-one is fifty sequential HTTPS calls at up to six seconds each. That
+   * is the difference between a dashboard and a timeout. Missing keys come back
+   * as nulls in position, so the caller can still line results up with input.
+   */
+  mget: async (keys: string[]) => {
+    if (keys.length === 0) return [];
+    return (await cmd<(string | null)[]>("MGET", ...keys)) ?? keys.map(() => null);
+  },
+  /** Remove a member from a sorted set. Needed to move a board row between accounts. */
+  zrem: (key: string, member: string) => cmd<number>("ZREM", key, member),
+  /**
+   * Trim a sorted set by rank, lowest scores first.
+   *
+   * Attempt history is append-only and would otherwise grow without limit for
+   * as long as somebody keeps practising. With scores as timestamps, dropping
+   * the lowest ranks drops the oldest entries — which is what makes a "last N
+   * attempts" list a fixed-size record rather than a slow leak.
+   */
+  zremrangebyrank: (key: string, start: number, stop: number) =>
+    cmd<number>("ZREMRANGEBYRANK", key, start, stop),
+  /** Lowest first, with scores. `zrevrange` is the counterpart. */
+  zrange: (key: string, start: number, stop: number) =>
+    cmd<string[]>("ZRANGE", key, start, stop, "WITHSCORES"),
   /** Returns the value AFTER the increment, or null if the store is unreachable. */
   incr: (key: string) => cmd<number>("INCR", key),
+  incrBy: (key: string, by: number) => cmd<number>("INCRBY", key, by),
   zadd: (key: string, score: number, member: string) =>
     cmd<number>("ZADD", key, score, member),
   /** Highest first. */

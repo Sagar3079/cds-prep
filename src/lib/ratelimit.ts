@@ -43,6 +43,41 @@ const WINDOWS = {
   "account:create": { tokens: 5, window: "1 h" },
 
   /**
+   * Anonymous account creation. 30 per hour.
+   *
+   * Deliberately NOT `account:create`. That bucket is five an hour because its
+   * comment reasons that a real person signs up once; this one fires because a
+   * real person opened a test, and it fires for everybody. A coaching centre or
+   * a college behind one NAT'd address is the normal case, not the abusive one,
+   * and five an hour would lock out the sixth student of the morning.
+   *
+   * Thirty still caps the obvious abuse — a script minting accounts in a loop —
+   * because the endpoint no-ops for anyone who already holds a session, so a
+   * genuine visitor consumes exactly one token ever.
+   */
+  "anon:create": { tokens: 30, window: "1 h" },
+
+  /**
+   * Admin sign-in. 10 per hour.
+   *
+   * This is defence in depth and nothing more. It is per-IP, it fails open on
+   * error, and it does not exist at all when KV is unconfigured — so the real
+   * protection against guessing is a 40-character secret and scrypt on every
+   * attempt (`lib/admin.ts`). Ten is generous for a human typing a password
+   * they have saved, and irrelevant to anyone who is not.
+   */
+  "admin:login": { tokens: 10, window: "1 h" },
+
+  /**
+   * Auto-saved test results. 40 per hour.
+   *
+   * One per finished test, and a test takes ten minutes, so a human ceiling is
+   * about six. Forty leaves room for the retries a flaky mobile connection
+   * produces without leaving the endpoint open as a write amplifier.
+   */
+  "attempt:save": { tokens: 40, window: "1 h" },
+
+  /**
    * Whoami. 60 per minute.
    *
    * Fired once per leaderboard mount, not polled, and it costs two Redis reads.
@@ -156,6 +191,9 @@ const MESSAGES: Record<LimitedRoute, string> = {
   "account:create":
     "That's a lot of join attempts in a short time. Give it a few minutes and try again.",
   "account:read": "Too many requests just now. Give it a moment and try again.",
+  "anon:create": "Too many new sessions from this network just now. Give it a few minutes.",
+  "admin:login": "Too many attempts. Wait an hour.",
+  "attempt:save": "Too many results saved in a short time. Give it a moment.",
   submit:
     "You've sent a lot of results in a short time. Wait a little and try again.",
   explain: "Too many explanations at once. Give it a moment and they'll load.",
