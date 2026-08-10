@@ -216,7 +216,20 @@ export default function AdminClient() {
         body: JSON.stringify({ password }),
       });
       if (!res.ok) {
-        setError("Wrong password.");
+        /**
+         * Only 401 means the password was wrong.
+         *
+         * This said "Wrong password." for every failure, which is how a
+         * same-origin check that rejected all real browsers spent a deploy
+         * looking like a typo. A message that names the wrong cause is worse
+         * than a vague one — it sends you to check the thing that is fine.
+         */
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        setError(
+          res.status === 401
+            ? "Wrong password."
+            : `Sign-in failed (${res.status}). ${data.error ?? ""}`.trim(),
+        );
         return;
       }
       setPassword("");

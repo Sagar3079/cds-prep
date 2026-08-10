@@ -159,8 +159,28 @@ export const ADMIN_HEADERS = {
 export function sameOrigin(req: Request): boolean {
   const origin = req.headers.get("origin");
   if (!origin) return true; // Same-origin fetches may omit it entirely.
+
+  /**
+   * Compare against the host the BROWSER asked for, not `req.url`.
+   *
+   * This is the whole bug that shipped: behind nginx, `req.url` is the address
+   * the proxy dialled — `http://127.0.0.1:3101/...` — so `new URL(req.url).host`
+   * is `127.0.0.1:3101` and can never equal `prepcadet.in`. Every browser
+   * login was refused as cross-origin, while curl sailed through because it
+   * sends no `Origin` header at all and took the early return above. A check
+   * that only fails for real clients is worse than no check.
+   *
+   * `host` is correct here because the site's nginx config sets
+   * `proxy_set_header Host $host` (ops/nginx/prepcadet.in). `x-forwarded-host`
+   * is preferred when present for deployments that rewrite Host instead.
+   */
+  const forwarded =
+    req.headers.get("x-forwarded-host")?.split(",")[0]?.trim() ||
+    req.headers.get("host");
+  if (!forwarded) return false;
+
   try {
-    return new URL(origin).host === new URL(req.url).host;
+    return new URL(origin).host === forwarded;
   } catch {
     return false;
   }
