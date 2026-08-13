@@ -131,6 +131,26 @@ export const sessionCookie = (token: string) =>
 /** Promote a disposable record to a permanent one. Call before granting anything. */
 export async function makePermanent(id: string): Promise<void> {
   await kv.persist(accountKey(id));
+  /**
+   * Dropping the TTL is not enough on its own. `currentAccount()` below
+   * re-arms `ANON_TTL_SEC` on every authenticated request FOR AS LONG AS the
+   * stored record still says `anonymous: true` — so persisting the key and
+   * stopping there is undone by the account holder's own next page load. Both
+   * halves have to change together, which is why this lives here rather than
+   * at each call site: the payment routes called `persist` alone for a while
+   * and nothing about it lasted past one visit.
+   */
+  const raw = await kv.get(accountKey(id));
+  if (!raw) return;
+  try {
+    const acct = JSON.parse(raw) as Account;
+    if (acct.anonymous) {
+      await kv.set(accountKey(id), JSON.stringify({ ...acct, anonymous: false }));
+    }
+  } catch {
+    // Corrupt record — the TTL removal above still stands, and nothing safe
+    // can be done with JSON that doesn't parse.
+  }
 }
 
 /**
@@ -162,9 +182,17 @@ export async function createAnonymousAccount(): Promise<{
   const wrote = await kv.setEx(accountKey(id), ANON_TTL_SEC, JSON.stringify(account));
   if (wrote !== "OK") return null;
 
+  /**
+   * `setEx`, not `set` then `expire`. The TTL used to be a second, unawaited
+   * call, so any failure in it — and `kv` swallows every failure, returning
+   * null for a dead socket exactly as it does for a missing key — left an
+   * immortal `sess:` key with nothing anywhere reporting it. One per affected
+   * request, in the hottest account path in the app, on a store that is billed
+   * by what it holds. Written in one command the key cannot exist without its
+   * expiry.
+   */
   const token = newToken();
-  await kv.set(sessionKey(token), id);
-  void kv.expire(sessionKey(token), SESSION_TTL_SEC);
+  await kv.setEx(sessionKey(token), SESSION_TTL_SEC, id);
 
   return { account, token };
 }

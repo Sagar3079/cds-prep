@@ -70,8 +70,14 @@ interface Stored {
 export async function issueCode(accountId: string): Promise<string> {
   const code = newCode();
   const record: Stored = { hash: hash(code, accountId), sentAt: Date.now() };
-  await kv.set(otpKey(accountId), JSON.stringify(record));
-  await kv.expire(otpKey(accountId), OTP_TTL_SEC);
+  /**
+   * One command, because the expiry is the security property here and not
+   * housekeeping. Ten minutes at five guesses is what makes six digits safe to
+   * mail; a `set` whose following `expire` silently failed — and `kv` reports
+   * nothing when it does — would leave a code good forever, and `checkCode`
+   * reads elapsed time from nothing but the key's own absence.
+   */
+  await kv.setEx(otpKey(accountId), OTP_TTL_SEC, JSON.stringify(record));
   await kv.del(attemptsKey(accountId));
   return code;
 }
@@ -170,8 +176,9 @@ export async function issueBindCode(
 ): Promise<string> {
   const code = newCode();
   const record: StoredBind = { hash: hash(code, accountId), sentAt: Date.now(), email };
-  await kv.set(bindKey(accountId), JSON.stringify(record));
-  await kv.expire(bindKey(accountId), OTP_TTL_SEC);
+  // Atomic for the same reason as `issueCode`, and more so: a bind code that
+  // never expires is a permanent claim on `email:<hash>` waiting to be made.
+  await kv.setEx(bindKey(accountId), OTP_TTL_SEC, JSON.stringify(record));
   await kv.del(bindAttemptsKey(accountId));
   return code;
 }

@@ -169,8 +169,9 @@ export async function POST(req: Request) {
 
   /**
    * Confirming a code from that mailbox proves ownership, which is the same
-   * evidence `/api/account/claim` accepts for the same conclusion. An older
-   * record that never finished verifying is verified now.
+   * evidence `/api/account/verify/check` accepts for the same conclusion. An
+   * older record that never finished verifying is verified now. (This used to
+   * name `/api/account/claim`; that route is gone — see `../../route.ts`.)
    */
   if (!owner.emailVerified || owner.anonymous) {
     owner = { ...owner, emailVerified: true, anonymous: false };
@@ -181,11 +182,43 @@ export async function POST(req: Request) {
   // The owner account is confirmed loadable — only now is it safe to move
   // anything the caller paid for across, since this is the step that deletes
   // it from `acct.id`.
-  const moved = await transferPlan(acct.id, ownerId);
+  //
+  // `transferPlan` now throws rather than silently truncating a balance when
+  // it can't tell "the owner has no plan" from "the read failed" (see
+  // entitlement.ts's `activePlanStrict`). Uncaught, that was a 500 with no
+  // session cookie set — the caller ends up signed into neither account,
+  // holding a code that has already been spent (`checkBindCode` is single-use
+  // above this point), unable to retry. Caught here, `acct.id`'s plan is
+  // provably untouched (the strict read throws before anything is written),
+  // so the honest answer is the same "try again" 500 the owner-load failure
+  // above already gives — nothing was moved, nothing was lost.
+  let moved: Awaited<ReturnType<typeof transferPlan>>;
+  try {
+    moved = await transferPlan(acct.id, ownerId);
+  } catch {
+    // Two different failures inside `transferPlan` land here, and both leave
+    // `acct.id`'s plan provably untouched (it throws before writing anything)
+    // — but the code the confirmed address just spent is single-use, so
+    // "try again" costs a fresh one against a 3/hour send limit. Worth saying
+    // plainly rather than blaming the account load, which this may not be.
+    return NextResponse.json(
+      {
+        error:
+          "Your account is fine, but the transfer couldn't be confirmed. Email support and it'll be sorted.",
+      },
+      { status: 500 },
+    );
+  }
 
+  /**
+   * `setEx`, so the key cannot outlive its expiry. The TTL was a separate,
+   * unawaited `expire` — and `kv` reports no failure it ever suffers — so a
+   * dropped second call left an immortal `sess:` key behind, which for a
+   * session is worse than a leak: it is a cookie that stays valid for as long
+   * as Redis lives, on the one account here that holds a paid plan.
+   */
   const token = newToken();
-  await kv.set(sessionKey(token), ownerId);
-  void kv.expire(sessionKey(token), SESSION_TTL_SEC);
+  await kv.setEx(sessionKey(token), SESSION_TTL_SEC, ownerId);
 
   bumpAsync("restore:ok");
 

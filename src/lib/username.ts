@@ -8,7 +8,7 @@ import { randomInt } from "node:crypto";
  * candidate nothing about whether they beat anyone, so the generated name has
  * to read like a person picked it.
  *
- * There is no uniqueness index in this app — `POST /api/account` has never
+ * There is no uniqueness index in this app — no account-creation path has ever
  * enforced one, and adding a permanent `uname:` key per account would grow a
  * second copy of the account table forever. So the space is made wide instead:
  * 96 x 96 x 32^4 is a little over nine billion, which puts a coin-flip
