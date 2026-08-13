@@ -357,15 +357,13 @@ export default function SettingsPage() {
           Clearing site data resets it all.
         </p>
         <p className="text-[0.8125rem] leading-relaxed text-muted">
-          The leaderboard is the exception, and only if you join it. Joining
-          stores your email address, the username you pick and your daily score
-          on a server. Your email is never shown to anyone — the board shows a
-          masked form like{" "}
-          <span className="whitespace-nowrap">s••••@gmail.com</span> unless you
-          set a username. Buying a plan requires confirming that address with a
-          six-digit code; joining the board alone does not, so a board name is
-          a label rather than proof of who somebody is. Leaderboard entries are
-          deleted two days after the day they belong to.
+          The leaderboard is the exception. An account and a generated name are
+          created automatically the first time you start a test — nothing to
+          join, no email to type — and that name plus your score are what the
+          board shows. Buying a plan requires confirming an email address with
+          a six-digit code; being on the board alone does not, so a board name
+          is a label rather than proof of who somebody is. Boards are weekly
+          and cleared out about nine days after the week they belong to.
         </p>
         <div className="flex flex-wrap gap-x-4 gap-y-1">
           <Link

@@ -19,9 +19,21 @@ export const metadata: Metadata = pageMetadata({
  * leaderboard in `src/app/api/submit` and `src/app/api/leaderboard`, error
  * reports in `src/app/api/log`, rate limiting in `src/lib/ratelimit.ts`,
  * automatic accounts in `src/app/api/session/anon`, saved results in
- * `src/lib/attempts.ts`, the daily counts in `src/lib/analytics.ts`, and the
- * internal page in `src/app/admin`. If any of those change, this page is wrong
- * until it changes too.
+ * `src/lib/attempts.ts`, the daily counts in `src/lib/analytics.ts`, the visit
+ * summary in `src/lib/traffic.ts`, the host and error panels in
+ * `src/lib/health.ts`, and the internal page in `src/app/admin` +
+ * `src/lib/adminData.ts`. If any of those change, this page is wrong until it
+ * changes too.
+ *
+ * The three that were wrong and are the reason this warning exists: the IP
+ * bullet in section 2 said an address "is not built into a profile" while
+ * `traffic.ts` was grouping every request by address; section 4 described the
+ * internal page as accounts, results and payments when it also carries the
+ * visit summary, host health and client crash reports; and section 6 promised
+ * permanent retention for "an email or a plan" when only binding an email
+ * drops the account's TTL. A policy written against code drifts the moment the
+ * code moves, so treat this file as part of the change, not as documentation
+ * of it.
  */
 export default function PrivacyPage() {
   return (
@@ -84,8 +96,12 @@ export default function PrivacyPage() {
       </p>
       <p>
         An account created this way is <strong>deleted automatically after
-        ninety days</strong> without a visit, unless you have bound an email or
-        bought a plan.
+        ninety days</strong> without a visit. The ninety days restart every time
+        you come back, so an account in use is never reaped, and a completed
+        purchase removes that expiry altogether. Binding an email removes it
+        too — which is the honest reason we ask for an address
+        after a purchase rather than a marketing one: it is what lets you reach
+        what you bought from a different browser or a new phone.
       </p>
 
       <h3>If you add an email</h3>
@@ -108,16 +124,28 @@ export default function PrivacyPage() {
         </li>
       </ul>
       <p>
-        Your address is never shown on the leaderboard. Only the generated name
-        is public.
+        <strong>Your full address is never shown on the leaderboard</strong>,
+        and what is shown depends on how old your account is. Every account
+        created since sign-up became automatic carries a generated name, and
+        that is all the board ever displays for it. Accounts from before that —
+        when an email was the only way in — may have no name to show, and for
+        those the board shows the address <strong>masked</strong>: the first
+        character, then dots, then the domain, so{" "}
+        <code>sagar@gmail.com</code> appears as <code>s••••@gmail.com</code>.
+        The masking is deliberate, so you can recognise your own row without
+        the address being readable by anyone else. The consequence to be plain
+        about: the <em>domain</em> is visible on those rows, and the length of
+        the hidden part is approximated rather than exact. The whole address is
+        never shown.
       </p>
 
       <h3>When you finish a test</h3>
       <ul>
         <li>
           The result is saved to your account as described above, and for the
-          daily test your score and display name go on that day&apos;s public
-          leaderboard. Both are{" "}
+          daily test your score and display name go on that week&apos;s public
+          leaderboard — one board per subject, Sunday to Saturday, holding your
+          best score of the week rather than your latest. Both are{" "}
           <strong>visible to anyone who opens it</strong>.
         </li>
         <li>
@@ -134,10 +162,26 @@ export default function PrivacyPage() {
       <h3>Automatically, on any request</h3>
       <ul>
         <li>
-          <strong>Your IP address</strong>, used transiently for rate limiting —
-          to stop one client hammering an endpoint. It is not built into a
-          profile and is not used to identify you. Standard web-server request
-          logs on our host may also record it, as they do for any website.
+          <strong>Your IP address</strong>, used for rate limiting — to stop one
+          client hammering an endpoint — and, separately, recorded in the
+          ordinary access log our web server keeps for every request, as any web
+          server does.
+        </li>
+        <li>
+          <strong>A visit summary built from those logs.</strong> We read them
+          back on our internal page to see how the site is being found and used,
+          and that reading is <strong>grouped by address</strong>: for each one
+          it works out which of our pages were requested and which came first,
+          when it arrived, how far through landing → home → test → results →
+          pricing it got, whether the device is a phone, tablet or desktop,
+          which browser, and which site referred it. What the page then shows is
+          counts built from those groups — how many came from Instagram, how
+          many reached the test, how many saw one page and left — not a row per
+          address and not a list of addresses. We say &quot;grouped by
+          address&quot; rather than &quot;per person&quot; because it is not the
+          same thing: everyone behind one coaching-centre or hostel router looks
+          like a single visitor here, and one person moving from wifi to mobile
+          data looks like two.
         </li>
         <li>
           <strong>Error reports</strong>, if a page crashes: the error message,
@@ -146,6 +190,18 @@ export default function PrivacyPage() {
           deleted automatically after three days.
         </li>
       </ul>
+      <p>
+        What the visit summary is <strong>not</strong> is as much the point as
+        what it is. It is not joined to your account, your email, your session
+        cookie or your test results — nothing anywhere links an address to a
+        person&apos;s row on the leaderboard — and we make no attempt to work
+        out whose address it is. We keep no separate copy of it either: it is
+        recomputed from whatever the server&apos;s own access logs still hold
+        and held in memory for a few minutes at a time, so deleting the logs
+        deletes it. It exists so we can tell whether money spent bringing people
+        here brought anyone who then took a test. There are still no third-party
+        analytics and no tracking scripts of any kind.
+      </p>
 
       <h2>3. Payments</h2>
       {BILLING_LIVE ? (
@@ -171,13 +227,16 @@ export default function PrivacyPage() {
       <h2>4. Who else can see it</h2>
       <ul>
         <li>
-          <strong>Anyone, for the leaderboard</strong> — display name and score,
-          by design. Nothing else on it is public.
+          <strong>Anyone, for the leaderboard</strong> — the display name
+          described in section 2 and your score, by design. Nothing else on it
+          is public: not your email, not your other results, and{" "}
+          <strong>not whether you are on a paid plan</strong>. Rank is the score
+          and nothing else.
         </li>
         <li>
           <strong>Upstash</strong>, which provides the Redis database that holds
-          accounts, sessions, leaderboard entries, test results, and error
-          reports.
+          accounts, sessions, leaderboard entries, test results, payment records
+          and error reports.
         </li>
         <li>
           <strong>Our hosting provider</strong>, which serves the site and keeps
@@ -188,11 +247,46 @@ export default function PrivacyPage() {
           only.
         </li>
         <li>
-          <strong>Us</strong> — {SITE.name} has a password-protected internal
-          page listing accounts, test results and payment records, used to run
-          the service and to check that people who paid actually received what
-          they paid for. Email addresses are hidden on it by default and shown
-          one at a time only when deliberately revealed.
+          <strong>Us</strong> — {SITE.name} has one password-protected internal
+          page, used to run the service and to check that people who paid
+          actually received what they paid for. It carries more than accounts
+          and payments, so it is listed in full below.
+        </li>
+      </ul>
+
+      <h3>What the internal page shows</h3>
+      <ul>
+        <li>
+          <strong>Accounts</strong> — display name, when it was created, whether
+          an email is bound and whether it has been confirmed, and whether a
+          plan is live. Email addresses are hidden by default and shown one at a
+          time only when deliberately revealed, and no other column is derived
+          from an address, so revealing is the only way one appears.
+        </li>
+        <li>
+          <strong>Results</strong> — one account&apos;s saved attempts when
+          opened, and a feed of the most recent finished tests by anybody, each
+          with its score and the name that would appear on the board.
+        </li>
+        <li>
+          <strong>Money</strong> — payments taken, and checkouts started and
+          never finished, with the plan, the amount, the reference number and
+          the account each belongs to.
+        </li>
+        <li>
+          <strong>The visit summary</strong> described in section 2, read from
+          the server&apos;s access logs.
+        </li>
+        <li>
+          <strong>Server and database health</strong> — uptime, memory, disk,
+          load, certificate expiry, which build is running, and how many keys
+          the database holds and how much memory they occupy. Nothing in this
+          part concerns any individual.
+        </li>
+        <li>
+          <strong>Crash reports</strong> from the last three days — the same
+          ones described in section 2, with their message, stack trace and
+          route.
         </li>
       </ul>
       <p>
@@ -206,16 +300,38 @@ export default function PrivacyPage() {
 
       <h2>5. Counts we keep</h2>
       <p>
+        Three different things, kept apart here because they are not equally
+        thin and one paragraph covering all three would flatter two of them.
+      </p>
+
+      <h3>Daily totals</h3>
+      <p>
         We count how many people arrive each day, how many accounts are created,
         how many tests are finished, and how many payments succeed. These are{" "}
         <strong>daily totals and nothing else</strong> — a number per day, with
         no name, no address, no device details and nothing tying any of it back
         to a person. They tell us that eleven tests were finished yesterday, not
-        who finished them.
+        who finished them. They are kept for about thirteen months.
       </p>
+
+      <h3>The visit summary</h3>
       <p>
-        Separately, to stop one person taking unlimited free random tests by
-        clearing their browser, we keep a daily count of free random tests
+        This is the one described in section 2, and it is{" "}
+        <strong>not just a number per day</strong>. It is read from our web
+        server&apos;s access logs and grouped by network address before it is
+        counted, so along the way it knows the pages one address requested, the
+        one it landed on, when it arrived, the referring site, the device class
+        and the browser. It holds no name, no email and no link to any account,
+        the page it feeds shows totals rather than addresses, and we keep no
+        copy beyond the logs it is read from — but it is a fuller picture than
+        the totals above, and it would be misleading to let it sit under the
+        sentence written for them.
+      </p>
+
+      <h3>The free-tier check</h3>
+      <p>
+        Separately again, to stop one person taking unlimited free random tests
+        by clearing their browser, we keep a daily count of free random tests
         started per network address. The address itself is not stored — only a
         one-way fingerprint of it — and the count is deleted after two days.
       </p>
@@ -223,19 +339,41 @@ export default function PrivacyPage() {
       <h2>6. How long it is kept</h2>
       <ul>
         <li>
-          Accounts with no email and no plan:{" "}
+          Accounts with no email bound:{" "}
           <strong>ninety days after your last visit</strong>, then deleted
-          automatically along with their saved results.
+          automatically along with their saved results. The ninety days restart
+          on every visit.
         </li>
         <li>
-          Accounts with an email or a plan: until you ask us to delete them.
+          Accounts with an email bound: until you ask us to delete them.
+        </li>
+        <li>
+          Accounts that have bought a plan: <strong>never deleted for
+          inactivity while that plan is live</strong>, and the ninety-day
+          expiry is dropped the moment the purchase is granted, so the account
+          is kept until you ask us to delete it. The payment record itself —
+          separate from the account — is kept for about thirteen months so a
+          purchase can be traced and put back by hand, which is what to write
+          to us about if a plan you paid for is not showing.
         </li>
         <li>Saved test results: the most recent fifty per account.</li>
+        <li>
+          The internal recent-results feed: the last five hundred finished tests
+          by anybody, each holding the account it belongs to, the name that
+          appears on the board and the score. It is trimmed by count rather than
+          by age, so an entry can outlive the account it came from until five
+          hundred more tests push it out. It is never public.
+        </li>
         <li>Sessions: until they expire or you sign out.</li>
         <li>Daily counts: about thirteen months. They name nobody.</li>
         <li>
-          Leaderboard entries: they are per-day, and old days are not the
-          public board.
+          Leaderboard entries: one board per subject per week, running Sunday to
+          Saturday and deleted about nine days after the week it belongs to
+          opens. Last week&apos;s board is not the public board.
+        </li>
+        <li>
+          The visit summary: not stored at all — it lives as long as the web
+          server&apos;s own access logs do, and is recomputed from them.
         </li>
         <li>Error reports: three days, then deleted automatically.</li>
         <li>
@@ -257,9 +395,13 @@ export default function PrivacyPage() {
           <strong>Delete your account</strong> — if you bound an email, write to{" "}
           <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a> from that
           address and we will remove the account, its email, its saved results
-          and its leaderboard entries. If you never bound one, clearing site
-          data is enough: what is left holds no email and nothing that names
-          you, and it deletes itself after ninety days.
+          and its leaderboard entries. One thing we will not claim to remove
+          instantly is the internal recent-results feed in section 6: it is
+          trimmed by count, so an entry there carrying a display name and a
+          score rotates out as new tests arrive rather than on the day you ask.
+          If you never bound an address, clearing site data is enough: what is
+          left holds no email and nothing that names you, and it deletes itself
+          after ninety days.
         </li>
         <li>
           <strong>See a copy, or correct something</strong> — same address, same

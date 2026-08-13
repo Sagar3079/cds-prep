@@ -11,8 +11,6 @@ interface Row {
   name: string;
   score: number;
   isYou: boolean;
-  /** On a paid plan. Colours the name; never affects the rank. */
-  paid?: boolean;
 }
 interface Board {
   /** The Sunday this week's board opened on, in IST. */
@@ -197,10 +195,13 @@ export default function LeaderboardClient({
         to type an address to "join" a board they are on would be asking for
         something the site no longer needs.
 
-        Nothing that stood here was deleted outright. `POST /api/account/claim`
-        still exists and still trades a code for a session; the entry point to
-        it moved to Settings, where somebody restoring a purchase on a new
-        phone will look for it, rather than sitting in front of everybody else.
+        Nothing that stood here was deleted outright. Trading a code for a
+        session moved to Settings' bind flow (`/api/account/bind`), where
+        somebody restoring a purchase on a new phone will look for it, rather
+        than sitting in front of everybody else. `POST /api/account/claim` — an
+        older route that could hand a session to anyone who could spell an
+        unclaimed address, no code required — is actually gone; see
+        `src/app/api/account/route.ts`'s header comment for why.
       */}
 
       {me.signedIn && (
@@ -252,22 +253,14 @@ export default function LeaderboardClient({
               {r.rank}
             </span>
             {/*
-              A plan colours the name and nothing else — no badge, no crown, no
-              change to the ordering. Rank on this board is the score, and a
-              board where paying moved you up would not be a leaderboard.
-
-              `title` rather than visible label text so the colour has a stated
-              meaning for anyone who hovers, without adding a second thing to
-              read to every row. Colour is not carrying information a reader
-              would otherwise miss: the rank and score are already there in
-              text.
+              A plan used to colour the name here. It no longer does, and the
+              board no longer receives that fact at all: this page is public and
+              unauthenticated, so anyone reading the response could see which
+              named people had paid. See the note in `api/leaderboard/route.ts`
+              — the row is a name and a score, and "you" is the only marking on
+              it.
             */}
-            <span
-              className={`min-w-0 flex-1 truncate text-[0.9375rem] font-semibold ${
-                r.paid ? "text-accent-ink" : "text-ink"
-              }`}
-              title={r.paid ? "On a plan" : undefined}
-            >
+            <span className="min-w-0 flex-1 truncate text-[0.9375rem] font-semibold text-ink">
               {r.name}
               {r.isYou && <span className="ml-1.5 text-accent-ink">you</span>}
             </span>

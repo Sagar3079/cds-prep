@@ -118,7 +118,7 @@ export const rupees = (paise: number) =>
 export const BILLING_LIVE: boolean = true;
 
 /** Shown on every policy page. Bump when the wording materially changes. */
-export const LAST_UPDATED = "7 August 2026";
+export const LAST_UPDATED = "13 August 2026";
 
 /**
  * The year in the footer's copyright line.

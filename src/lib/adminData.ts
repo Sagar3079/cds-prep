@@ -1,7 +1,7 @@
 import "server-only";
 import { kv, kvConfigured } from "./kv";
 import { accountKey, type Account } from "./account";
-import { activePlan, istDayKey } from "./entitlement";
+import { istDayKey } from "./entitlement";
 import { series, recentDays, type Metric } from "./analytics";
 import { recentAttempts, attemptsFor } from "./attempts";
 import { looksGenerated } from "./username";
@@ -131,7 +131,21 @@ export async function listUsers(opts: {
       }
       return {
         id: a.id,
-        name: a.username?.trim() || (a.email ? a.email.split("@")[0] : "Cadet"),
+        /**
+         * Never derived from the address.
+         *
+         * This used to fall back to `a.email.split("@")[0]`, which put the
+         * local part — the half of an address a person is actually recognised
+         * by — in the Name column of a table whose Email column is deliberately
+         * gated behind a per-row reveal. For every account with an address and
+         * no username, which is every account predating generated names, the
+         * gate was protecting nothing: the identity was already on screen one
+         * column to the left, for all two hundred rows at once. "Cadet" is the
+         * same generic fallback `account.ts`'s `displayName()` uses for the
+         * same case on the public board. `email` below is untouched and still
+         * the only way an address appears, one row at a time, on purpose.
+         */
+        name: a.username?.trim() || "Cadet",
         email: a.email ?? null,
         emailVerified: Boolean(a.emailVerified),
         anonymous: Boolean(a.anonymous),
@@ -174,15 +188,23 @@ export interface AdminPayment {
 /**
  * Every payment ever taken, newest first.
  *
- * `rzp:paid:*` is permanent and keyed by order id with no by-account index, so
- * this is the only way to answer any revenue question — and the only way to
- * find the failure this panel exists to surface: money received against an
- * account that never got a plan. That has happened once already in production.
+ * `rzp:paid:*` is keyed by order id with no by-account index, so this is the
+ * only way to answer any revenue question — and the only way to find the
+ * failure this panel exists to surface: money received against an account
+ * that never got a plan. That has happened once already in production.
  *
- * READ ONLY. `rzp:paid:<orderId>` is not merely a record: its NX write is the
- * entire guard against `verify` and the webhook both granting for one payment.
- * Deleting or pre-creating one causes a real customer to silently never receive
- * what they paid for, so nothing in the admin surface may write to this family.
+ * Not permanent any more: it carries `PAYMENT_RECORD_TTL_SEC` (400 days, see
+ * `entitlement.ts`) rather than living forever, so a revenue query against a
+ * genuinely ancient order will come back empty — the Razorpay dashboard is the
+ * durable record past that point, this panel is the operational one.
+ *
+ * READ ONLY regardless. The grant-idempotency guard against `verify` and the
+ * webhook both granting for one payment now lives on a SEPARATE key
+ * (`rzp:granted:<orderId>`, `entitlement.ts`'s `grantedKey`) precisely so a
+ * lost write to one doesn't strand the other — but `rzp:paid:<orderId>` is
+ * still the payment's only record, and deleting or pre-creating one still
+ * causes a real customer to silently never receive what they paid for. Nothing
+ * in the admin surface may write to either family.
  */
 export async function listPayments(limit = 500): Promise<Walk<AdminPayment> & {
   totalPaise: number;

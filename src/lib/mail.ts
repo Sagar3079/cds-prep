@@ -63,9 +63,31 @@ async function send(input: {
 
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
-    // The provider's wording can name the account and the domain, so it goes to
-    // the log; the caller gets a token it can turn into plain English.
-    console.error(`[mail] send failed ${res.status}: ${detail.slice(0, 400)}`);
+    /**
+     * The provider quotes the recipient back in its error text — "Invalid `to`
+     * field", a suppression notice, a bounce reason — and this line goes
+     * straight into the server's log, where a candidate's address would then
+     * sit in plaintext for as long as logs are kept, next to the timestamp
+     * that says exactly when they asked for a code. A log is not a place an
+     * address belongs, and nobody consented to it landing there by typing one
+     * into a verification box.
+     *
+     * So the local part is masked and the domain kept. `@gmail.com` still
+     * tells you the recipient was a consumer mailbox and that the field parsed
+     * at all, which is most of what this line is read for; the rest of the
+     * provider's wording is kept verbatim, because a redacted log that cannot
+     * explain a failure only gets replaced by somebody logging the raw body
+     * again. The status code is the first thing on the line for the same
+     * reason — 401 is a key problem, 422 is an address problem, and those need
+     * different people.
+     */
+    // The excluded characters are JSON and prose punctuation, not address
+    // syntax: the local part has to be able to carry `.` and `+`, while a
+    // quote, brace or colon means the address ended and the provider's own
+    // wording resumed — swallowing those would mangle the line this is meant
+    // to keep readable.
+    const safe = detail.replace(/[^\s"'<>@,;:(){}[\]]+@([A-Za-z0-9.-]+)/g, "•••@$1");
+    console.error(`[mail] send failed ${res.status}: ${safe.slice(0, 400)}`);
     return { ok: false, reason: res.status === 401 ? "bad-key" : "rejected" };
   }
 

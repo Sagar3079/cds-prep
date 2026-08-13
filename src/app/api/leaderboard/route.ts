@@ -73,7 +73,6 @@ export interface BoardResult {
     name: string;
     score: number;
     isYou: boolean;
-    paid: boolean;
   }[];
   yourRank: number | null;
   total: number;
@@ -135,26 +134,22 @@ export async function getBoard(
   const account = me !== undefined ? me : await currentAccount();
 
   /**
-   * Which rows belong to somebody on a plan, so the board can mark them.
+   * No plan status on this board, and nothing may put it back.
    *
-   * One `MGET` for the page rather than a `GET` per row: this renders on every
-   * leaderboard view, and a round trip per entry would put twenty sequential
-   * calls in front of it.
+   * Rows used to carry `paid`, read from `entl:*` with one MGET, and the client
+   * coloured a paying candidate's name with it. The colour was harmless as a
+   * design; the field was not. This route is unauthenticated and the page it
+   * feeds is public, so `paid` told anyone who opened the board — or simply
+   * curled the endpoint — exactly which named people had handed money over for
+   * a subscription. Nobody agreed to publish that by taking a practice test,
+   * and the privacy policy's promise about this board is a name and a score and
+   * nothing else.
    *
-   * It is only ever a colour on a name. Rank is the score and nothing else — a
-   * board where paying moved you up would not be a leaderboard.
+   * Who is on a plan is a real operational question and it already has an
+   * answer behind the admin gate (`lib/adminData.ts`). It does not need a
+   * second, public one. Do not reintroduce a badge, a colour, an ordering
+   * tweak or any other paid signal on a response this route serves.
    */
-  const plans = await kv.mget(entries.map((e) => `entl:${e.id}`));
-  const paidRow = plans.map((raw) => {
-    if (!raw) return false;
-    try {
-      const until = (JSON.parse(raw) as { until?: number }).until;
-      return typeof until === "number" && until > Date.now();
-    } catch {
-      return false;
-    }
-  });
-
   const rows = entries.map((e, i) => ({
     rank: i + 1,
     name: names[i] ?? "Someone",
@@ -162,7 +157,6 @@ export async function getBoard(
     // −0.25 penalty in play.
     score: e.score / 100,
     isYou: Boolean(account && account.id === e.id),
-    paid: paidRow[i] ?? false,
   }));
 
   let yourRank: number | null = null;
