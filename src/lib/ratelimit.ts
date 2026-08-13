@@ -151,15 +151,28 @@ const WINDOWS = {
   "random:start": { tokens: 60, window: "1 h" },
 
   /**
-   * Opening a checkout. 10 per hour.
+   * Opening a checkout. 40 per hour.
    *
    * Every one of these is a live call to Razorpay's Orders API against our
    * credentials, so an unthrottled caller can mint orders in our account for
-   * free. A real buyer creates one or two — an abandoned modal, then a retry.
-   * Ten leaves room for a genuinely indecisive afternoon and still caps what a
-   * script can do to the orders list.
+   * free — which is what the old figure of ten was sized against, counting one
+   * indecisive buyer and forgetting there is more than one buyer per address.
+   * This bucket is keyed on IP and is spent BEFORE anyone is authenticated, and
+   * the reasoning `anon:create` sets out applies here word for word: a coaching
+   * centre or a college behind one NAT'd address is the normal case in this
+   * market, not the abusive one. A real buyer costs one or two tokens — an
+   * abandoned modal, then a retry — so ten locked out the fifth person on that
+   * network to reach for a card that hour, and did it with a 429 in front of
+   * somebody trying to pay us.
+   *
+   * Forty is roughly twenty genuine buyers an hour behind one address, matched
+   * to `anon:create`'s thirty on the same shared-connection reasoning and a
+   * little above it because this endpoint bites at the worst possible moment.
+   * It still caps the abuse it was written for: a script hammering this can
+   * make forty junk orders an hour and nothing else, since no order can be
+   * captured without a payment and uncaptured orders cost only dashboard noise.
    */
-  "payment:order": { tokens: 10, window: "1 h" },
+  "payment:order": { tokens: 40, window: "1 h" },
 
   /**
    * Verifying a payment. 60 per hour.

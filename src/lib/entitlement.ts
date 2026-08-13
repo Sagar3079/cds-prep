@@ -29,6 +29,41 @@ const usageKey = (accountId: string, day: string) => `rq:${accountId}:${day}`;
 const planKey = (accountId: string) => `entl:${accountId}`;
 
 /**
+ * "Has anybody taken responsibility for granting this order?", as its own key.
+ *
+ * A different question from "has this payment been recorded", and collapsing
+ * the two is what could take money and hand back nothing. `/verify` and the
+ * webhook both race to write `rzp:paid:<order>` with NX and the loser used to
+ * skip the grant — but that NX write also reports a loss when the call itself
+ * times out on the wire, and then a write that DID land is found by the next
+ * reader, reported to the customer as confirmed, and granted by nobody: this
+ * side skipped on a false loss, the webhook skipped on a true one, and
+ * `rzp:paid:*` is written once and never revisited, so nothing ever retried.
+ *
+ * Asking the grant question separately decouples it. Whichever route runs
+ * second still gets to claim the grant when the first never did, while NX
+ * still guarantees exactly one of them ever holds the claim.
+ *
+ * It lives here rather than beside `paidKey` in `razorpay.ts` because it is an
+ * entitlement's idempotency and not a gateway detail — `transferPlan` below
+ * already carries the same shape of marker against the same hazard.
+ */
+export const grantedKey = (orderId: string) => `rzp:granted:${orderId}`;
+
+/**
+ * How long a payment record and its grant marker live. 400 days.
+ *
+ * The figure `analytics.ts` gives its own long-lived counters and the one
+ * `transferPlan`'s `xfer:` marker already uses, so nothing new is being
+ * invented. Both payment keys share it, and that they MATCH is the load-bearing
+ * part: `/verify` needs no session and the signature it checks stays valid
+ * forever, so the marker is the only thing between a replayed callback and a
+ * second free plan. A marker that expired before the record it guards would
+ * reopen exactly the double grant it exists to close.
+ */
+export const PAYMENT_RECORD_TTL_SEC = 400 * 86_400;
+
+/**
  * The calendar day, in IST.
  *
  * `toISOString().slice(0,10)` is a bug here for the same reason `storage.ts`
@@ -63,6 +98,44 @@ export async function activePlan(
 }
 
 /**
+ * `activePlan`, for the one caller that must not confuse "there is no plan"
+ * with "we could not find out".
+ *
+ * `kv.get` fails open: a timeout, a dropped connection and a 500 from Upstash
+ * all arrive as the same `null` that a missing key does. Everywhere else that
+ * is the trade this app makes on purpose. In a grant it is not, because there
+ * "no existing plan" means "start counting from today" — so one unlucky read
+ * during a renewal silently overwrites the twenty-five days somebody still had
+ * with the thirty they just bought, logs nothing, and leaves no record of what
+ * was thrown away.
+ *
+ * So this one reads through `kv.getStrict`, which throws on anything that is
+ * not an answer. `null` from it means precisely one thing: the store replied
+ * and the key is not there — no plan, or one that lapsed and was reaped, both
+ * of which correctly extend from now.
+ *
+ * A present-but-unreadable record throws as well. It is remaining paid time
+ * that EXISTS and cannot be read, which is the same harm as a failed read:
+ * overwriting it would destroy both the days and the only evidence of them,
+ * where failing leaves the raw value in Redis and the payment showing as
+ * `ungranted` in the admin panel for somebody to look at.
+ */
+async function activePlanStrict(
+  accountId: string,
+): Promise<Entitlement | null> {
+  const raw = await kv.getStrict(planKey(accountId));
+  // Strictly `null`, not falsy: an empty value at this key is a corrupt record,
+  // not an absent one, and it falls through to the parse below to be treated
+  // as such rather than quietly reading as "this account never had a plan".
+  if (raw === null) return null;
+  const e = JSON.parse(raw) as Entitlement;
+  if (typeof e.until !== "number") {
+    throw new Error(`entitlement record for ${accountId} carries no expiry`);
+  }
+  return e.until > Date.now() ? e : null;
+}
+
+/**
  * Serialize read-modify-write access to one account's entitlement.
  *
  * `grantPlan` and `transferPlan` both GET the current record, compute a new
@@ -92,12 +165,31 @@ async function withAccountLock<T>(
   fn: () => Promise<T>,
 ): Promise<T> {
   const lockKey = `lock:entl:${accountId}`;
+  /**
+   * Bounded by the clock, not by a number of attempts.
+   *
+   * Thirty tries reads like three seconds only if every `setIfAbsent` comes
+   * back promptly. Nothing makes it: `kv`'s fetch allows each call a six-second
+   * `AbortSignal.timeout`, so a store that is slow rather than down turned this
+   * into thirty × six ≈ three minutes spent inside a live payment request —
+   * well past nginx's proxy read timeout, which turns one webhook delivery into
+   * a retry landing while the first is still running, which is more contention,
+   * which makes the loop slower still.
+   *
+   * A deadline caps the whole loop no matter how slow one call is. The honest
+   * worst case is these eight seconds plus whichever call was already in flight
+   * when they ran out, so ~14s rather than ~180s.
+   */
+  const deadline = Date.now() + 8_000;
   let acquired = false;
-  for (let i = 0; i < 30 && !acquired; i += 1) {
+  while (!acquired && Date.now() < deadline) {
     acquired = await kv.setIfAbsent(lockKey, "1", 5);
-    if (!acquired) await new Promise((r) => setTimeout(r, 50 + Math.random() * 50));
+    // Randomised, so two callers that collided do not line up and collide again.
+    if (!acquired && Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 50 + Math.random() * 50));
+    }
   }
-  // ~3s of contention and still no lock: proceed unlocked rather than hang a
+  // The deadline passed and still no lock: proceed unlocked rather than hang a
   // payment confirmation indefinitely. This one call degrades to the pre-fix
   // behaviour instead of failing the request outright — a real regression
   // only under contention far beyond anything this app has ever seen.
@@ -126,22 +218,108 @@ export async function grantPlan(o: {
   return withAccountLock(o.accountId, async () => {
     const plan = PLANS.find((p) => p.id === o.planId);
     const days = plan?.days ?? 0;
-    const existing = await activePlan(o.accountId);
+    /**
+     * Refuse rather than guess.
+     *
+     * The whole "extends from whatever is left" promise above rests on this one
+     * read, and a read that failed looks exactly like an account with nothing on
+     * it. Proceeding on that would hand a renewing customer thirty days in place
+     * of the fifty-five they should have had and destroy the old record doing
+     * it, with no error and nothing left to reconcile from.
+     *
+     * Throwing costs far less than that. The payment is already recorded, both
+     * callers hand back their grant claim when this throws so the other one can
+     * try, Razorpay redelivers the webhook until it is granted, and until then
+     * the payment shows in the admin panel as one whose account holds no live
+     * plan. Loud and recoverable beats quiet and permanent.
+     */
+    let existing: Entitlement | null;
+    try {
+      existing = await activePlanStrict(o.accountId);
+    } catch (err) {
+      console.error(
+        `[entitlement] grant aborted for ${o.accountId} on order ${o.orderId}: existing plan unreadable`,
+        err,
+      );
+      throw new Error(`entitlement read failed for ${o.accountId}`);
+    }
     const from = existing ? existing.until : Date.now();
     const record: Entitlement = {
       planId: o.planId,
       until: from + days * 86_400_000,
       orderId: o.orderId,
     };
-    await kv.set(planKey(o.accountId), JSON.stringify(record));
-    // TTL a week past expiry: the record is worth reading for a few days after
-    // it lapses (support asking "what did they buy?") and worth nothing forever.
-    await kv.expire(
+    /**
+     * The one write this whole function exists to make, and until now the
+     * one place in it that still trusted `kv` blind. `kv.set` fails open —
+     * timeout, 5xx, dropped connection all come back as the same `null` a
+     * genuine success never returns — so a caller that doesn't check it can
+     * tell a customer "confirmed" over a plan that was never written, then
+     * hold the grant claim for 400 days with nothing left to retry it. Every
+     * other write that matters in this codebase checks its result
+     * (`account.ts`'s `createAnonymousAccount`, `payments/order/route.ts`'s
+     * pending write); this one hadn't, and it is the most important of them.
+     *
+     * A non-`"OK"` result is not automatically a failure, though — the same
+     * ambiguity `getStrict` exists to resolve elsewhere applies here too: the
+     * response can be lost after the write actually lands. So a failed-
+     * looking result gets one strict re-read before this throws, checked
+     * against `record.orderId` specifically rather than merely "a plan
+     * exists" — an OLDER purchase's still-live entitlement would otherwise
+     * read as false success for a DIFFERENT order that never actually wrote.
+     */
+    const ttlSec =
+      Math.ceil((record.until - Date.now()) / 1000) + 7 * 86_400;
+    const wrote = await kv.setEx(
       planKey(o.accountId),
-      Math.ceil((record.until - Date.now()) / 1000) + 7 * 86_400,
+      ttlSec,
+      JSON.stringify(record),
     );
+    if (wrote !== "OK") {
+      let confirmed: Entitlement | null;
+      try {
+        confirmed = await activePlanStrict(o.accountId);
+      } catch (err) {
+        console.error(
+          `[entitlement] grant unconfirmed for ${o.accountId} on order ${o.orderId}: write result lost and re-read failed`,
+          err,
+        );
+        throw new Error(`entitlement write unconfirmed for ${o.accountId}`);
+      }
+      if (confirmed?.orderId !== o.orderId) {
+        console.error(
+          `[entitlement] grant write failed for ${o.accountId} on order ${o.orderId}`,
+        );
+        throw new Error(`entitlement write failed for ${o.accountId}`);
+      }
+      // It landed despite the ambiguous response — proceed as a success.
+    }
     return record;
   });
+}
+
+/**
+ * Whether THIS specific order's grant already landed on the account.
+ *
+ * Called only after losing the `grantedKey` race — the marker being held
+ * means either "someone else is genuinely handling it" or "someone else
+ * claimed it a moment ago and hasn't finished, or failed and is about to hand
+ * it back", and those two look identical from outside. A strict read failure
+ * counts as unconfirmed rather than as a coin flip either way: the honest
+ * answer is "cannot tell right now", and every caller treats "cannot tell"
+ * the same as "not yet" — report it upward, let a webhook redelivery or the
+ * sibling route's own retry settle it, rather than answering 200 on a guess.
+ */
+export async function grantConfirmedFor(
+  accountId: string,
+  orderId: string,
+): Promise<boolean> {
+  try {
+    const current = await activePlanStrict(accountId);
+    return current?.orderId === orderId;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -181,15 +359,38 @@ export async function transferPlan(
   const [firstId, secondId] = fromId < toId ? [fromId, toId] : [toId, fromId];
   return withAccountLock(firstId, () =>
     withAccountLock(secondId, async () => {
+      // Deliberately the fail-open read: a source that cannot be read reports
+      // "nothing to move", and nothing is written or deleted on the way to that
+      // answer. Unlike the target read below, it destroys nothing to be wrong.
       const source = await activePlan(fromId);
       if (!source) return null;
 
       const marker = `xfer:${source.orderId}`;
-      const won = await kv.setIfAbsent(marker, toId, 400 * 86_400);
+      const won = await kv.setIfAbsent(marker, toId, PAYMENT_RECORD_TTL_SEC);
       // Already transferred — a double-submitted form, or a retry after a timeout.
       if (!won) return null;
 
-      const target = await activePlan(toId);
+      /**
+       * The same read as `grantPlan`'s and the same hazard: `from` below
+       * extends whatever the target already holds, so a failed read here writes
+       * over the days that account had rather than adding to them — and by this
+       * point the one-shot marker is spent, so nothing would ever put them back.
+       *
+       * Hand the marker back before failing. Nothing has been written yet and
+       * the source plan is still on `fromId`, so a retry is a real second
+       * attempt rather than a duplicate transfer.
+       */
+      let target: Entitlement | null;
+      try {
+        target = await activePlanStrict(toId);
+      } catch (err) {
+        await kv.del(marker);
+        console.error(
+          `[entitlement] transfer ${fromId} -> ${toId} aborted: target plan unreadable`,
+          err,
+        );
+        throw new Error(`entitlement read failed for ${toId}`);
+      }
       const remaining = Math.max(0, source.until - Date.now());
       const from = target ? target.until : Date.now();
       const record: Entitlement = {
@@ -198,11 +399,43 @@ export async function transferPlan(
         orderId: source.orderId,
       };
 
-      await kv.set(planKey(toId), JSON.stringify(record));
-      await kv.expire(
-        planKey(toId),
-        Math.ceil((record.until - Date.now()) / 1000) + 7 * 86_400,
-      );
+      /**
+       * The delete below is the irreversible half of this function — the
+       * one-shot marker above is already spent, so once `fromId`'s plan is
+       * gone, nothing retries this. It used to run unconditionally after a
+       * `kv.set` whose result nobody checked: `kv.set` fails open, so a
+       * dropped response reads identically to a real write, and the delete
+       * then ran anyway — the plan vanishes from BOTH accounts, no crash
+       * required, just an unlucky timeout. Gating the delete on a confirmed
+       * write is what the header comment already promised ("a crash between
+       * the two writes leaves the plan on both accounts") — that promise only
+       * held for an actual crash, not for this.
+       */
+      const ttlSec =
+        Math.ceil((record.until - Date.now()) / 1000) + 7 * 86_400;
+      const wrote = await kv.setEx(planKey(toId), ttlSec, JSON.stringify(record));
+      let confirmed = wrote === "OK";
+      if (!confirmed) {
+        try {
+          confirmed = (await activePlanStrict(toId))?.orderId === record.orderId;
+        } catch (err) {
+          console.error(
+            `[entitlement] transfer ${fromId} -> ${toId} target write unconfirmed`,
+            err,
+          );
+        }
+      }
+      if (!confirmed) {
+        // Deliberately not `kv.del(marker)` here: unlike the read failure
+        // above, a write of unknown outcome must not be retried blind — a
+        // second attempt on top of a write that actually landed would double
+        // the days on the target. This is now a case for the admin panel's
+        // reconciliation view, the same as an ungranted payment.
+        console.error(
+          `[entitlement] transfer ${fromId} -> ${toId} aborted: source plan left in place, target unconfirmed`,
+        );
+        throw new Error(`entitlement transfer write failed for ${toId}`);
+      }
       await kv.del(planKey(fromId));
       return record;
     }),

@@ -15,30 +15,71 @@ const TOKEN = process.env.KV_REST_API_TOKEN;
 
 export const kvConfigured = Boolean(URL_ && TOKEN);
 
+/**
+ * One round trip, with failures left intact.
+ *
+ * `cmd` below is the one everything uses, and it swallows every failure into
+ * the same `null` a missing key returns. That is deliberate and it is right for
+ * a leaderboard — but it means a caller cannot tell "Redis says this key does
+ * not exist" from "Redis never answered", and there is one place in this app
+ * where confusing those two silently destroys something a customer paid for
+ * (see `activePlanStrict` in `entitlement.ts`). This variant throws instead, so
+ * that caller can decide for itself. Nothing else should use it: fail-open is
+ * the correct behaviour everywhere the store backs something optional.
+ */
+async function cmdStrict<T>(...parts: (string | number)[]): Promise<T | null> {
+  if (!kvConfigured) throw new Error("kv: not configured");
+  const res = await fetch(URL_!, {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${TOKEN}`,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(parts.map(String)),
+    cache: "no-store",
+    signal: AbortSignal.timeout(6000),
+  });
+  if (!res.ok) throw new Error(`kv: ${String(parts[0])} answered HTTP ${res.status}`);
+  const data = (await res.json()) as { result?: T; error?: string };
+  /**
+   * Both checks exist so that `null` out of here means one thing only: the
+   * response body carried `"result": null`, which is Redis saying the key is
+   * not there. Upstash reports a command error as a non-200 with an `error`
+   * field, so the first is belt to the `res.ok` braces above; the second
+   * catches a body of some shape this client did not expect. Reading either as
+   * "no value" is the exact confusion this function exists to refuse.
+   */
+  if (typeof data.error === "string") throw new Error(`kv: ${data.error}`);
+  if (!("result" in data)) {
+    throw new Error(`kv: ${String(parts[0])} answered with no result`);
+  }
+  return data.result ?? null;
+}
+
 async function cmd<T>(...parts: (string | number)[]): Promise<T | null> {
-  if (!kvConfigured) return null;
   try {
-    const res = await fetch(URL_!, {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${TOKEN}`,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(parts.map(String)),
-      cache: "no-store",
-      signal: AbortSignal.timeout(6000),
-    });
-    if (!res.ok) return null;
-    const data = (await res.json()) as { result?: T };
-    return data.result ?? null;
+    return await cmdStrict<T>(...parts);
   } catch {
     // A leaderboard is a nice-to-have; it must never take a test down with it.
+    // Unconfigured, unreachable, timed out, a 500 from Upstash or a body that
+    // is not JSON all land here and all read as "no value", exactly as before.
     return null;
   }
 }
 
 export const kv = {
   get: (key: string) => cmd<string>("GET", key),
+  /**
+   * `get`, where `null` is an answer rather than a shrug.
+   *
+   * It returns null only when the store replied and the key is genuinely not
+   * there; a timeout, a dropped connection, a non-200 or an unparseable body
+   * all throw. The one caller is the read a plan grant extends from, where
+   * "no existing plan" and "could not tell" have to lead to different
+   * outcomes — treating a failed read as an empty account is how somebody's
+   * remaining paid days get overwritten with a fresh thirty.
+   */
+  getStrict: (key: string) => cmdStrict<string>("GET", key),
   set: (key: string, value: string) => cmd<string>("SET", key, value),
   /**
    * Set with an expiry, in one round trip.

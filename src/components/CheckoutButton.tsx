@@ -86,8 +86,18 @@ function loadCheckout(): Promise<void> {
   return scriptLoad;
 }
 
-/** `idle` covers "not started" and "came back from a dismissed modal" alike. */
-type Phase = "idle" | "opening" | "verifying" | "paid";
+/**
+ * `idle` covers "not started" and "came back from a dismissed modal" alike.
+ *
+ * `unconfirmed` is the one terminal failure. Every other error here puts the
+ * button back the way it was on purpose — a declined card, a dropped
+ * connection and a dismissed modal are all "try again", and they are all cases
+ * where no money moved. This one is the opposite: the server took a payment it
+ * could not record and said so with a 502, so pressing Buy again pays twice
+ * for one purchase. There is nothing the browser can do about it and exactly
+ * one thing the person should do, so the button does not come back.
+ */
+type Phase = "idle" | "opening" | "verifying" | "paid" | "unconfirmed";
 
 /**
  * What the server said is missing before this person can buy. Both come from
@@ -173,7 +183,29 @@ export default function CheckoutButton({
         const data = (await res.json().catch(() => ({}))) as {
           verified?: boolean;
           error?: string;
+          orderId?: string;
         };
+        /**
+         * 502 is not a generic failure from that endpoint, it is one specific
+         * answer: the signature checked out, so the money moved, and the
+         * payment could not be written down. Returning to `idle` here handed a
+         * clickable Buy button to somebody who had just been charged and told
+         * something had gone wrong — the one combination that produces a second
+         * charge for one intended purchase. It ends the flow instead, carrying
+         * the order number, which is the only thing support needs to fix it by
+         * hand. Every other status keeps its retry-friendly behaviour below.
+         */
+        if (res.status === 502) {
+          const ref = data.orderId ?? r.razorpay_order_id;
+          set(
+            "unconfirmed",
+            `${
+              data.error ??
+              "Payment taken but we couldn't confirm it just now."
+            } Quote order ${ref} to ${SUPPORT_EMAIL} and it will be sorted manually. Do not pay again.`,
+          );
+          return;
+        }
         if (!res.ok || !data.verified) {
           // The money may well have moved even though this failed, so the
           // message must never read as "nothing happened".
@@ -275,6 +307,13 @@ export default function CheckoutButton({
   }, [planId, planName, set, verify]);
 
   const busy = phase === "opening" || phase === "verifying";
+  /**
+   * Kept as a disabled button rather than swapped for a message block, so that
+   * the live region below stays mounted across the phase change. A region that
+   * appears at the same moment as its text is often not announced at all, and
+   * this is the one message in this component that must be heard.
+   */
+  const spent = phase === "unconfirmed";
 
   if (need === "verify") {
     return (
@@ -361,14 +400,16 @@ export default function CheckoutButton({
         type="button"
         className="btn-primary w-full"
         onClick={() => void start()}
-        disabled={busy}
+        disabled={busy || spent}
         aria-busy={busy}
       >
         {phase === "opening"
           ? "Opening…"
           : phase === "verifying"
             ? "Confirming…"
-            : label}
+            : spent
+              ? "Payment taken — contact support"
+              : label}
       </button>
       {/*
         One live region per button, always present rather than mounted with the

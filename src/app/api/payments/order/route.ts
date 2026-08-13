@@ -156,9 +156,20 @@ export async function POST(req: Request) {
    * price that were actually quoted, instead of against whatever the browser
    * says afterwards. `kv` fails open and returns null when Redis is
    * unconfigured; verification still works, with less detail recorded.
+   *
+   * `setEx` rather than `set` then `expire`: two calls with nothing atomic
+   * between them, and a `kv` that reports no failure it suffers, is how an
+   * abandoned checkout ends up as a key that never dies. The same fix the
+   * session write in `bind/confirm` already took, for the same reason.
+   *
+   * Logged when it fails, because the failure is invisible otherwise and it is
+   * the one that costs money: the webhook falls back to the account id in the
+   * order's Razorpay notes, so a payment is still grantable without this — but
+   * the price and plan we quoted exist nowhere else.
    */
-  await kv.set(
+  const remembered = await kv.setEx(
     pendingOrderKey(result.order.id),
+    PENDING_TTL_SEC,
     JSON.stringify({
       planId: plan.id,
       paise: plan.paise,
@@ -167,7 +178,11 @@ export async function POST(req: Request) {
       createdAt: Date.now(),
     }),
   );
-  await kv.expire(pendingOrderKey(result.order.id), PENDING_TTL_SEC);
+  if (!remembered) {
+    console.error(
+      `[razorpay] order ${result.order.id} opened but not recorded — the webhook will have to read its notes`,
+    );
+  }
 
   return NextResponse.json({
     orderId: result.order.id,

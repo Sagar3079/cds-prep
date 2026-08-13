@@ -77,9 +77,29 @@ export async function readJsonCapped<T>(
 ): Promise<Read<T>> {
   const text = await readTextCapped(req, maxBytes);
   if (!text.ok) return text;
+  let parsed: unknown;
   try {
-    return { ok: true, value: JSON.parse(text.value) as T };
+    parsed = JSON.parse(text.value);
   } catch {
     return { ok: false, status: 400, error: NOT_JSON };
   }
+  /**
+   * Valid JSON is not the same thing as a body.
+   *
+   * The four bytes `null` parse perfectly and every caller here immediately
+   * reaches for a field on what comes back, so `body.code` threw a TypeError
+   * inside the handler and the route answered 500 — an unhandled crash on a
+   * request that is simply malformed, from any caller who cares to send it.
+   * `4`, `"x"` and `true` do the same. The cap above already decided that a
+   * body this route cannot use is a 400 and not an exception, so this joins the
+   * same rejection rather than inventing a second one.
+   *
+   * Arrays pass, deliberately: `typeof [] === "object"`, reading a named field
+   * off one is `undefined` rather than a throw, and every caller then rejects
+   * it on its own missing-field check.
+   */
+  if (typeof parsed !== "object" || parsed === null) {
+    return { ok: false, status: 400, error: NOT_JSON };
+  }
+  return { ok: true, value: parsed as T };
 }

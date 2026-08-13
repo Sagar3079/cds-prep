@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { readJsonCapped } from "@/lib/body";
-import { currentAccount } from "@/lib/account";
+import { currentAccount, makePermanent } from "@/lib/account";
 import { kv } from "@/lib/kv";
-import { PLANS, type PlanId } from "@/lib/legal";
-import { grantPlan } from "@/lib/entitlement";
+import { PLANS } from "@/lib/legal";
+import {
+  PAYMENT_RECORD_TTL_SEC,
+  grantConfirmedFor,
+  grantPlan,
+  grantedKey,
+} from "@/lib/entitlement";
 import { bumpAsync } from "@/lib/analytics";
 import { rateLimit } from "@/lib/ratelimit";
 import {
@@ -34,8 +39,11 @@ const str = (v: unknown): string | null =>
  * nothing — a forged POST must not be able to mark an order paid.
  *
  * A verified payment records to `rzp:paid:<order_id>` and grants the plan. The
- * webhook does exactly the same from Razorpay's side; whichever gets there
- * first does both, and the loser does neither.
+ * webhook does exactly the same from Razorpay's side, and the two decisions are
+ * taken separately: whoever wins the record write records, and whoever wins the
+ * `rzp:granted:<order_id>` claim grants. They are usually the same caller and
+ * they do not have to be — see the grant block below for why one NX write
+ * cannot honestly answer both questions.
  */
 export async function POST(req: Request) {
   const limited = await rateLimit(req, "payment:verify");
@@ -113,10 +121,18 @@ export async function POST(req: Request) {
    * record with a later timestamp. A second call for an order already marked
    * paid is not an error — the customer paid once and is asking again whether
    * it worked — so it still answers yes.
+   *
+   * With a TTL rather than forever. A payment record earns its keep while the
+   * plan it bought is live and while support might still be asked about it, and
+   * nothing after that; unbounded, a record written by a botched deploy or some
+   * long-dead edge case sits in the store for the life of the account. 400 days
+   * is the figure this codebase already uses for its longest-lived keys, and the
+   * grant marker below deliberately carries the same one.
    */
   const firstToRecord = await kv.setIfAbsent(
     paidKey(orderId),
     JSON.stringify(record),
+    PAYMENT_RECORD_TTL_SEC,
   );
 
   /**
@@ -151,35 +167,126 @@ export async function POST(req: Request) {
   /**
    * The point of all of this: turn a payment into access.
    *
-   * Gated on `firstToRecord`, and that is load-bearing rather than tidy.
-   * `grantPlan` extends from whatever is left on the account so that buying a
-   * second month early adds to the first instead of discarding it — which means
-   * calling it twice for ONE payment hands out sixty days for a thirty-day
-   * purchase. This route and the webhook both run for the same payment in the
-   * normal case, so the one that lost the race must not grant.
+   * NOT gated on `firstToRecord` any more, and that is the whole of this block.
+   * `grantPlan` extends from whatever is left on the account, so calling it
+   * twice for one payment hands out sixty days for a thirty-day purchase and
+   * something has to make it happen exactly once. `firstToRecord` looked like
+   * that something and was not: it reports a loss both when the webhook
+   * genuinely recorded this payment first AND when the NX write timed out on
+   * the wire after landing, and in the second case this route reported success
+   * off the read above while nobody granted anything — the webhook arriving
+   * later found the key present, called it a race loss, and skipped too. No
+   * TTL, no retry, no trace: paid, told it worked, nothing.
    *
-   * Only when the order carried an account and a plan — the order route now
-   * requires both, but a payment made before that rule existed, or one whose
-   * pending record has expired, would have neither, and granting a plan to
-   * `null` is not a thing to attempt. Those are recorded and reconciled by
-   * hand, which is the honest failure.
+   * So the grant claims its own one-shot key. `grantedKey` answers only "has
+   * anyone taken responsibility for granting this order", which is a question
+   * the record write cannot answer for it, and whichever of the two routes runs
+   * second still gets to claim it when the first never did.
+   *
+   * Only when the order carried an account and a plan we recognise — the order
+   * route now requires both, but a payment made before that rule existed, or
+   * one whose pending record has expired, would have neither, and granting a
+   * plan to `null` is not a thing to attempt. The claim is deliberately not
+   * taken in that case either: the webhook can recover an account from the
+   * order's own notes where this route cannot, and a claim taken here would
+   * lock it out of doing so. Those are recorded and reconciled by hand, which
+   * is the honest failure.
    */
-  /**
-   * Counted here rather than at the webhook, and gated on the same NX write
-   * that gates the grant — otherwise `verify` and the webhook would both count
-   * one payment and the admin panel would report double the revenue it took.
-   */
-  if (firstToRecord) bumpAsync("pay:ok");
-
-  if (firstToRecord && record.accountId && record.planId) {
-    await grantPlan({
-      accountId: record.accountId,
-      planId: record.planId as PlanId,
-      orderId,
-    });
+  const plan = PLANS.find((p) => p.id === record.planId);
+  if (record.planId && !plan) {
+    // A planId matching nothing in `PLANS` used to reach `grantPlan` as an
+    // unchecked cast and be granted as `days ?? 0` — an entitlement that
+    // expired the moment it was written, with nothing anywhere saying so. Same
+    // reasoning as the signature-mismatch log above: a real checkout never
+    // produces one, so every line here is a bug or a renamed plan id.
+    console.error(
+      `[razorpay] order ${orderId} names unknown plan "${record.planId}" — not granting`,
+    );
   }
 
-  const plan = PLANS.find((p) => p.id === record.planId);
+  // Stays true when there is nothing this payment needed granted (no account,
+  // or an unknown plan already logged above) — that is a reconciliation case,
+  // not a confirmation failure, and must not turn a real "verified: true"
+  // into a false "couldn't confirm" for the customer.
+  let granted = true;
+  if (record.accountId && plan) {
+    const claimed = await kv.setIfAbsent(
+      grantedKey(orderId),
+      paymentId,
+      PAYMENT_RECORD_TTL_SEC,
+    );
+    if (claimed) {
+      try {
+        // Documented as "call before granting anything", and never once called
+        // from a payment path: an anonymous account that has just paid was
+        // still carrying the ninety-day reaper TTL it was born with, so a plan
+        // could outlive the account holding it.
+        await makePermanent(record.accountId);
+        await grantPlan({
+          accountId: record.accountId,
+          planId: plan.id,
+          orderId,
+        });
+        /**
+         * Counted on the grant rather than on the record write, so that one
+         * payment is one count no matter which route got here first, and so
+         * that a claim handed back below is not counted twice when the webhook
+         * picks it up. The cost is that a payment nobody could grant never
+         * reaches this counter — those are the rows the admin panel already
+         * flags as orphaned, and they are a reconciliation case rather than a
+         * conversion.
+         */
+        bumpAsync("pay:ok");
+      } catch (err) {
+        /**
+         * The grant did not happen, so the marker must stop claiming it did.
+         * `grantPlan` only throws where it has written nothing — on a read it
+         * could not trust, before any write — so handing the claim back costs
+         * nothing and is exactly what lets the webhook, seconds behind at
+         * worst, grant instead. Held, this order becomes the permanent
+         * no-plan case this whole block exists to prevent.
+         */
+        await kv.del(grantedKey(orderId));
+        granted = false;
+        console.error(
+          `[razorpay] grant failed for order ${orderId} (account ${record.accountId}) — claim released for the webhook`,
+          err,
+        );
+      }
+    } else {
+      /**
+       * Lost the claim race — almost always because the webhook (or an
+       * earlier `/verify` call for the same order) already finished, which is
+       * fine and common. But "the marker is held" and "the marker is held by
+       * something that hasn't finished, or already failed and is a heartbeat
+       * from releasing it" look identical from here, and this route only gets
+       * to answer the customer once. Confirm the grant actually landed before
+       * saying so.
+       */
+      granted = await grantConfirmedFor(record.accountId, orderId);
+      if (!granted) {
+        console.error(
+          `[razorpay] order ${orderId}: grant claim held elsewhere but not yet confirmed granted`,
+        );
+      }
+    }
+  }
+
+  if (!granted) {
+    // Same shape as the record-write ambiguity above: money moved, this
+    // request cannot vouch that a plan came out the other end, and "verified:
+    // true" would be a promise this route isn't in a position to make. The
+    // webhook (or a support ticket) is what resolves it from here.
+    return NextResponse.json(
+      {
+        error:
+          "Payment taken but we couldn't confirm your plan just now. Email support with this order number and it will be sorted manually.",
+        orderId,
+        paymentId,
+      },
+      { status: 502 },
+    );
+  }
 
   return NextResponse.json({
     verified: true,
