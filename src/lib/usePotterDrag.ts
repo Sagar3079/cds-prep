@@ -11,6 +11,15 @@ const ZERO: DragOffset = { x: 0, y: 0 };
 
 /** Below this, the gesture was a tap, not a drag. Fingers wobble. */
 const SLOP = 5;
+/**
+ * A thumb, not a cursor. A real tap on a high-DPR phone routinely moves
+ * 5-10px between pointerdown and pointerup — a mouse click moves 0px, and
+ * Chrome DevTools' touch emulation synthesizes touch FROM the mouse, so it
+ * also moves 0px. `SLOP` alone never fires on any desktop test and always
+ * fires on a real touch tap, which turned "tap Potter to mute" into "nudge
+ * Potter and persist the nudge" on an actual phone.
+ */
+const SLOP_COARSE = 12;
 
 /**
  * Gap kept between him and the panel wall, in px.
@@ -43,9 +52,13 @@ export function usePotterDrag(
   const [side, setSide] = useState<"left" | "right">("left");
   const hostRef = useRef<HTMLDivElement | null>(null);
 
-  const start = useRef<{ px: number; py: number; ox: number; oy: number } | null>(
-    null,
-  );
+  const start = useRef<{
+    px: number;
+    py: number;
+    ox: number;
+    oy: number;
+    pointerType: string;
+  } | null>(null);
   const moved = useRef(false);
   /** The applied offset, readable synchronously from the pointer handlers. */
   const applied = useRef<DragOffset>(ZERO);
@@ -227,6 +240,7 @@ export function usePotterDrag(
         py: e.clientY,
         ox: applied.current.x,
         oy: applied.current.y,
+        pointerType: e.pointerType,
       };
       start.current = s;
       moved.current = false;
@@ -246,7 +260,10 @@ export function usePotterDrag(
         if (ev.pointerId !== pointerId || start.current !== s) return;
         const dx = ev.clientX - s.px;
         const dy = ev.clientY - s.py;
-        if (!moved.current && Math.hypot(dx, dy) < SLOP) return;
+        // A mouse click doesn't wobble; a thumb tap does. Same gesture, two
+        // different definitions of "still basically a tap".
+        const slop = s.pointerType === "mouse" ? SLOP : SLOP_COARSE;
+        if (!moved.current && Math.hypot(dx, dy) < slop) return;
         if (!moved.current) {
           moved.current = true;
           setDragging(true);

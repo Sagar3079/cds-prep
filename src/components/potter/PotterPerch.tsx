@@ -92,6 +92,11 @@ export default function PotterPerch() {
     if (!scope) return;
     const onMove = (e: Event) => {
       const ev = e as PointerEvent;
+      // A touch scroll IS a stream of pointermove events — on a mouse,
+      // moving the cursor and scrolling are mutually exclusive, so this
+      // never mattered on desktop. On a real touchscreen, every swipe over
+      // this component was re-rendering the whole SVG mid-scroll.
+      if (ev.pointerType !== "mouse") return;
       const box = host!.getBoundingClientRect();
       const cx = box.left + box.width / 2;
       // Quantised to 0.1: setLook on every pointermove re-rendered the whole

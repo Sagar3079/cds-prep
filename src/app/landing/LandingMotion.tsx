@@ -137,10 +137,16 @@ export default function LandingMotion() {
         cy += (ty - cy) * 0.08;
         deck.style.setProperty("--rx", `${(REST_X + cx).toFixed(2)}deg`);
         deck.style.setProperty("--ry", `${(REST_Y + cy).toFixed(2)}deg`);
-        if (Math.abs(tx - cx) > 0.02 || Math.abs(ty - cy) > 0.02) {
+        // Real sensor noise never settles inside a couple hundredths of a
+        // degree, so that threshold used to keep this rAF loop running at
+        // 60fps forever on a phone — which also meant `data-live` (below)
+        // never cleared, so the CSS transition that would have smoothed the
+        // jitter stayed permanently off. Widened so idle actually means idle.
+        if (Math.abs(tx - cx) > 0.15 || Math.abs(ty - cy) > 0.15) {
           raf = requestAnimationFrame(frame);
         } else {
           running = false;
+          delete deck.dataset.live; // hand smoothing back to the CSS transition
         }
       };
       const kick = () => {
@@ -173,10 +179,22 @@ export default function LandingMotion() {
       const onOrient = (e: DeviceOrientationEvent) => {
         if (e.beta === null && e.gamma === null) return;
         orientationLive = true;
-        // gamma is left/right tilt, beta front/back. Beta is offset by the
-        // angle people actually hold a phone at, not flat on a table.
-        ty = clamp((e.gamma ?? 0) / 28) * RANGE;
-        tx = clamp(((e.beta ?? 45) - 45) / 32) * (RANGE * 0.7);
+        // gamma (left/right tilt) is mathematically degenerate as beta
+        // (front/back tilt) approaches 90° — which is exactly how a phone is
+        // held to read this page. At that pose, ordinary hand tremor makes
+        // raw gamma swing across its whole range, which used to flip `ty`
+        // from one edge of the deck's tilt to the other every few frames.
+        //
+        // Working from the unit gravity vector instead of raw Euler angles
+        // avoids that singularity by construction: cos(beta) → 0 as the
+        // phone stands upright, which multiplies gamma's own thrash OUT
+        // instead of amplifying it into a snap.
+        const b = ((e.beta ?? 45) * Math.PI) / 180;
+        const g = ((e.gamma ?? 0) * Math.PI) / 180;
+        const gx = -Math.cos(b) * Math.sin(g);
+        const gy = -Math.sin(b);
+        ty = clamp(gx / 0.45) * RANGE;
+        tx = clamp((gy + 0.7) / 0.45) * (RANGE * 0.7); // 0.7 ≈ rest hold at 45°
         kick();
       };
 
@@ -197,10 +215,11 @@ export default function LandingMotion() {
           window.removeEventListener("deviceorientation", onOrient);
         });
         // If orientation never reports, scroll keeps driving it.
-        window.setTimeout(() => {
+        const fallback = window.setTimeout(() => {
           if (!orientationLive) return;
           window.removeEventListener("scroll", onScrollTilt);
         }, 1200);
+        cleanups.push(() => window.clearTimeout(fallback));
       }
       cleanups.push(() => cancelAnimationFrame(raf));
     }

@@ -920,18 +920,30 @@
   position: fixed;
   left: 50%;
   bottom: -26vh;
-  width: 320vw;
+  /* `320vw` is uncapped on a wide viewport, and on a real 390px phone at
+     DPR 3 the mask below turned this into a ~3700×2000 device-pixel
+     composited layer, re-rasterized every scroll frame as the URL bar
+     collapses. Desktop DevTools emulates at DPR 1 with desktop GPU memory,
+     so this was invisible there; on a mid-range phone it's a scroll
+     stutter source. The grid pattern reads the same capped — it tiles. */
+  width: min(320vw, 1100px);
   height: 80vh;
   z-index: 0;
   pointer-events: none;
   transform: translateX(-50%) perspective(55vh) rotateX(74deg);
   transform-origin: 50% 100%;
+  /* The top fade used to be `mask-image`, which forces the compositor to
+     carry a separate alpha mask for this whole fixed layer. A plain
+     gradient painted in the solid ground colour reads identically — nothing
+     but the grid itself sits under `.floor`'s top edge — and composites as
+     an ordinary paint layer instead of a masked one. Stacked first so it
+     paints over the grid layers below it; stops mirror the old mask's
+     `#000 → transparent 74%` curve with visible/hidden swapped. */
   background-image:
+    linear-gradient(to top, transparent, var(--bg) 74%),
     linear-gradient(to right, var(--line) 1px, transparent 1px),
     linear-gradient(to bottom, var(--line) 1px, transparent 1px);
-  background-size: 5rem 5rem;
-  -webkit-mask-image: linear-gradient(to top, #000, transparent 74%);
-  mask-image: linear-gradient(to top, #000, transparent 74%);
+  background-size: 100% 100%, 5rem 5rem, 5rem 5rem;
   opacity: 0.5;
 }
 
